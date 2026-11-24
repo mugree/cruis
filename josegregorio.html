@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>*** CONSULTORIO JOSÉ GREGORIO HERNÁNDEZ // #POP ***</title>
+<style>
+	/* ===== #POP INTERVENIDO: Fondo punteado morado, tarjetas 2.0, controles 1.0, rojo/amarillo/morado/blanco ===== */
+	body {
+		margin: 0;
+		padding: 12px;
+		background-color: #2B003B;
+		background-image: radial-gradient(#FF0000 1.5px, transparent 1.5px), radial-gradient(#FFFF00 1.5px, #2B003B 1.5px);
+		background-size: 40px 40px;
+		background-position: 0 0, 20px 20px;
+		color: #111111;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 15px;
+	}
+
+	/* Enlaces clásicos Web 1.0 */
+	a.link-10 {
+		color: #0000EE;
+		text-decoration: underline;
+		font-weight: bold;
+	}
+	a.link-10:visited { color: #6A0080; }
+	a.link-10:hover { background: #FFFF00; color: #FF0000; text-decoration: none; }
+
+	h1, h2, h3 { font-family: 'Times New Roman', Times, serif; margin: 0; }
+	h3 { font-size: 21px; color: #6A0080; margin-bottom: 6px; }
+	.mono { font-family: 'Courier New', Courier, monospace; }
+
+	/* Contenedor principal Web 2.0 con bordes gruesos 1.0 */
+	.contenedor-pop {
+		width: 980px;
+		max-width: 100%;
+		margin: 0 auto;
+		background-color: #FFFDF0;
+		border: 5px outset #FFFF00;
+		border-radius: 10px;
+		box-shadow: 10px 10px 0px #FF0000;
+		overflow: hidden;
+		box-sizing: border-box;
+	}
+
+	/* Cabecera degradada Web 2.0 */
+	header.cabecera-pop {
+		background: linear-gradient(90deg, #CC0000 0%, #6A0080 100%);
+		color: #FFFFFF;
+		padding: 16px 20px;
+		border-bottom: 4px solid #FFFF00;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 15px;
+		flex-wrap: wrap;
+	}
+
+	header.cabecera-pop h1 {
+		font-family: 'Courier New', Courier, monospace;
+		font-size: 26px;
+		color: #FFFF00;
+		text-shadow: 2px 2px 0px #000000;
+	}
+
+	.logo {
+		max-height: 75px;
+		width: auto;
+		border: 4px ridge #FFFF00;
+		background: #FFFFFF;
+		padding: 3px;
+	}
+
+	/* Marquees Web 1.0 */
+	marquee { display: block; font-weight: bold; padding: 5px 0; }
+	.m-rojo { background: #CC0000; color: #FFFF00; font-family: 'Courier New', monospace; border-bottom: 2px solid #000; }
+	.m-amarillo { background: #FFFF00; color: #6A0080; font-family: 'Times New Roman', serif; font-size: 17px; border-bottom: 3px solid #000; }
+	.m-morado { background: #4B0082; color: #FFFF00; font-family: 'Courier New', monospace; border-top: 3px solid #FFFF00; }
+	.m-fotos { background: #FFFFFF; border-top: 4px ridge #6A0080; border-bottom: 4px ridge #6A0080; padding: 6px 0; }
+	.m-fotos img { height: 95px; margin: 0 6px; vertical-align: middle; border: 3px outset #CC0000; }
+
+	/* Barra de navegación Web 1.0 con botones 3D */
+	nav.nav-pop {
+		background-color: #4B0082;
+		padding: 10px 15px;
+		border-bottom: 4px ridge #FFFFFF;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		align-items: center;
+		justify-content: center;
+	}
+
+	button, .boton {
+		font-family: 'Courier New', Courier, monospace;
+		font-size: 13px;
+		font-weight: bold;
+		padding: 6px 14px;
+		background: #E0E0E0;
+		color: #000000;
+		border: 3px outset #FFFFFF;
+		cursor: pointer;
+		text-decoration: none;
+		display: inline-block;
+	}
+	button:active, .boton:active { border-style: inset; background: #FFFF00; }
+	.boton-rojo { background: #FF0000; color: #FFFF00; border-color: #FF8888; }
+	.boton-amarillo { background: #FFFF00; color: #6A0080; border-color: #FFF59D; }
+	.boton-morado { background: #6A0080; color: #FFFFFF; border-color: #B366FF; }
+
+	/* Layout de dos columnas Web 2.0 */
+	.layout-columnas {
+		display: flex;
+		gap: 18px;
+		padding: 18px;
+	}
+
+	main { flex: 2.3; min-width: 0; }
+
+	aside {
+		flex: 1;
+		background-color: #FFFFCC;
+		border: 3px groove #6A0080;
+		border-radius: 8px;
+		padding: 14px;
+		height: fit-content;
+		box-shadow: 4px 4px 0px #6A0080;
+	}
+
+	/* Tarjetas Web 2.0 + bordes 1.0 */
+	.tarjeta-pop {
+		background-color: #FFFFFF;
+		border: 2px solid #6A0080;
+		border-radius: 8px;
+		padding: 15px;
+		margin-bottom: 20px;
+		box-shadow: 5px 5px 0px #FFFF00;
+	}
+
+	.tarjeta-pop .cabecera-tarjeta {
+		background-color: #CC0000;
+		color: #FFFF00;
+		font-family: Arial, sans-serif;
+		font-size: 17px;
+		font-weight: bold;
+		padding: 6px 12px;
+		margin: -15px -15px 12px -15px;
+		border-bottom: 3px solid #000000;
+		border-radius: 6px 6px 0 0;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.dato-mono {
+		font-family: 'Courier New', Courier, monospace;
+		background-color: #FFFF00;
+		color: #000000;
+		padding: 2px 6px;
+		font-weight: bold;
+		border: 1px solid #000000;
+		font-size: 12px;
+		display: inline-block;
+		margin-bottom: 6px;
+	}
+
+	.pill-20 {
+		display: inline-block;
+		background-color: #6A0080;
+		color: #FFFFFF;
+		padding: 2px 9px;
+		border-radius: 12px;
+		font-size: 11px;
+		font-family: Arial, sans-serif;
+		margin-right: 4px;
+	}
+
+	.texto-serif {
+		font-family: 'Times New Roman', Times, serif;
+		font-size: 16px;
+		line-height: 1.5;
+		color: #111111;
+	}
+
+	/* Hero */
+	.hero {
+		background: linear-gradient(135deg, #6A0080, #2B003B);
+		color: #FFFFFF;
+		text-align: center;
+		padding: 18px 12px;
+		border: 6px double #FFFF00;
+		border-radius: 8px;
+		margin-bottom: 16px;
+	}
+	.hero .pequeno { font-family: 'Courier New', monospace; color: #FFFF00; font-size: 18px; }
+	.hero .grande { font-family: 'Times New Roman', serif; font-size: 38px; font-weight: bold; text-shadow: 3px 3px 0 #FF0000; }
+
+	/* Tablas gruesas 1.0 */
+	table { border-collapse: collapse; width: 100%; }
+	.grueso { border: 4px solid #6A0080; background: #FFFFFF; }
+	.grueso td, .grueso th { border: 2px solid #CC0000; padding: 8px; vertical-align: top; }
+
+	.foto { width: 100%; height: auto; display: block; border: 3px outset #6A0080; margin-bottom: 6px; }
+	.vacia { min-height: 90px; background: #FFFF00; color: #6A0080; font-family: 'Courier New', monospace; display: flex; align-items: center; justify-content: center; text-align: center; border: 3px dashed #FF0000; padding: 6px; font-size: 12px; }
+
+	/* Carrusel */
+	.carrusel { border: 6px ridge #FFFF00; background: #000000; position: relative; margin-bottom: 20px; }
+	.carrusel img { width: 100%; height: 320px; object-fit: cover; display: block; }
+	.carrusel .controles { background: #6A0080; text-align: center; padding: 8px; border-top: 2px solid #FFFF00; }
+	.carrusel .contador { font-family: 'Courier New', monospace; color: #FFFF00; margin: 0 12px; font-weight: bold; }
+
+	/* Promo */
+	.promo { background: #FFFF00; border: 8px ridge #FF0000; text-align: center; padding: 16px; border-radius: 8px; }
+	.promo .precio { font-family: 'Times New Roman', serif; font-size: 42px; color: #CC0000; font-weight: bold; text-shadow: 2px 2px 0 #FFFFFF; }
+
+	.parpadeo { animation: parpadeo 0.9s steps(2, start) infinite; }
+	@keyframes parpadeo { to { visibility: hidden; } }
+
+	.badge-hot {
+		background: #FFFF00;
+		color: #CC0000;
+		font-family: 'Courier New', monospace;
+		font-size: 11px;
+		padding: 2px 6px;
+		border: 1px solid #000;
+	}
+
+	/* Servicios */
+	.servicios { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+	.servicio { border: 3px outset #6A0080; background: #FFFFFF; padding: 12px; box-shadow: 4px 4px 0 #FFFF00; }
+	.servicio h3 { background: #6A0080; color: #FFFF00; padding: 4px 8px; font-size: 17px; }
+	.servicio p { margin: 8px 0 0; line-height: 1.45; font-family: 'Times New Roman', serif; font-size: 15px; }
+
+	/* Espacios editables */
+	.pegar { min-height: 120px; border: 3px dashed #CC0000; background: #FFFDF0; padding: 10px; font-family: 'Times New Roman', serif; font-size: 16px; line-height: 1.45; white-space: pre-wrap; }
+	.pegar:empty:before { content: attr(data-vacio); color: #5C4300; font-family: 'Times New Roman', serif; font-size: 15px; }
+
+	.seccion { display: none; }
+	.seccion.visible { display: block; }
+
+	footer {
+		background: #CC0000;
+		color: #FFFFFF;
+		text-align: center;
+		padding: 15px;
+		border-top: 4px solid #FFFF00;
+		font-family: 'Courier New', monospace;
+	}
+	footer a { color: #FFFF00; font-weight: bold; }
+
+	@media (max-width: 780px) {
+		.layout-columnas { flex-direction: column; }
+		.hero .grande { font-size: 28px; }
+		.carrusel img { height: 220px; }
+	}
+</style>
+</head>
+<body>
+
+<div class="contenedor-pop">
+
+	<!-- CABECERA #POP -->
+	<header class="cabecera-pop">
+		<div>
+			<h1>[>>> CONSULTORIO // JOSÉ GREGORIO HERNÁNDEZ <<<]</h1>
+			<div style="font-family: 'Times New Roman', serif; font-style: italic; color: #FFF;">
+				Comunidad Gregoriana Internacional · Sanación, guía espiritual y ciencia oculta.
+			</div>
+		</div>
+		<img class="logo" alt="Logo" src="https://josegregoriohernandez.com/assets/images/logopeque.png" style="width 150%;">
+	</header>
+
+	<!-- MARQUEES WEB 1.0 -->
+	<marquee class="m-rojo" scrollamount="7">★ CONSULTORIO JOSE GREGORIO HERNANDEZ ★ NOVENA MILAGROSA ★ CONSULTA EN LÍNEA ★ COMUNIDAD GREGORIANA ★ TESTIMONIOS DE SANACIÓN ★</marquee>
+	<marquee class="m-amarillo" direction="right" scrollamount="5">JoseGregorioHernandez.com ~ Consultorio ~ Comunidad Gregoriana internacional ~ Atención espiritual continua ~</marquee>
+
+	<!-- TIRA DE IMÁGENES -->
+	<marquee class="m-fotos" id="tiraFotos" scrollamount="4"></marquee>
+
+	<!-- NAVEGACIÓN CON BOTONES 3D NATIVOS -->
+	<nav class="nav-pop">
+		<span style="color: #FFFF00; font-family: 'Courier New', monospace; font-weight: bold;">[MENÚ]:</span>
+		<a class="boton" href="#home">[ HOME ]</a>
+		<a class="boton boton-amarillo" href="#servicios">[ SERVICIOS ]</a>
+		<a class="boton boton-morado" href="#oraciones">[ ORACIONES ]</a>
+		<a class="boton" href="#testimonios">[ TESTIMONIOS ]</a>
+		<a class="boton boton-rojo" href="#consulta">[ ★ CONSULTA EN LÍNEA ]</a>
+		<a class="boton boton-amarillo" href="#sedes">[ SEDES ]</a>
+	</nav>
+
+	<!-- CUERPO DE DOS COLUMNAS WEB 2.0 -->
+	<div class="layout-columnas">
+
+		<!-- COLUMNA PRINCIPAL -->
+		<main>
+
+			<!-- ================= HOME ================= -->
+			<section id="home" class="seccion">
+				<div class="hero">
+					<div class="pequeno parpadeo">★ CONSULTORIO ESPIRITUAL ★</div>
+					<div class="grande">Jose Gregorio Hernandez</div>
+				</div>
+
+				<!-- Carrusel -->
+				<div class="carrusel" id="carrusel">
+					<div id="carruselImg"></div>
+					<div class="controles">
+						<button type="button" id="btnPrev">◀ ANTERIOR</button>
+						<span class="contador" id="carruselContador"></span>
+						<button type="button" id="btnNext">SIGUIENTE ▶</button>
+					</div>
+				</div>
+
+				<!-- Tarjeta Testimonios -->
+				<div class="tarjeta-pop">
+					<div class="cabecera-tarjeta">
+						<span>:: TESTIMONIOS DE SANACIÓN</span>
+						<span class="badge-hot parpadeo">¡CASOS REALES!</span>
+					</div>
+					<table class="grueso"><tr>
+						<td class="texto-serif">
+							<span class="dato-mono">MILAGROS COMPROBADOS</span><br>
+							Cada día más personas cuentan que se sanaron milagrosamente después de visitar el consultorio.
+							<br><br>
+							<span class="pill-20">#sanación</span> <span class="pill-20">#fe</span> <span class="pill-20">#milagros</span>
+							<br><br>
+							<a class="link-10" href="#testimonios">[Leer todos los testimonios →]</a>
+						</td>
+						<td style="width:34%;" data-img="3"></td>
+					</tr></table>
+				</div>
+
+				<!-- Tarjeta Consulta -->
+				<div class="tarjeta-pop">
+					<div class="cabecera-tarjeta">
+						<span>:: CONSULTA EN LÍNEA (INICIAR CHAT)</span>
+						<span class="badge-hot">EN VIVO</span>
+					</div>
+					<table class="grueso"><tr>
+						<td style="width:34%;" data-img="4"></td>
+						<td class="texto-serif">
+							<span class="dato-mono">ATENCIÓN A DISTANCIA</span><br>
+							Servicio de la comunidad gregoriana internacional para participar en una sanación, una cirugía o una guía espiritual a distancia. Si quieres cambiar un problema o una enfermedad, tuya o de alguien cercano, reserva tu espacio.
+							<br><br>
+							<a class="boton boton-rojo" href="#consulta">[ SEPARAR ESPACIO AHORA ]</a>
+						</td>
+					</tr></table>
+				</div>
+
+				<!-- Tarjeta Oración -->
+				<div class="tarjeta-pop">
+					<div class="cabecera-tarjeta">
+						<span>:: ORACIÓN A JOSÉ GREGORIO HERNÁNDEZ</span>
+					</div>
+					<table class="grueso"><tr>
+						<td class="texto-serif">
+							Oh señor dios mio que todo lo puedes y que habeis acogido en tu seno a vuestro amado Siervo Jose Gregorio, que por vuestra gran misericordia le diste el poder de curar enfermos en este mundo, dadle señor la gracia de curarme, como medico espiritual, mi alma y mi cuerpo si ha de ser para tu gloria. Te pido esto señor dios mio en nombre de tu amado hijo quien enseño a orar diciendo: padre nuestro...
+							<br><br>
+							<a class="link-10" href="#oraciones">[Leer oración completa →]</a>
+						</td>
+						<td style="width:34%;" data-img="5"></td>
+					</tr></table>
+				</div>
+
+				<!-- Tarjeta Comunidad -->
+				<div class="tarjeta-pop">
+					<div class="cabecera-tarjeta">
+						<span>:: COMUNIDAD GREGORIANA INTERNACIONAL</span>
+					</div>
+					<table class="grueso"><tr>
+						<td style="width:34%;" data-img="6"></td>
+						<td class="texto-serif">
+							<span class="dato-mono">CIENCIA Y OCULTISMO</span><br>
+							Somos una comunidad reconocida a nivel mundial, líderes indiscutibles de la ciencia del ocultismo que pueden revelar hasta los mas increíbles secretos y misterios.<br><br>
+							Nuestros conocimientos lo demostramos con hechos y no con palabras, nuestros tratamientos naturistas y operaciones espirituales son increíbles, eficaces es decir soluciones para todos los males.
+						</td>
+					</tr></table>
+				</div>
+			</section>
+
+			<!-- ================= SERVICIOS ================= -->
+			<section id="servicios" class="seccion">
+				<div class="tarjeta-pop">
+					<div class="cabecera-tarjeta"><span>:: CATÁLOGO DE SERVICIOS ESPIRITUALES</span></div>
+					<div class="servicios">
+						<div class="servicio">
+							<div data-img="7"></div>
+							<h3>Cirugía espiritual</h3>
+							<p>Quienes vienen a consulta son preparados para recibir la visita del Doctor José Gregorio Hernández, alcanzando la gracia de ser sanados mediante una cirugía espiritual.<br><br>Entre las bendiciones recibidas hay casos de corazones cerrados, bloqueos afectivos, desengaños profundos y personas que habían perdido la fe en volver a sentir o ser correspondidas. Lo único que se pide es firmeza y cumplir cada paso al pie de la letra para recibir el milagro.</p>
+						</div>
+						<div class="servicio">
+							<div data-img="8"></div>
+							<h3>Tratamientos naturales</h3>
+							<p>No todos los corazones están preparados para una intervención mayor; muchos requieren primero baños, riegos o limpiezas suaves para abrir el camino.<br><br>A veces descuidamos la piel, dejamos enfriar la chispa o cargamos bloqueos que apagan nuestra suerte. Estos males se tratan con hierbas dulces y preparados que se consiguen en yerberías o tiendas naturistas. El alivio y el magnetismo dependen de la disciplina con que se haga cada baño, pues cada persona y cada búsqueda pide su propia fórmula.</p>
+						</div>
+						<div class="servicio">
+							<div data-img="9"></div>
+							<h3>UNIÓN Y PROTECCIÓN</h3>
+							<p>Los vínculos se han ido dañando por la distancia, los chismes, las envidias y las energías ajenas que se atravidensan en el camino.<br><br>El Doctor José Gregorio creció bajo principios de devoción, lealtad y unión; por eso brinda su guía a quienes buscan proteger un vínculo, atraer armonía o salvar lo que parecía perdido. Donde otros no ven solución, mostramos el camino.</p>
+						</div>
+						<div class="servicio">
+							<div data-img="10"></div>
+							<h3>Limpieza del hogar</h3>
+							<p>Cuando sientes que el ambiente está pesado, que la armonía se pierde o que ya no dan ganas ni de volver al lugar, es señal de que está cargado de energías densas y rastros pasados.<br><br>Es necesario hacer una limpieza para que regresen la paz y el magnetismo. Contamos con hermanos capacitados que llevan los elementos consagrados y purifican el espacio, siempre con la autorización del Doctor y de la congregación.</p>
+						</div>
+						<div class="servicio">
+							<div data-img="11"></div>
+							<h3>SUPERACIÓN POR UN SER QUE SE FUE</h3>
+							<p>A muchas personas les cuesta soltar a alguien que partió o superar una ruptura, ya sea por culpa propia, por orgullo o por traición.<br><br>Para quienes cargan ese peso en silencio, contamos con hermanos capacitados para brindar la guía y el alivio que necesitan para cerrar ese ciclo y volver a abrirse a la vida.</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- ================= ORACIONES ================= -->
+			<section id="oraciones" class="seccion">
+				<div class="tarjeta-pop">
+					<div class="cabecera-tarjeta"><span>:: ORACIÓN DE SANACIÓN</span></div>
+					<table class="grueso"><tr>
+						<td style="width:30%;" data-img="12"></td>
+						<td>
+							<h3>Oración a José Gregorio Hernández</h3>
+							<div class="dato-mono">TEXTO EDITABLE / COPIABLE</div>
+							<div class="pegar" contenteditable="true" data-vacio="OH, Dios, tu que velas con incesante providencia por el bien de tus criaturas; tú, divino Señor, que por medio de tu Hijo, nos has dicho que busquemos para encontrar y que llamemos para que se nos responda, invoco en tu nombre al Dr. José Gregorio Hernández para sanar a esta criatura, en el nombre del Padre, del Hijo y del Espíritu Santo; y que su fluido de bondad y deseo de ayuda al necesitado penetre en esta criatura que desea ser sanada, infundiéndole, con tu divino poder, salud, vigor, vitalidad y deseo de recuperación, y asimismo infundiendo en su mente, fortaleza, animo y paz.
+
+Os suplicamos señor, que le deis fuerza para resistir el mal y vencerlo. Gracias, OH Dios, te doy, por tu bondad infinita. Hágase tu voluntad. Te lo pedimos de corazón.
+
+Amen."></div>
+						</td>
+					</tr></table>
+					<div style="margin-top:10px;" data-img="13"></div>
+				</div>
+			</section>
+
+			<!-- ================= TESTIMONIOS ================= -->
+			<section id="testimonios" class="seccion">
+				<div class="tarjeta-pop">
+					<div class="cabecera-tarjeta"><span>:: LIBRO DE TESTIMONIOS</span></div>
+					<marquee class="m-rojo" scrollamount="9">TESTIMONIOS ★ TESTIMONIOS ★ TESTIMONIOS ★ TESTIMONIOS ★ TESTIMONIOS ★</marquee>
+					<table class="grueso" style="margin-top:8px;">
+						<tr>
+							<td style="width:28%; text-align:center;"><img src="https://josegregoriohernandez.com/assets/images/JGHWEB.jpg" style="width:90%; border:3px outset #6A0080;"></td>
+							<td>
+								<span class="dato-mono">CASO #01 · RESTAURACIÓN DE HOGAR</span>
+								<div class="pegar" contenteditable="true" data-vacio="Nora Amaya
+
+Gracias a la ayuda del Dr. José Gregorio Hernández puede regresar con mi esposo. Teníamos un matrimonio muy lindo pero de repente y sin decir nada mi esposo empaco su maleta y salió de la casa, días después me entere que estaba viviendo con una mujer menor que él. Empecé a asistir a psicólogos y a varios centros, pues caí en una depresión fuerte por lo sucedido con mi esposo, hasta que un día encontré la ayuda del Dr. José Gregorio Hernández. Gracias a todo su tratamiento, puede levantarme de la depresión, y puede darme cuenta que estaba siendo víctima de una atadura. Gracias a la ayuda espiritual de nuevo somos una familia unida y feliz."></div>
+							</td>
+						</tr>
+						<tr>
+							<td style="width:28%;" data-img="15"></td>
+							<td>
+								<span class="dato-mono">CASO #02 · MILAGRO DE VIDA</span>
+								<div class="pegar" contenteditable="true" data-vacio="Sofía Cárdenas
+
+Tengo 34 años y quería compartir mi testimonio con ustedes Llevo 4 años de casada la verdad somos un matrimonio feliz. Hace 2 años buscamos tener un hijo pero no lo logramos después. De intentarlo por varios meses decidimos con mi esposo buscar ayuda, pero ni los tratamientos de fertilidad lograron que quedara embarazada. Ya sin esperanzas y cansada alguien me hablo del Dr. José Gregorio Hernández, entonces decidí asistir. Me envió varios procedimientos, los cuales seguí tal cual el los dijo. De repente un día recibí la noticia que tanto esperaba si gracias a la ayuda del Dr. José Gregorio Hernández logre quedar embarazada y tener a mi hijo sano y salvo. Gracias a su ayuda ahora somos la familia que tanto queríamos ser."></div>
+							</td>
+						</tr>
+						<tr>
+							<td style="width:28%; text-align:center;"><img src="https://josegregoriohernandez.com/assets/images/B6.jpg" style="width:90%; border:3px outset #6A0080;"></td>
+							<td>
+								<span class="dato-mono">CASO #03 · LIBERACIÓN ESPIRITUAL</span>
+								<div class="pegar" contenteditable="true" data-vacio="Mercedes Martínez
+
+Quiero compartirles mi caso y dar fiel testimonio de la ayuda y guía espiritual del Dr. José Gregorio Hernández
+
+Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos hijos. Mi esposo era un hombre responsable, respetuoso y muy buen papa, mis hijos estudiaban, y yo me encargaba del hogar. De repente las cosas empezaron a cambiar, pues mi esposo de un momento a otro empezó a consumir alcohol, a llegar tarde a la casa, incluso llego a agredirme físicamente lo que causo un enfrentamiento fuerte entre mi esposo y uno de mis hijos. Mi maravillosa familia se empezó a derrumbar. Desesperada y bastante afectada por la situación, alguien me dijo que buscara ayuda donde el Dr. José Gregorio Hernández, al principio no creí, pero un día decidí asistir y tras un diagnóstico del Dr. Se logró identificar que mi esposo tenia toso su entorno manipulado por una persona cercana a nosotros que estaba empeñada a destruir nuestro hogar. Gracias a todo el procedimiento que se realizó con ayuda y guía del Dr. Mi esposo pude ser liberado de la manipulación y ahora somos la familia que siempre fuimos"></div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</section>
+
+			<!-- ================= CONSULTA EN LÍNEA ================= -->
+			<section id="consulta" class="seccion">
+				<div class="tarjeta-pop">
+					<div class="cabecera-tarjeta"><span>:: CONSULTA ESPIRITUAL EN LÍNEA</span></div>
+					<div class="promo">
+						<div class="mono parpadeo" style="font-weight:bold; color:#6A0080;">★ SERVICIO DE LA COMUNIDAD GREGORIANA INTERNACIONAL ★</div>
+						<div class="precio">Separe su espacio</div>
+						<p class="texto-serif">Sanación, cirugía o guía espiritual a distancia mediante sala de chat privada.</p>
+						<a class="boton boton-rojo" href="chat" target="_blank">[ INICIAR CONSULTA EN VIVO ]</a>
+					</div>
+					<table class="grueso" style="margin-top:14px;"><tr>
+						<td style="width:25%;" data-img="17"></td>
+						<td style="width:25%;" data-img="18"></td>
+						<td style="width:25%;" data-img="19"></td>
+						<td style="width:25%;" data-img="20"></td>
+					</tr></table>
+				</div>
+			</section>
+
+			<!-- ================= SEDES ================= -->
+			<section id="sedes" class="seccion">
+				<div class="tarjeta-pop">
+					<div class="cabecera-tarjeta"><span>:: DIRECTORIO DE SEDES EN COLOMBIA</span></div>
+					<table class="grueso">
+						<tr bgcolor="#FFFF00"><th colspan="2">BOGOTÁ Y CUNDINAMARCA</th><th>DIRECCIÓN</th></tr>
+						<tr><td rowspan="5" style="width:26%;" data-img="21"></td><td><b>Chapinero</b></td><td class="mono">Cll 45 # 13-16 Ofi. 201</td></tr>
+						<tr><td><b>Fontibón</b></td><td class="mono">Cll. 17 #98-93 Piso 2</td></tr>
+						<tr><td><b>Suba</b></td><td class="mono">Cll 145 # 90-32 Piso 2</td></tr>
+						<tr><td><b>Venecia</b></td><td class="mono">Auto. Sur #53B-47 Piso 2</td></tr>
+						<tr><td><b>Zipaquirá</b></td><td class="mono">Cra 10 # 8-38</td></tr>
+						<tr bgcolor="#FFFF00"><th colspan="2">OTRAS CIUDADES</th><th>DIRECCIÓN</th></tr>
+						<tr><td rowspan="5" style="width:26%;" data-img="22"></td><td><b>Cali</b></td><td class="mono">Cra 38D # 4C-71</td></tr>
+						<tr><td><b>Bucaramanga</b></td><td class="mono">Cra 27 # 32-62 L201</td></tr>
+						<tr><td><b>Ibagué</b></td><td class="mono">Av. Guabinal #42-44 Br. Calarcá</td></tr>
+						<tr><td><b>Pereira</b></td><td class="mono">Cra 6 # 23-63</td></tr>
+						<tr><td><b>Villavicencio</b></td><td class="mono">Cra 33 # 35-05</td></tr>
+					</table>
+				</div>
+			</section>
+
+			<!-- FIELDSET INTERACTIVO ESTILO #POP -->
+			<fieldset style="border: 3px groove #CC0000; background-color: #FFFFFF; margin-top: 10px;">
+				<legend style="background-color: #FFFF00; color: #000000; font-family: 'Courier New', monospace; font-weight: bold; padding: 3px 10px; border: 2px solid #000;">
+					[ ENVIAR PETICIÓN O VELADORA VIRTUAL ]
+				</legend>
+				<form onsubmit="event.preventDefault(); alert('Tu petición ha sido registrada en el altar virtual.'); this.reset();">
+					<label class="mono"><b>Motivo:</b></label>
+					<select style="font-family: 'Courier New', monospace; background: #FFFFCC; border: 2px inset #888;">
+						<option>Salud y Cirugía Espiritual</option>
+						<option>Unión de Pareja y Protección</option>
+						<option>Limpieza de Hogar / Negocio</option>
+						<option>Agradecimiento por Milagro</option>
+					</select>
+					<br><br>
+					<label class="mono"><b>Nombre o iniciales:</b></label><br>
+					<input type="text" required placeholder="Ej: M.M. - Bogotá" style="width: 70%; font-family: 'Courier New', monospace; padding: 4px; border: 2px inset #888;">
+					<input type="submit" value="ENCENDER VELA ★" class="boton boton-rojo">
+				</form>
+			</fieldset>
+
+		</main>
+
+		<!-- BARRA LATERAL #POP (WEB 2.0 + WEB 1.0) -->
+		<aside>
+			<div style="background-color: #6A0080; color: #FFFF00; padding: 6px; font-family: 'Courier New', monospace; font-weight: bold; text-align: center; border: 2px solid #000;">
+				★ TABLÓN DE MILAGROS ★
+			</div>
+
+			<!-- Marquee vertical Web 1.0 -->
+			<marquee direction="up" height="105" scrollamount="2" style="background: #FFFFFF; border: 2px inset #888888; padding: 6px; margin: 10px 0; font-family: 'Courier New', monospace; font-size: 12px;">
+				• [HOY] Nora A.: Gracias Dr. José Gregorio por unir mi hogar.<br><br>
+				• [AYER] Sofía C.: Milagro concedido tras la novena.<br><br>
+				• [EN VIVO] Sala de chat espiritual abierta ahora.
+			</marquee>
+
+			<h4 style="margin: 10px 0 6px 0; color: #CC0000; font-family: 'Courier New', monospace;">GUÍA RÁPIDA:</h4>
+			<table border="2" bordercolor="#000000" width="100%" cellpadding="4" cellspacing="0" bgcolor="#FFFFFF" style="font-size: 12px;">
+				<tr bgcolor="#CC0000" style="color: #FFFF00;">
+					<th>Elemento</th>
+					<th>Uso</th>
+				</tr>
+				<tr>
+					<td>Vela Blanca</td>
+					<td><code>FE / LUZ</code></td>
+				</tr>
+				<tr bgcolor="#FFF5CC">
+					<td>Hierbas Dulces</td>
+					<td><code>RIEGOS</code></td>
+				</tr>
+				<tr>
+					<td>Novena 9 días</td>
+					<td><code>MILAGRO</code></td>
+				</tr>
+			</table>
+
+			<hr size="3" color="#6A0080">
+
+			<h4 style="margin: 6px 0; color: #6A0080; font-family: 'Courier New', monospace;">ACCESOS DIRECTOS:</h4>
+			<ul style="padding-left: 18px; margin: 6px 0; font-size: 13px;">
+				<li><a href="#home" class="link-10">Inicio_Consultorio.html</a></li>
+				<li><a href="#servicios" class="link-10">Cirugia_Espiritual.txt</a></li>
+				<li><a href="#oraciones" class="link-10">Oracion_Milagrosa.doc</a></li>
+				<li><a href="#testimonios" class="link-10">Libro_Testimonios.html</a></li>
+				<li><a href="#sedes" class="link-10">Sedes_Colombia.map</a></li>
+			</ul>
+
+			<hr size="3" color="#CC0000">
+
+			<div style="text-align: center; margin-top: 10px;">
+				<div style="font-size: 11px; font-weight: bold; margin-bottom: 4px;">DEVOTOS EN LÍNEA:</div>
+				<div style="background: #000000; color: #00FF00; font-family: 'Courier New', monospace; padding: 5px 10px; border: 3px inset #888888; display: inline-block; font-weight: bold;">
+					VISITAS: 084921
+				</div>
+			</div>
+		</aside>
+
+	</div>
+
+	<!-- MARQUEE Y FOOTER -->
+	<marquee class="m-morado" direction="right" scrollamount="6">josegregorio ★ ★ josegregorio ★ ★ josegregorio ★ ★ comunidad gregoriana ★ ★</marquee>
+	<footer>
+		Consultorio Jose Gregorio Hernandez © 2026 · JoseGregorioHernandez.com ·
+		<a href="cruisssing.html">[ ← VOLVER A CRUISSSING ]</a>
+	</footer>
+
+</div>
+
+<script>
+	/* ============================================================
+	   EDITA AQUÍ: pega las listas de imágenes extraídas
+	   ============================================================ */
+	const IMAGENES_SITIO_1 = [
+		// "https://josegregoriohernandez.com/.../imagen.jpg",
+	];
+	const IMAGENES_SITIO_2 = [
+		"https://drjosegregoriohernandezcol.com/wp-content/uploads/2022/10/consultorio-Dr-Jose-Gregorio-Hernandez-logo2.png"
+	];
+	/* ============================================================ */
+
+	const IDS_YT = ["5S5pI0TvBjw", "hyI7xxIYoT8", "N0cAESOUWE4", "oRpg5S1jMbc", "n6K_JE6qurE",
+		"5EzkhUCuDes", "AR6YgRr4DH4", "gqHybjm3Ilo", "auH62MMyDrs", "74oycKZS-B0", "62WxRK0GBfk", "D_7ZDUtMReY"];
+	const SET2 = IMAGENES_SITIO_2.concat(IDS_YT.map(id => "https://img.youtube.com/vi/" + id + "/hqdefault.jpg"));
+
+	const TODAS = [];
+	for (let i = 0; i < Math.max(IMAGENES_SITIO_1.length, SET2.length); i++) {
+		if (IMAGENES_SITIO_1[i]) TODAS.push({ src: IMAGENES_SITIO_1[i], origen: "#1" });
+		if (SET2[i]) TODAS.push({ src: SET2[i], origen: "#2" });
+	}
+
+	function esc(s) {
+		return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+	}
+	function tag(i, clase) {
+		if (!TODAS.length) return '<div class="vacia">[imagen]</div>';
+		const m = TODAS[i % TODAS.length];
+		return '<img class="' + clase + '" src="' + esc(m.src) + '" alt="imagen ' + m.origen + '" onerror="this.style.display=\'none\'">';
+	}
+
+	document.querySelectorAll('[data-img]').forEach(el => {
+		const n = parseInt(el.getAttribute('data-img'), 10) || 0;
+		el.innerHTML = tag(n, 'foto');
+	});
+
+	const tira = document.getElementById('tiraFotos');
+	tira.innerHTML = TODAS.map(m => '<img src="' + esc(m.src) + '" alt="" onerror="this.style.display=\'none\'">').join('');
+	if (!TODAS.length) tira.style.display = 'none';
+
+	let idx = 0, timer = null;
+	const cImg = document.getElementById('carruselImg');
+	const cCont = document.getElementById('carruselContador');
+	function pintarCarrusel() {
+		if (!TODAS.length) { cImg.innerHTML = '<div class="vacia">[imágenes del carrusel]</div>'; return; }
+		cImg.innerHTML = '<img src="' + esc(TODAS[idx].src) + '" alt="imagen ' + TODAS[idx].origen + '">';
+		cCont.textContent = (idx + 1) + ' / ' + TODAS.length;
+	}
+	function mover(d) { if (!TODAS.length) return; idx = (idx + d + TODAS.length) % TODAS.length; pintarCarrusel(); }
+	function iniciar() { detener(); timer = setInterval(() => mover(1), 3500); }
+	function detener() { if (timer) clearInterval(timer); timer = null; }
+	document.getElementById('btnPrev').addEventListener('click', () => mover(-1));
+	document.getElementById('btnNext').addEventListener('click', () => mover(1));
+	document.getElementById('carrusel').addEventListener('mouseenter', detener);
+	document.getElementById('carrusel').addEventListener('mouseleave', iniciar);
+	pintarCarrusel();
+	iniciar();
+
+	const secciones = Array.from(document.querySelectorAll('.seccion'));
+	function mostrar() {
+		const id = (location.hash || '#home').slice(1);
+		const existe = secciones.some(s => s.id === id);
+		secciones.forEach(s => s.classList.toggle('visible', s.id === (existe ? id : 'home')));
+		window.scrollTo(0, 0);
+	}
+	window.addEventListener('hashchange', mostrar);
+	mostrar();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Net Art - Romperte (Galeria)</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			background-color: #000;
+			overflow: hidden;
+			width: 100vw;
+			height: 100vh;
+			font-family: 'Courier New', Courier, monospace;
+			transition: filter 0.5s ease, background-color 0.5s ease;
+		}
+
+		/* Video de Fondo a Pantalla Completa */
+		.seccion-video {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			z-index: 1;
+		}
+
+		.seccion-video video {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			filter: contrast(300%) saturate(800%) sepia(100%) hue-rotate(315deg) brightness(100%);
+			transition: filter 0.6s ease;
+		}
+
+		/* Estados de color acumulables por clic */
+		.seccion-video video.color-estado-1 {
+			filter: contrast(450%) saturate(1500%) sepia(100%) hue-rotate(340deg) brightness(115%) !important;
+		}
+
+		.seccion-video video.color-estado-2 {
+			filter: contrast(350%) saturate(1000%) sepia(100%) hue-rotate(240deg) brightness(120%) !important;
+		}
+
+		.seccion-video video.color-estado-3 {
+			filter: contrast(400%) saturate(1200%) sepia(100%) hue-rotate(120deg) brightness(130%) !important;
+		}
+
+		.seccion-video video.color-estado-4 {
+			filter: contrast(250%) saturate(600%) brightness(220%) hue-rotate(0deg) !important;
+		}
+
+		/* Capa de inicio con GIF sin bordes */
+		#capaInicio {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			z-index: 10;
+			background: #000000;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			cursor: pointer;
+		}
+
+		#capaInicio img {
+			max-width: 280px;
+			max-height: 280px;
+			border: none;
+			box-shadow: none;
+			outline: none;
+			transition: transform 0.2s ease;
+		}
+
+		#capaInicio img:hover {
+			transform: scale(1.05);
+		}
+
+		/* Sección de Audio y Karaoke */
+		.seccion-audio {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			z-index: 2;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			background: transparent;
+			pointer-events: none;
+		}
+
+		.contenedor-karaoke {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+			max-width: 85%;
+			pointer-events: auto;
+		}
+
+		/* Texto brillante con resplandor amarillo */
+		.texto-karaoke {
+			color: #ffffff;
+			font-size: 2.2rem;
+			font-weight: bold;
+			line-height: 1.6;
+			letter-spacing: 1px;
+			transition: opacity 0.8s ease, text-shadow 0.8s ease;
+			text-shadow: 
+				0 0 10px #ffea00, 
+				0 0 25px #ffea00, 
+				0 0 45px #ffea00,
+				0 0 70px #ffea00,
+				0 0 95px #ffea00;
+		}
+
+		/* Bloque apilado de líneas fijas */
+		.bloque-apilado-fijo {
+			display: flex;
+			flex-direction: column;
+			gap: 14px;
+			margin-bottom: 25px;
+			align-items: center;
+		}
+
+		/* Opacidad baja para letra secundaria */
+		.opacidad-baja {
+			opacity: 0.25;
+			text-shadow: 0 0 5px rgba(255, 234, 0, 0.4);
+		}
+
+		/* Botones / Palabras Interactivas */
+		.palabra-enamorarte {
+			color: #ff3366;
+			text-decoration: underline;
+			cursor: pointer;
+			padding: 0 6px;
+			display: inline-block;
+			animation: pulsoRojo 0.8s infinite alternate;
+		}
+
+		@keyframes pulsoRojo {
+			from { transform: scale(1); text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0000; }
+			to { transform: scale(1.25); text-shadow: 0 0 25px #ff0055, 0 0 50px #ff0000; }
+		}
+
+		.palabra-amar {
+			color: #ffffff;
+			text-decoration: underline;
+			cursor: pointer;
+			padding: 0 6px;
+			display: inline-block;
+			animation: pulsoAmarillo 0.8s infinite alternate;
+		}
+
+		@keyframes pulsoAmarillo {
+			from { transform: scale(1); text-shadow: 0 0 15px #ffea00; }
+			to { transform: scale(1.3); text-shadow: 0 0 30px #ffea00, 0 0 60px #ffffff; }
+		}
+
+		.palabra-llevar {
+			color: #ffea00;
+			text-decoration: underline;
+			cursor: pointer;
+			padding: 0 6px;
+			display: inline-block;
+			animation: pulsoLlevar 0.8s infinite alternate;
+		}
+
+		@keyframes pulsoLlevar {
+			from { transform: scale(1); text-shadow: 0 0 10px #ffea00; }
+			to { transform: scale(1.25); text-shadow: 0 0 25px #ffea00, 0 0 45px #ff0055; }
+		}
+
+		/* Pop-ups Modales Minimalistas */
+		.modal-backdrop {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			background: rgba(0, 0, 0, 0.8);
+			backdrop-filter: blur(5px);
+			z-index: 100;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			pointer-events: auto;
+			cursor: pointer; /* Indica que al hacer clic afuera se puede interactuar */
+		}
+
+		.modal-caja {
+			background: #000000;
+			border: 1.5px solid #ffea00;
+			box-shadow: 0 0 30px #ffea00, inset 0 0 15px rgba(255, 234, 0, 0.4);
+			padding: 35px 45px;
+			border-radius: 8px;
+			text-align: center;
+			max-width: 90vw;
+			animation: aparecerModal 0.3s ease;
+			cursor: default; /* Evita heredar la mano en el contenido interior */
+		}
+
+		@keyframes aparecerModal {
+			from { opacity: 0; transform: scale(0.85); }
+			to { opacity: 1; transform: scale(1); }
+		}
+
+		.modal-titulo {
+			color: #ffffff;
+			font-size: 2rem;
+			font-weight: bold;
+			text-shadow: 0 0 15px #ffea00;
+			margin-bottom: 25px;
+			letter-spacing: 1px;
+		}
+
+		.modal-botones {
+			display: flex;
+			justify-content: center;
+			gap: 20px;
+		}
+
+		.btn-pop {
+			background: transparent;
+			color: #ffea00;
+			border: 1px solid #ffea00;
+			font-family: inherit;
+			font-size: 1.25rem;
+			font-weight: bold;
+			padding: 10px 28px;
+			cursor: pointer;
+			text-decoration: none;
+			display: inline-block;
+			border-radius: 4px;
+			text-shadow: 0 0 8px #ffea00;
+			box-shadow: 0 0 12px rgba(255, 234, 0, 0.3);
+			transition: all 0.2s ease;
+		}
+
+		.btn-pop:hover {
+			background: #ffea00;
+			color: #000000;
+			box-shadow: 0 0 30px #ffea00;
+		}
+
+		.btn-pop.btn-no {
+			color: #ff0055;
+			border-color: #ff0055;
+			text-shadow: 0 0 8px #ff0055;
+			box-shadow: 0 0 12px rgba(255, 0, 85, 0.3);
+		}
+
+		.btn-pop.btn-no:hover {
+			background: #ff0055;
+			color: #ffffff;
+			box-shadow: 0 0 30px #ff0055;
+		}
+	</style>
+</head>
+<body>
+
+	<!-- Capa inicial con GIF -->
+	<div id="capaInicio">
+		<img src="https://i.pinimg.com/originals/e2/5a/a0/e25aa0b26167091d4561ab78d3e43743.gif" alt="Click para iniciar">
+	</div>
+
+	<!-- Video de Fondo -->
+	<div class="seccion-video">
+		<video id="videoAna" loop muted playsinline preload="auto">
+			<source src="ana.mp4" type="video/mp4">
+			<source src="ana.mp4.mp4" type="video/mp4">
+			<source src="ana.mp4_2.mp4" type="video/mp4">
+			<source src="Ana Gabriel Simplemente Amigos (Video Oficial).mp4" type="video/mp4">
+		</video>
+	</div>
+
+	<!-- Audio y Letra -->
+	<div class="seccion-audio">
+		<audio id="musica" preload="auto">
+			<source src="romperte.mp3" type="audio/mp3">
+			<source src="romperte.mp3.mp3" type="audio/mp3">
+			<source src="romperte.mp3_2.mp3" type="audio/mp3">
+			<source src="Cris MJ - Romperte (Clean) - ErikGamer RMX.mp3" type="audio/mp3">
+		</audio>
+
+		<div id="contenedorKaraoke" class="contenedor-karaoke">
+			<div id="karaokeText" class="texto-karaoke"></div>
+		</div>
+	</div>
+
+	<!-- Pop-up Modal Minimalista -->
+	<div id="modalPopUp" class="modal-backdrop" style="display: none;">
+		<div class="modal-caja">
+			<!-- Paso 1: ¿quieres? -->
+			<div id="pasoQuieres">
+				<div class="modal-titulo">¿quieres?</div>
+				<button id="btnAbrirOpciones" class="btn-pop">Continuar</button>
+			</div>
+
+			<!-- Paso 2: Sí / No -->
+			<div id="pasoOpciones" style="display: none;">
+				<div class="modal-titulo">¿Deseas ir a la galería?</div>
+				<div class="modal-botones">
+					<a href="galeria.html" id="btnSiGaleria" class="btn-pop">Sí</a>
+					<button id="btnNoCerrar" class="btn-pop btn-no">No</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const capaInicio = document.getElementById('capaInicio');
+		const videoAna = document.getElementById('videoAna');
+		const audio = document.getElementById('musica');
+		const karaokeText = document.getElementById('karaokeText');
+		const seccionAudio = document.querySelector('.seccion-audio');
+		
+		const modalPopUp = document.getElementById('modalPopUp');
+		const pasoQuieres = document.getElementById('pasoQuieres');
+		const pasoOpciones = document.getElementById('pasoOpciones');
+		const btnAbrirOpciones = document.getElementById('btnAbrirOpciones');
+		const btnNoCerrar = document.getElementById('btnNoCerrar');
+
+		let estadoColorActual = 0;
+		const totalEstadosColor = 5;
+		let timerReinicio = null;
+
+		function cambiarColorPersistente() {
+			for (let i = 1; i < totalEstadosColor; i++) {
+				videoAna.classList.remove(`color-estado-${i}`);
+			}
+			estadoColorActual = (estadoColorActual + 1) % totalEstadosColor;
+			if (estadoColorActual > 0) {
+				videoAna.classList.add(`color-estado-${estadoColorActual}`);
+			}
+		}
+
+		// Abrir pop-up al presionar 'llevar' y pausar el audio
+		function abrirPopUp() {
+			pasoQuieres.style.display = 'block';
+			pasoOpciones.style.display = 'none';
+			modalPopUp.style.display = 'flex';
+			audio.pause();
+		}
+
+		// Clic AFUERA del cuadro modal (en el fondo transparente/oscuro): cierra el pop-up y reanuda la canción
+		modalPopUp.addEventListener('click', (e) => {
+			if (e.target === modalPopUp) {
+				modalPopUp.style.display = 'none';
+				audio.play();
+			}
+		});
+
+		btnAbrirOpciones.addEventListener('click', () => {
+			pasoQuieres.style.display = 'none';
+			pasoOpciones.style.display = 'block';
+		});
+
+		btnNoCerrar.addEventListener('click', () => {
+			window.close();
+			document.body.innerHTML = '';
+		});
+
+		// Delegación de eventos interactivas
+		seccionAudio.addEventListener('click', (e) => {
+			const id = e.target.id;
+			const cl = e.target.classList;
+
+			if (id === 'btnAmar1' || cl.contains('palabra-amar') || id === 'btnEnamorarte' || cl.contains('palabra-enamorarte')) {
+				e.stopPropagation();
+				cambiarColorPersistente();
+			} else if (id === 'btnLlevar' || cl.contains('palabra-llevar')) {
+				e.stopPropagation();
+				abrirPopUp();
+			}
+		});
+
+		const letraLRC = [
+			{ tiempo: 0, texto: "" },
+			{ tiempo: 18.87, texto: "Es normal que lluevan, mami" },
+			{ tiempo: 22.53, texto: "Es parte de la fama, más problema', más dinero" },
+			{ tiempo: 28.78, texto: "Quiero romperte, el amor hacerte" },
+			{ tiempo: 33.41, texto: "En ti perderme y descabronarte" },
+			{ tiempo: 38.24, texto: "Quiero romperte, <span id='btnEnamorarte' class='palabra-enamorarte'>enamorarte</span>" },
+			{ tiempo: 43.22, texto: "Vo'a perderme y descabronarte" },
+			{ tiempo: 47.61, texto: "Yo vo'a meterte hasta que el mundo se acabe" },
+			{ tiempo: 52.56, texto: "Chingamo rico, bebé, ah-ah" },
+			{ tiempo: 58.16, texto: "Mami, vamo a hacerlo real" },
+			{ tiempo: 60.55, texto: "¿Qué es lo que estamo haciendo mal?" },
+			{ tiempo: 63.01, texto: "Si los dos queremo <span id='btnAmar1' class='palabra-amar'>amar</span>" },
+			{ tiempo: 64.98, texto: "Hay que dejarse llevar" },
+			{ tiempo: 67.52, texto: "Me fascina su ternura, pelo largo hasta las cadera'" },
+			{ tiempo: 71.79, texto: "Y si tú a ella la viera' cómo encima se menea" },
+			{ tiempo: 76.34, texto: "Yo vo'a romperte, bebé, dame la suerte" },
+			{ tiempo: 81.12, texto: "Pa que te suelte' y comerte (ah)" },
+			{ tiempo: 84.67, texto: "Que yo tengo mi glopeta en caleta pa'l que apriete, ey (ah)" },
+			{ tiempo: 89.39, texto: "En la calle andamo fuerte, milloneta, pa que sepa' (ah)" },
+			{ tiempo: 95.40, texto: "Ta bellaca pidiéndome má'" },
+			{ tiempo: 100.31, texto: "Yo la pesco de la cintura" },
+			{ tiempo: 105.02, texto: "Bellaquearte, romperte toa la night" },
+			{ tiempo: 110.42, texto: "Ma, dime qué fay, dime si tú me extrañai" },
+			{ tiempo: 114.20, texto: "Pa bellaquearte, perrearte toa la night (tra, tra, tra)" },
+			{ tiempo: 120.09, texto: "Ma, dime qué fay, dime si tú me extrañai (MJ)" },
+			{ tiempo: 123.86, texto: "Yo vo'a romperte, bebé, dame la suerte" },
+			{ tiempo: 128.66, texto: "Pa que te suelte' y comerte (brr)" },
+			{ tiempo: 133.34, texto: "--- FIN ---" }
+		];
+
+		function reiniciarTodo() {
+			if (timerReinicio) clearTimeout(timerReinicio);
+			audio.pause();
+			audio.currentTime = 0;
+			videoAna.currentTime = 0;
+			
+			for (let i = 1; i < totalEstadosColor; i++) {
+				videoAna.classList.remove(`color-estado-${i}`);
+			}
+			estadoColorActual = 0;
+			modalPopUp.style.display = 'none';
+			
+			karaokeText.innerHTML = '';
+			delete karaokeText.dataset.modo;
+			delete karaokeText.dataset.tiempo;
+
+			capaInicio.style.display = 'flex';
+		}
+
+		capaInicio.addEventListener('click', () => {
+			capaInicio.style.display = 'none';
+			videoAna.play();
+			audio.play();
+		});
+
+		const TIEMPO_INICIO_FIJO_1 = 63.01;
+		const TIEMPO_INICIO_FIJO_2 = 64.98;
+		const TIEMPO_FIN_FIJO = 64.98 + 20;
+
+		audio.addEventListener('timeupdate', () => {
+			const t = audio.currentTime;
+
+			// Fade Out continuo a partir de 1:04 (64s)
+			if (t >= 64) {
+				const tiempoTranscurrido = t - 64;
+				audio.volume = Math.max(0.12, 1.0 - (tiempoTranscurrido * 0.03));
+			} else {
+				audio.volume = 1.0;
+			}
+
+			let lineaActual = letraLRC[0];
+			for (let i = 0; i < letraLRC.length; i++) {
+				if (t >= letraLRC[i].tiempo) {
+					lineaActual = letraLRC[i];
+				}
+			}
+
+			// Lógica apilada fija (63.01s a 84.98s)
+			if (t >= TIEMPO_INICIO_FIJO_1 && t < TIEMPO_FIN_FIJO) {
+				let htmlApilado = `<div class="bloque-apilado-fijo">`;
+				
+				// Línea 1 fija a los 63.01s
+				htmlApilado += `<div class="texto-karaoke">Si los dos queremo <span id="btnAmar1" class="palabra-amar">amar</span></div>`;
+
+				// Línea 2 apilada abajo a los 64.98s
+				if (t >= TIEMPO_INICIO_FIJO_2) {
+					htmlApilado += `<div class="texto-karaoke">Hay que dejarse <span id="btnLlevar" class="palabra-llevar">llevar</span></div>`;
+				}
+
+				htmlApilado += `</div>`;
+
+				if (t >= 67.52 && lineaActual.texto !== "") {
+					htmlApilado += `<div class="texto-karaoke opacidad-baja">${lineaActual.texto}</div>`;
+				}
+
+				if (karaokeText.dataset.modo !== "fijo" || karaokeText.dataset.tiempo !== String(lineaActual.tiempo)) {
+					karaokeText.innerHTML = htmlApilado;
+					karaokeText.dataset.modo = "fijo";
+					karaokeText.dataset.tiempo = lineaActual.tiempo;
+				}
+			} else {
+				if (karaokeText.dataset.modo === "fijo" || karaokeText.dataset.tiempo !== String(lineaActual.tiempo)) {
+					karaokeText.innerHTML = `<div class="texto-karaoke ${t >= 67.52 ? 'opacidad-baja' : ''}">${lineaActual.texto}</div>`;
+					karaokeText.dataset.modo = "normal";
+					karaokeText.dataset.tiempo = lineaActual.tiempo;
+				}
+			}
+		});
+
+		audio.addEventListener('ended', () => {
+			timerReinicio = setTimeout(() => {
+				reiniciarTodo();
+			}, 30000);
+		});
+	</script>
+
+</body>
+</html>

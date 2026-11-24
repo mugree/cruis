@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>*** DIRECTORIO CRUISING & SALAS - EDICIÓN CLÁSICA ***</title>
+  <style>
+    /* FONDO CON PATRÓN DE CUADRÍCULA ROJA Y MORADA ESTILO WEB 1.0 */
+    body {
+      background-color: #2B003B; /* Morado oscuro de base */
+      background-image: radial-gradient(#FF0000 1px, transparent 1px), radial-gradient(#FFFF00 1px, #2B003B 1px);
+      background-size: 40px 40px;
+      background-position: 0 0, 20px 20px;
+      color: #000000;
+      font-family: Arial, Helvetica, sans-serif; /* Tipografía Web 2.0 por defecto */
+      margin: 0;
+      padding: 15px;
+    }
+
+    /* CONTENEDOR PRINCIPAL ESTILO WEB 2.0 CON BORDES FUERTES 1.0 */
+    .contenedor-20 {
+      max-width: 920px;
+      margin: 0 auto;
+      background-color: #FFFFFF; /* Fondo blanco para lectura */
+      border: 4px outset #FFFF00;
+      border-radius: 10px;
+      box-shadow: 8px 8px 0px #FF0000;
+      overflow: hidden;
+    }
+
+    /* CABECERA DEGRADADA ROJO A MORADO (WEB 2.0) */
+    header {
+      background: linear-gradient(90deg, #CC0000 0%, #6A0080 100%);
+      color: #FFFFFF;
+      padding: 20px;
+      border-bottom: 4px solid #FFFF00;
+    }
+
+    header h1 {
+      font-family: "Courier New", Courier, monospace;
+      margin: 0;
+      font-size: 24px;
+      text-shadow: 2px 2px #000000;
+    }
+
+    /* MARQUEE WEB 1.0 */
+    .caja-marquee {
+      background-color: #FFFF00;
+      color: #CC0000;
+      font-family: "Courier New", Courier, monospace;
+      font-weight: bold;
+      border-bottom: 3px solid #000000;
+      padding: 5px 0;
+    }
+
+    /* BARRA DE NAVEGACIÓN CON BOTONES NATIVOS WEB 1.0 */
+    nav {
+      background-color: #4B0082; /* Morado índigo */
+      padding: 10px 15px;
+      border-bottom: 3px ridge #FFFFFF;
+    }
+
+    /* BOTÓN CLÁSICO 3D DE WINDOWS 95 / WEB 1.0 */
+    .btn-10 {
+      background-color: #E0E0E0;
+      color: #000000;
+      font-family: "Courier New", Courier, monospace;
+      font-weight: bold;
+      font-size: 12px;
+      border: 3px outset #FFFFFF;
+      padding: 4px 10px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin: 2px;
+    }
+    .btn-10:active {
+      border-style: inset;
+      background-color: #FFFF00;
+    }
+
+    .btn-rojo {
+      background-color: #FF0000;
+      color: #FFFF00;
+      border: 3px outset #FF8888;
+    }
+
+    /* ESTRUCTURA DE DOS COLUMNAS WEB 2.0 */
+    .layout-columnas {
+      display: flex;
+      gap: 15px;
+      padding: 15px;
+      background-color: #FFFDF0; /* Blanco cálido amarillento */
+    }
+
+    main {
+      flex: 2;
+    }
+
+    aside {
+      flex: 1;
+      background-color: #FFFFCC; /* Fondo amarillo claro */
+      border: 3px groove #6A0080;
+      padding: 12px;
+      border-radius: 6px;
+    }
+
+    /* TARJETAS DE SALAS (Fusión 2.0 + 1.0) */
+    .tarjeta-sala {
+      background-color: #FFFFFF;
+      border: 2px solid #6A0080;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 18px;
+      box-shadow: 4px 4px 0px #FFFF00;
+    }
+
+    .tarjeta-sala h2 {
+      font-family: Arial, sans-serif;
+      background-color: #CC0000;
+      color: #FFFF00;
+      padding: 5px 10px;
+      margin: -15px -15px 10px -15px;
+      font-size: 16px;
+      border-bottom: 2px solid #000000;
+    }
+
+    /* MEZCLA DE TIPOGRAFÍAS */
+    .texto-serif {
+      font-family: "Times New Roman", Times, serif;
+      font-size: 16px;
+      color: #111111;
+    }
+
+    .dato-mono {
+      font-family: "Courier New", Courier, monospace;
+      background-color: #FFFF00;
+      color: #000000;
+      padding: 2px 5px;
+      font-weight: bold;
+      border: 1px solid #000000;
+    }
+
+    /* HIPERVÍNCULOS WEB 1.0 PUROS */
+    a.link-10 {
+      color: #0000EE;
+      text-decoration: underline;
+      font-weight: bold;
+    }
+    a.link-10:visited {
+      color: #6A0080;
+    }
+    a.link-10:hover {
+      background-color: #FFFF00;
+      color: #FF0000;
+    }
+
+    /* ETIQUETAS WEB 2.0 */
+    .pill-20 {
+      background-color: #6A0080;
+      color: #FFFFFF;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-family: Arial, sans-serif;
+    }
+
+    /* EFECTO PARPADEO CLÁSICO <BLINK> */
+    .parpadeo {
+      animation: blinker 1s linear infinite;
+      background-color: #FF0000;
+      color: #FFFF00;
+      padding: 1px 4px;
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      font-weight: bold;
+    }
+    @keyframes blinker {
+      50% { opacity: 0; }
+    }
+
+    footer {
+      background-color: #CC0000;
+      color: #FFFFFF;
+      text-align: center;
+      padding: 15px;
+      border-top: 4px solid #FFFF00;
+      font-family: "Courier New", Courier, monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="contenedor-20">
+    
+    <!-- CABECERA -->
+    <header>
+      <h1>[>>> ZONA_ROJA // RED DE SALAS & CRUISING <<<]</h1>
+      <p style="margin: 5px 0 0 0; font-family: 'Times New Roman', serif; font-size: 15px;">
+        <i>Portal independiente de puntos de encuentro, cabinas y mapas urbanos.</i>
+      </p>
+    </header>
+
+    <!-- MARQUEE PRINCIPAL -->
+    <div class="caja-marquee">
+      <marquee behavior="alternate" scrollamount="5">
+        ★ ¡BIENVENIDO AL DIRECTORIO! ★ ACTUALIZADO HOY ★ ENTRADA LIBRE Y ANÓNIMA ★ USA LOS BOTONES PARA FILTRAR ★
+      </marquee>
+    </div>
+
+    <!-- BARRA DE BOTONES NATIVOS WEB 1.0 -->
+    <nav>
+      <span style="color: #FFFF00; font-family: 'Courier New', monospace; font-weight: bold;">MENÚ:</span>
+      <button class="btn-10" onclick="alert('Mostrando todas las salas')">[ TODAS LAS SALAS ]</button>
+      <button class="btn-10">[ CABINAS 24H ]</button>
+      <button class="btn-10">[ PARQUES / EXTERIOR ]</button>
+      <button class="btn-10 btn-rojo">[ + REPORTAR PUNTO ]</button>
+    </nav>
+
+    <!-- CUERPO DOS COLUMNAS -->
+    <div class="layout-columnas">
+      
+      <!-- COLUMNA PRINCIPAL -->
+      <main>
+
+        <!-- TARJETA 1 -->
+        <div class="tarjeta-sala">
+          <h2>:: SALA 01: SUBSUELO ESTACIÓN CENTRAL <span class="parpadeo">¡HOT AHORA!</span></h2>
+          
+          <p>
+            <span class="dato-mono">AFLUENCIA: ALTA</span> 
+            <span class="dato-mono">HORA PICO: 18:00 - 23:00</span>
+          </p>
+
+          <p class="texto-serif">
+            Pasillo de conexión nivel -2 junto a los locales cerrados. Iluminación tenue y tránsito constante de gente saliendo de oficinas. Se recomienda máxima discreción en los accesos.
+          </p>
+
+          <hr size="3" color="#6A0080">
+
+          <p>
+            <span class="pill-20">#subsuelo</span>
+            <span class="pill-20">#centro</span>
+            <span class="pill-20">#discreto</span>
+          </p>
+
+          <div style="background-color: #F0F0F0; padding: 8px; border: 1px dashed #000000;">
+            <b>Enlaces rápidos:</b> 
+            <a href="#" class="link-10">[Ver Mapa ASCII]</a> | 
+            <a href="#" class="link-10">[Leer 14 comentarios]</a>
+            <br><br>
+            <button class="btn-10">👍 Confirmar ambiente (18)</button>
+            <button class="btn-10">⚠️ Avisar vigilancia (0)</button>
+          </div>
+        </div>
+
+        <!-- TARJETA 2 -->
+        <div class="tarjeta-sala">
+          <h2>:: SALA 02: VIDEO CABINAS "EL LABERINTO"</h2>
+          
+          <p>
+            <span class="dato-mono">ESTADO: ABIERTO 24H</span> 
+            <span class="dato-mono">ENTRADA: $5.00</span>
+          </p>
+
+          <p class="texto-serif">
+            Local clásico en el centro histórico. Cuenta con 15 cabinas privadas con compuertas comunicadas, sala de proyección oscura y zona de descanso al fondo.
+          </p>
+
+          <hr size="3" color="#FF0000">
+
+          <p>
+            <span class="pill-20">#cabinas</span>
+            <span class="pill-20">#gloryhole</span>
+            <span class="pill-20">#24horas</span>
+          </p>
+
+          <div style="background-color: #F0F0F0; padding: 8px; border: 1px dashed #000000;">
+            <b>Enlaces rápidos:</b> 
+            <a href="#" class="link-10">[Dirección exacta]</a> | 
+            <a href="#" class="link-10">[Normas del local]</a>
+            <br><br>
+            <button class="btn-10">👍 Estoy aquí ahora (7)</button>
+            <button class="btn-10">💬 Dejar nota</button>
+          </div>
+        </div>
+
+        <!-- FIELDSET CON FORMULARIO NATIVO WEB 1.0 -->
+        <fieldset style="border: 3px groove #CC0000; background-color: #FFFFFF;">
+          <legend style="background-color: #FFFF00; color: #000000; font-weight: bold; padding: 2px 8px; border: 1px solid #000;">
+            [ REPORTE RÁPIDO EN VIVO ]
+          </legend>
+          <form>
+            <label><b>Sala:</b></label>
+            <select style="font-family: 'Courier New', monospace; background: #FFFFCC;">
+              <option>01 - Estación Central</option>
+              <option>02 - Video Cabinas</option>
+              <option>03 - Parque Norte</option>
+            </select>
+            <br><br>
+            <label><b>Mensaje corto:</b></label><br>
+            <input type="text" size="40" placeholder="Ej: Hay buen movimiento ahora..." style="font-family: 'Courier New', monospace;">
+            <input type="submit" value="ENVIAR AVISO" class="btn-10 btn-rojo">
+          </form>
+        </fieldset>
+
+      </main>
+
+      <!-- BARRA LATERAL -->
+      <aside>
+        <div style="background-color: #6A0080; color: #FFFF00; padding: 5px; font-weight: bold; text-align: center;">
+          ★ TABLÓN DE SEÑALES ★
+        </div>
+
+        <!-- MARQUEE VERTICAL WEB 1.0 -->
+        <marquee direction="up" height="90" scrollamount="2" style="background: #FFFFFF; border: 2px inset #888888; padding: 5px; margin: 10px 0; font-family: 'Courier New', monospace; font-size: 12px;">
+          • [22:15] Usuario_89: Mucho movimiento en Sala 02.<br><br>
+          • [21:40] Anónimo: Zona norte tranquila hoy.<br><br>
+          • [20:10] Admin: Añadido nuevo punto en el centro.
+        </marquee>
+
+        <h4 style="margin: 10px 0 5px 0; color: #CC0000;">CÓDIGOS DE CONTACTO:</h4>
+        <table border="2" bordercolor="#000000" width="100%" cellpadding="4" cellspacing="0" bgcolor="#FFFFFF" style="font-size: 12px;">
+          <tr bgcolor="#FF0000" style="color: #FFFF00;">
+            <th>Acción</th>
+            <th>Clave</th>
+          </tr>
+          <tr>
+            <td>Mirada fija</td>
+            <td><code>INTERÉS</code></td>
+          </tr>
+          <tr bgcolor="#FFF5CC">
+            <td>Fuego / Cigarro</td>
+            <td><code>HABLAR</code></td>
+          </tr>
+          <tr>
+            <td>Caminar lento</td>
+            <td><code>SÍGUEME</code></td>
+          </tr>
+        </table>
+
+        <hr size="2" color="#000000">
+
+        <h4 style="margin: 5px 0; color: #6A0080;">DIRECTORIO DE ENLACES:</h4>
+        <ul style="padding-left: 18px; margin: 5px 0;">
+          <li><a href="#" class="link-10">Mapa_General_2026.html</a></li>
+          <li><a href="#" class="link-10">Foro_Sin_Registro</a></li>
+          <li><a href="#" class="link-10">Consejos_Seguridad.txt</a></li>
+          <li><a href="#" class="link-10">Libro_de_Visitas</a></li>
+        </ul>
+
+        <center style="margin-top: 15px;">
+          <div style="background: #000000; color: #00FF00; font-family: 'Courier New', monospace; padding: 5px; border: 3px inset #888888; display: inline-block;">
+            VISITAS: 019482
+          </div>
+        </center>
+      </aside>
+
+    </div>
+
+    <!-- PIE DE PÁGINA -->
+    <footer>
+      <marquee behavior="scroll" direction="left" scrollamount="3" style="width: 60%; background: #000000; color: #FFFF00; border: 1px solid #FFFF00;">
+        Optimizado para Netscape Navigator 4.0 e Internet Explorer 5.0 - Resolución 800x600
+      </marquee>
+      <br><br>
+      <button class="btn-10">[ SUBIR ARRIBA ▲ ]</button> 
+      <button class="btn-10">[ AÑADIR A FAVORITOS ★ ]</button>
+      <p style="font-size: 11px; margin-top: 10px;">
+        *** PÁGINA 100% LIBRE DE RASTREO - SOLO HIPERTEXTO ***
+      </p>
+    </footer>
+
+  </div>
+
+</body>
+</html>

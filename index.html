@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>ideas - Net Art</title>
+	<style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #000000;
+			color: #ffffff;
+			width: 100vw;
+			height: 100vh;
+			overflow: hidden;
+		}
+
+		/* ------------------------------------------------ */
+		/* SECCIÓN 1: DIV 2 -> DIV 1 A PANTALLA COMPLETA    */
+		/* ------------------------------------------------ */
+		#seccionArte {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			background-color: #000;
+			z-index: 100;
+			cursor: pointer;
+		}
+
+		.caja-fullscreen {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 1.2s ease-in-out;
+		}
+
+		.caja-fullscreen.activa {
+			opacity: 1;
+			pointer-events: auto;
+		}
+
+		.caja-fullscreen img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		/* ------------------------------------------------ */
+		/* SECCIÓN 2: MAPA INTERACTIVO Y COMENTARIOS        */
+		/* ------------------------------------------------ */
+		#seccionMapa {
+			display: none;
+			width: 100vw;
+			min-height: 100vh;
+			background-color: #000;
+			padding: 40px 20px 120px 20px;
+			flex-direction: column;
+			align-items: center;
+			overflow-y: auto;
+		}
+
+		#seccionMapa.activa {
+			display: flex;
+		}
+
+		/* Contenedor del Mapa */
+		.contenedor-mapa-wrapper {
+			width: 90vw;
+			max-width: 1100px;
+			text-align: center;
+			margin-bottom: 20px;
+		}
+
+		.titulo-arriba-mapa {
+			font-size: 22px;
+			font-weight: normal;
+			color: #ffffff;
+			margin-bottom: 15px;
+			letter-spacing: 1px;
+		}
+
+		.subtitulo-abajo-mapa {
+			font-size: 13px;
+			color: #888888;
+			margin-top: 15px;
+			margin-bottom: 60px;
+			letter-spacing: 1px;
+		}
+
+		#mapaContenedor {
+			position: relative;
+			width: 100%;
+			border: 1px solid #222222;
+			overflow: hidden;
+			cursor: crosshair;
+		}
+
+		#mapaContenedor img {
+			width: 100%;
+			height: auto;
+			display: block;
+		}
+
+		/* Formulario Popup al hacer clic en el mapa */
+		#popupComentario {
+			display: none;
+			position: absolute;
+			background-color: #000000;
+			border: 1px solid #ffffff;
+			padding: 15px;
+			width: 260px;
+			z-index: 500;
+			transform: translate(-50%, -100%);
+		}
+
+		#popupComentario input[type="text"] {
+			width: 100%;
+			padding: 8px;
+			margin-bottom: 10px;
+			background-color: #111111;
+			border: 1px solid #333333;
+			color: #ffffff;
+			box-sizing: border-box;
+			font-size: 13px;
+		}
+
+		#popupComentario .botones-popup {
+			display: flex;
+			gap: 8px;
+		}
+
+		#popupComentario button {
+			padding: 8px;
+			font-size: 12px;
+			border: 1px solid #ffffff;
+			background-color: #000000;
+			color: #ffffff;
+			cursor: pointer;
+			flex: 1;
+		}
+
+		#popupComentario button:hover {
+			background-color: #ffffff;
+			color: #000000;
+		}
+
+		/* ------------------------------------------------ */
+		/* PUNTOS ROJOS BRILLANTES (ANIMACIÓN RESPLANDOR)   */
+		/* ------------------------------------------------ */
+		.pin-comentario {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			background-color: #ff0000;
+			border: 1px solid #ffffff;
+			border-radius: 50%;
+			transform: translate(-50%, -50%);
+			cursor: pointer;
+			z-index: 100;
+			box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+			animation: pulsoBrillo 1.5s infinite alternate ease-in-out;
+		}
+
+		@keyframes pulsoBrillo {
+			from {
+				box-shadow: 0 0 4px #e60000, 0 0 8px #e60000;
+			}
+			to {
+				box-shadow: 0 0 14px #ff3333, 0 0 26px #ff0000, 0 0 36px #ff0000;
+			}
+		}
+
+		.pin-comentario:hover {
+			transform: translate(-50%, -50%) scale(1.6);
+			z-index: 200;
+		}
+
+		.pin-comentario .tooltip-comentario {
+			display: none;
+			position: absolute;
+			bottom: 20px;
+			left: 50%;
+			transform: translateX(-50%);
+			background-color: #000000;
+			border: 1px solid #ffffff;
+			padding: 8px 12px;
+			width: 200px;
+			font-size: 12px;
+			color: #ffffff;
+			z-index: 300;
+			pointer-events: none;
+		}
+
+		.pin-comentario:hover .tooltip-comentario {
+			display: block;
+		}
+
+		/* ------------------------------------------------ */
+		/* ENLACE ABAJO DEL MAPA CON AMARILLO POCO SATURADO */
+		/* ------------------------------------------------ */
+		.barra-enlace {
+			width: 100%;
+			max-width: 1100px;
+			text-align: center;
+			padding: 40px 0 20px 0;
+			margin-top: 60px;
+			border-top: 1px solid #222222;
+		}
+
+		.enlace-veo {
+			color: #e2dfb5; /* Amarillo muy poco saturado */
+			font-size: 1.4rem;
+			font-weight: normal;
+			text-decoration: underline;
+			letter-spacing: 2px;
+			cursor: pointer;
+		}
+
+		.enlace-veo:hover {
+			color: #ffffff;
+		}
+
+		/* ------------------------------------------------ */
+		/* POP-UP MODAL DE LOGIN                           */
+		/* ------------------------------------------------ */
+		#modalOverlayLogin {
+			display: none;
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			background-color: rgba(0, 0, 0, 0.85);
+			z-index: 2000;
+			justify-content: center;
+			align-items: center;
+		}
+
+		#login {
+			position: relative;
+			width: 280px;
+			background-color: #000000;
+			border: 1px solid #ffffff;
+			padding: 25px;
+		}
+
+		.btn-cerrar-login {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			background: transparent;
+			border: none;
+			color: #ffffff;
+			font-size: 16px;
+			cursor: pointer;
+		}
+
+		#login h2 {
+			margin-bottom: 15px;
+			font-size: 14px;
+			color: #ffffff;
+			font-weight: normal;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+		}
+
+		#login form input[type="text"],
+		#login form input[type="password"] {
+			width: 100%;
+			padding: 8px;
+			margin-bottom: 12px;
+			box-sizing: border-box;
+			border: 1px solid #333333;
+			background-color: #111111;
+			color: #ffffff;
+		}
+
+		#login form input[type="submit"] {
+			width: 100%;
+			padding: 8px;
+			background-color: #000000;
+			color: #ffffff;
+			border: 1px solid #ffffff;
+			cursor: pointer;
+			text-transform: uppercase;
+			font-size: 12px;
+		}
+
+		#login form input[type="submit"]:hover {
+			background-color: #ffffff;
+			color: #000000;
+		}
+	</style>
+</head>
+<body>
+
+	<!-- SECCIÓN 1: TRANSICIÓN DIV 2 -> DIV 1 A PANTALLA COMPLETA -->
+	<div id="seccionArte">
+		<!-- Inicia mostrando el Div 2 -->
+		<div id="div2" class="caja-fullscreen activa">
+			<img src="https://doctorcan.com/wp-content/uploads/2024/10/87156275_10028734-683x1024.png">
+		</div>
+
+		<!-- Div 1 -->
+		<div id="div1" class="caja-fullscreen"> 
+			<img src="https://www.infobae.com/resizer/v2/DZ5KM4RKKVCFJOLTCVG5CFKI7Q.png?auth=1f7623943d7c39e1f0ee2b77796e0b9f274fdf152934b02d5420353c62e3fc2f&smart=true&width=992&height=558&quality=85">
+		</div>
+	</div>
+
+	<!-- SECCIÓN 2: MAPA INTERACTIVO Y ENLACE FINAL -->
+	<div id="seccionMapa">
+
+		<!-- Mapa de la universidad -->
+		<div class="contenedor-mapa-wrapper">
+			<!-- Título arriba del mapa -->
+			<h2 class="titulo-arriba-mapa">¿Donde has hecho cruissing?</h2>
+
+			<div id="mapaContenedor">
+				<img id="imgMapa" src="https://bffrepositorio.unal.edu.co/server/api/core/bitstreams/d1ffd88a-eb03-4c76-b5b9-db9ff4d39569/content" alt="Mapa Universidad Nacional">
+
+				<div id="popupComentario">
+					<input type="text" id="inputNombreMapa" placeholder="Usuario" readonly>
+					<input type="text" id="inputTextoMapa" placeholder="Escribe..." required>
+					<div class="botones-popup">
+						<button type="button" id="btnGuardarPin">Publicar</button>
+						<button type="button" id="btnCerrarPopup">Cancelar</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Texto abajo del mapa -->
+			<p class="subtitulo-abajo-mapa">ubicalo en el mapa</p>
+		</div>
+
+		<!-- Enlace aún más abajo del mapa (Amarillo muy poco saturado) -->
+		<div class="barra-enlace">
+			<a id="btnCuandoTeVeo" class="enlace-veo">¿Cuando te veo?</a>
+		</div>
+
+	</div>
+
+	<!-- POP-UP MODAL DE LOGIN (Aparece al pulsar "¿Cuando te veo?") -->
+	<div id="modalOverlayLogin">
+		<div id="login">
+			<button class="btn-cerrar-login" id="btnCerrarLogin">&times;</button>
+			<h2>Acceder</h2>
+			<form id="loginForm">
+				<label for="username" style="font-size: 11px; display: block; margin-bottom: 4px;">USUARIO</label>
+				<input type="text" id="username" required>
+				<label for="pwd" style="font-size: 11px; display: block; margin-bottom: 4px;">CONTRASEÑA</label>
+				<input type="password" id="contraseña" required>
+				<input type="submit" value="Ingresar">
+			</form>
+			<div id="resultadoLogin" style="display: none; font-size: 12px; margin-top: 10px;"></div>
+		</div>
+	</div>
+
+	<script>
+		let usuarioLogueadoActual = 'Anónimo';
+		let coordsClicActual = { xPercent: 0, yPercent: 0 };
+		let estadoSeccion = 1;
+
+		const seccionArte = document.getElementById('seccionArte');
+		const seccionMapa = document.getElementById('seccionMapa');
+		const div1 = document.getElementById('div1');
+		const div2 = document.getElementById('div2');
+
+		// Endpoints de Sheety
+		const urlHoja1 = 'https://api.sheety.co/3bf2b2add58e4c4d360e0b269fb830d8/hojadeC/hoja1';
+		const urlHoja2 = 'https://api.sheety.co/3bf2b2add58e4c4d360e0b269fb830d8/hojadeC/hoja2';
+
+		// ----------------------------------------------------
+		// 1. TRANSICIÓN SILENCIOSA: DIV 2 -> DIV 1 -> MAPA
+		// ----------------------------------------------------
+		seccionArte.addEventListener('click', () => {
+			if (estadoSeccion === 1) {
+				div2.classList.remove('activa');
+				div1.classList.add('activa');
+				estadoSeccion = 2;
+			} else if (estadoSeccion === 2) {
+				seccionArte.style.display = 'none';
+				seccionMapa.classList.add('activa');
+				document.body.style.overflow = 'auto';
+			}
+		});
+
+		// ----------------------------------------------------
+		// 2. LÓGICA DEL MAPA Y PUNTOS ROJOS BRILLANTES
+		// ----------------------------------------------------
+		const mapaContenedor = document.getElementById('mapaContenedor');
+		const popupComentario = document.getElementById('popupComentario');
+		const inputNombreMapa = document.getElementById('inputNombreMapa');
+		const inputTextoMapa = document.getElementById('inputTextoMapa');
+		const btnGuardarPin = document.getElementById('btnGuardarPin');
+		const btnCerrarPopup = document.getElementById('btnCerrarPopup');
+
+		mapaContenedor.addEventListener('click', function(e) {
+			if (e.target.closest('.pin-comentario') || e.target.closest('#popupComentario')) {
+				return;
+			}
+
+			const rect = mapaContenedor.getBoundingClientRect();
+			const x = e.clientX - rect.left;
+			const y = e.clientY - rect.top;
+
+			coordsClicActual.xPercent = ((x / rect.width) * 100).toFixed(2);
+			coordsClicActual.yPercent = ((y / rect.height) * 100).toFixed(2);
+
+			popupComentario.style.left = coordsClicActual.xPercent + '%';
+			popupComentario.style.top = coordsClicActual.yPercent + '%';
+			popupComentario.style.display = 'block';
+
+			inputNombreMapa.value = usuarioLogueadoActual;
+			inputTextoMapa.focus();
+		});
+
+		btnCerrarPopup.addEventListener('click', () => {
+			popupComentario.style.display = 'none';
+			inputTextoMapa.value = '';
+		});
+
+		btnGuardarPin.addEventListener('click', function() {
+			const comentarioTexto = inputTextoMapa.value.trim();
+			if (!comentarioTexto) return;
+
+			const autor = inputNombreMapa.value || 'Anónimo';
+			const fechaActual = new Date().toLocaleString('es-CO');
+
+			crearPinEnMapa(autor, comentarioTexto, fechaActual, coordsClicActual.xPercent, coordsClicActual.yPercent);
+
+			popupComentario.style.display = 'none';
+			inputTextoMapa.value = '';
+
+			fetch(urlHoja2, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					hoja2: {
+						name: autor,
+						comentario: comentarioTexto,
+						fecha: fechaActual
+					}
+				})
+			}).catch(err => console.error('Error en Sheety hoja2:', err));
+		});
+
+		function crearPinEnMapa(autor, texto, fecha, xPct, yPct) {
+			const pin = document.createElement('div');
+			pin.className = 'pin-comentario';
+			pin.style.left = xPct + '%';
+			pin.style.top = yPct + '%';
+
+			pin.innerHTML = `
+				<div class="tooltip-comentario">
+					<strong>${autor}</strong><br>
+					<span style="font-size: 10px; color: #888;">${fecha}</span><br>
+					<div style="margin-top: 4px;">${texto}</div>
+				</div>
+			`;
+
+			mapaContenedor.appendChild(pin);
+		}
+
+		function cargarComentariosHoja2() {
+			fetch(urlHoja2)
+			.then(res => res.json())
+			.then(json => {
+				const datos = json.hoja2 || json.hoja2S || [];
+				datos.forEach(item => {
+					if (item.comentario) {
+						const x = item.x || Math.floor(Math.random() * 80 + 10);
+						const y = item.y || Math.floor(Math.random() * 80 + 10);
+						crearPinEnMapa(item.name || item.username || 'Anónimo', item.comentario, item.fecha || '', x, y);
+					}
+				});
+			})
+			.catch(err => console.log('GET hoja2:', err));
+		}
+
+		cargarComentariosHoja2();
+
+		// ----------------------------------------------------
+		// 3. POP-UP MODAL LOGIN ACTIVADO POR "¿CUANDO TE VEO?"
+		// ----------------------------------------------------
+		const btnCuandoTeVeo = document.getElementById('btnCuandoTeVeo');
+		const modalOverlayLogin = document.getElementById('modalOverlayLogin');
+		const btnCerrarLogin = document.getElementById('btnCerrarLogin');
+		const loginForm = document.getElementById('loginForm');
+
+		btnCuandoTeVeo.addEventListener('click', () => {
+			modalOverlayLogin.style.display = 'flex';
+		});
+
+		btnCerrarLogin.addEventListener('click', () => {
+			modalOverlayLogin.style.display = 'none';
+		});
+
+		// Envío de datos mediante Sheety a HojadeC / hoja1
+		loginForm.addEventListener('submit', function(e) {
+			e.preventDefault();
+
+			const usernameVal = document.getElementById('username').value;
+			const contrasenaVal = document.getElementById('contraseña').value;
+
+			usuarioLogueadoActual = usernameVal;
+
+			fetch(urlHoja1, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					hoja1: {
+						username: usernameVal,
+						contraseña: contrasenaVal
+					}
+				})
+			})
+			.then(res => res.json())
+			.then(data => {
+				console.log('Credenciales guardadas en Sheety hoja1:', data);
+				// Redirección directa al enlace solicitado
+				window.location.href = 'cruisssing.html';
+			})
+			.catch(err => {
+				console.error('Error al guardar en hoja1:', err);
+				// Redirecciona de todos modos en caso de fallo de red
+				window.location.href = 'cruisssing.html';
+			});
+		});
+	</script>
+
+</body>
+</html>
