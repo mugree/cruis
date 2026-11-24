@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatZona Net Art - Noches de Pelucheo & Salas</title>
+    <title>ChatZona Net Art - Cine Simultáneo, Noches de Pelucheo & Galería</title>
     <style>
         * {
             box-sizing: border-box;
@@ -25,7 +25,7 @@
         }
 
         /* =========================================================
-           1. BARRA SUPERIOR (PORTAL + SALAS + CONTROL VOLUMEN 0%=20%)
+           1. BARRA SUPERIOR (PORTAL + SALAS + VOLUMEN 0%=20%)
            ========================================================= */
         .topbar-portal {
             background: linear-gradient(90deg, #b30000 0%, #590059 50%, #1a0033 100%);
@@ -340,7 +340,7 @@
             border-bottom: 2px solid #000;
         }
 
-        /* Módulo Exclusivo de Sala #cine */
+        /* Módulo Exclusivo de Sala #cine SIMULTÁNEO */
         #moduloCine {
             display: none;
             background: #111;
@@ -367,12 +367,21 @@
 
         .cine-presets {
             display: flex;
-            gap: 4px;
+            gap: 5px;
             margin-bottom: 6px;
             align-items: center;
             font-size: 0.75rem;
             font-family: 'Courier New', Courier, monospace;
             flex-wrap: wrap;
+        }
+
+        .badge-vivo-cine {
+            background: #ff0033;
+            color: #fff;
+            padding: 2px 6px;
+            font-weight: bold;
+            border-radius: 2px;
+            animation: parpadeo 1s infinite alternate;
         }
 
         .btn-preset-video {
@@ -404,16 +413,6 @@
             width: 100%;
             height: 100%;
             border: none;
-        }
-
-        .aviso-local-youtube {
-            background: #220011;
-            color: #ffea00;
-            font-size: 0.72rem;
-            padding: 3px 6px;
-            text-align: center;
-            margin-top: 4px;
-            font-family: 'Courier New', Courier, monospace;
         }
 
         #listaMensajes {
@@ -503,9 +502,11 @@
             font-size: 0.95rem;
         }
 
-        /* Columna 2: Lista de Usuarios */
+        /* =========================================================
+           COLUMNA 2: USUARIOS + ENLACE DIRECTO A GALERIA.HTML
+           ========================================================= */
         .panel-usuarios {
-            width: 195px;
+            width: 215px;
             background: #e8e8e8;
             border: 2px solid #000;
             display: flex;
@@ -532,6 +533,34 @@
             font-size: 0.8rem;
         }
 
+        /* Acceso directo a Salas de Chat en Vivo (galeria.html) */
+        .caja-acceso-galeria {
+            background: #1a0033;
+            padding: 6px;
+            border-bottom: 2px solid #000;
+            text-align: center;
+        }
+
+        .btn-ir-galeria {
+            display: block;
+            width: 100%;
+            background: linear-gradient(90deg, #ff0055, #b30000);
+            color: #ffea00;
+            border: 2px outset #ff6688;
+            padding: 5px 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.76rem;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn-ir-galeria:hover {
+            background: #ffea00;
+            color: #000;
+            border-color: #fff;
+        }
+
         .ayuda-susurro {
             background: #ffffcc;
             font-size: 0.72rem;
@@ -546,7 +575,7 @@
             list-style: none;
             padding: 4px;
             overflow-y: auto;
-            font-size: 0.85rem;
+            font-size: 0.84rem;
         }
 
         #listaUsuarios li {
@@ -555,34 +584,52 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            cursor: pointer;
+            gap: 4px;
         }
 
         #listaUsuarios li:hover {
             background: #d0d8ff;
         }
 
+        .acciones-usuario-item {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+
         .btn-mini-susurro {
             background: #ff0066;
             color: #fff;
             border: none;
-            font-size: 0.68rem;
+            font-size: 0.66rem;
             padding: 2px 5px;
             border-radius: 2px;
             cursor: pointer;
         }
 
+        .btn-mini-vivo {
+            background: #000080;
+            color: #ffea00;
+            border: none;
+            font-size: 0.66rem;
+            padding: 2px 5px;
+            border-radius: 2px;
+            text-decoration: none;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+        }
+
         .icono-rol {
             font-weight: bold;
             font-family: 'Courier New', Courier, monospace;
-            margin-right: 4px;
+            margin-right: 3px;
         }
 
         .rol-reg { color: #cc0000; }
         .rol-inv { color: #008000; }
 
         /* =========================================================
-           4. COLUMNA DERECHA: IMÁGENES PROTAGONISTAS + TEXTO MÍNIMO
+           4. COLUMNA DERECHA: BÚSQUEDAS AL AZAR DE IMÁGENES
            ========================================================= */
         .panel-lateral-derecho {
             width: 280px;
@@ -649,10 +696,10 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(0, 0, 0, 0.55);
-            color: rgba(255, 255, 255, 0.78);
+            background: rgba(0, 0, 0, 0.45);
+            color: rgba(255, 255, 255, 0.72);
             font-family: Arial, sans-serif;
-            font-size: 0.62rem;
+            font-size: 0.6rem;
             padding: 2px 5px;
             text-align: center;
             white-space: nowrap;
@@ -664,14 +711,14 @@
         @media (max-width: 850px) {
             .panel-lateral-derecho { display: none; }
         }
-        @media (max-width: 600px) {
-            .panel-usuarios { width: 145px; }
+        @media (max-width: 620px) {
+            .panel-usuarios { width: 165px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- URL directa extraída con F12 de Noches de Pelucheo -->
+    <!-- Emisora en vivo: Noches de Pelucheo -->
     <audio id="streamRadio" preload="none">
         <source src="https://az13.yesstreaming.net/listen/noches_de_pelucheo/radio.mp3" type="audio/mpeg">
     </audio>
@@ -700,7 +747,7 @@
                         </div>
                         <div class="opcion-sala" data-sala="cine">
                             #cine
-                            <span>Proyección & Videos</span>
+                            <span>Cine Simultáneo</span>
                         </div>
                     </div>
                 </div>
@@ -739,8 +786,8 @@
                 <div class="caja-reglas">
                     <h4>⚠️ Reglas de la Red (#chatzona | #velacion | #cine):</h4>
                     <ul>
-                        <li>La emisora <strong>Noches de Pelucheo</strong> permanece activa de fondo en toda la red.</li>
-                        <li>En <strong>#cine</strong> puedes pegar enlaces de YouTube para verlos en pantalla.</li>
+                        <li>En <strong>#cine</strong> la reproducción es <strong>simultánea</strong> para todos los conectados.</li>
+                        <li>Desde la lista de <strong>Usuarios</strong> puedes entrar directo a las salas en vivo (<a href="galeria.html" style="color:#b30000;font-weight:bold;">galeria.html</a>).</li>
                         <li>Haz clic sobre cualquier usuario conectado para enviarle un <strong>susurro privado</strong>.</li>
                     </ul>
                 </div>
@@ -781,39 +828,36 @@
          INTERFAZ PRINCIPAL DE 3 COLUMNAS
          ========================================================= -->
     <main class="contenedor-webchat">
-        <!-- Columna 1: Cine + Chat + Envío -->
+        <!-- Columna 1: Cine Simultáneo + Chat + Envío -->
         <section class="panel-mensajes">
             <marquee class="marquee-sala" id="marqueeTexto" behavior="scroll" direction="left">
-                *** SALA ACTIVA: #CHATZONA *** SINTONIZANDO: NOCHES DE PELUCHEO EN VIVO *** CLIC EN UN USUARIO PARA SUSURRAR ***
+                *** SALA ACTIVA: #CHATZONA *** SINTONIZANDO: NOCHES DE PELUCHEO EN VIVO *** SALAS DE VIDEO EN GALERIA.HTML ***
             </marquee>
 
-            <!-- PANEL DE PROYECCIÓN EXCLUSIVO DE LA SALA #CINE -->
+            <!-- PANEL DE PROYECCIÓN SIMULTÁNEA DE LA SALA #CINE -->
             <div id="moduloCine">
                 <form id="formSubirVideo" class="cine-controles">
-                    <input type="text" id="inputUrlYoutube" placeholder="Pega aquí un enlace de YouTube (ej: https://www.youtube.com/watch?v=a13lpRMqdYA)" required>
-                    <button type="submit" class="btn-3d btn-3d-rojo">▶ Proyectar</button>
+                    <input type="text" id="inputUrlYoutube" placeholder="Pega un enlace de YouTube para transmitir en simultáneo a todos..." required>
+                    <button type="submit" class="btn-3d btn-3d-rojo">📡 Transmitir a Todos</button>
                 </form>
 
                 <div class="cine-presets">
-                    <span>🎬 Base:</span>
-                    <button type="button" class="btn-preset-video" data-vid="a13lpRMqdYA">Video Principal</button>
-                    <button type="button" class="btn-preset-video" data-vid="jfKfPfyJRdk">Radio Visual</button>
-                    <button type="button" class="btn-preset-video" data-vid="4xDzrJKXOOY">Nocturno</button>
-                    <a id="linkRespaldoYoutube" href="https://www.youtube.com/watch?v=a13lpRMqdYA" target="_blank" style="color:#00ffff; margin-left:auto; text-decoration:underline;">↗ Abrir directo en YouTube</a>
+                    <span class="badge-vivo-cine">● EN VIVO SIMULTÁNEO</span>
+                    <span id="estadoTiempoCine" style="color:#00ffcc;">Minuto: 00:00</span>
+                    <button type="button" id="btnSincronizarCine" class="btn-preset-video">🔄 Sincronizar minuto exacto</button>
+                    <button type="button" class="btn-preset-video" data-vid="a13lpRMqdYA">Video Base</button>
+                    <a id="linkRespaldoYoutube" href="https://www.youtube.com/watch?v=a13lpRMqdYA" target="_blank" style="color:#00ffff; margin-left:auto; text-decoration:underline;">↗ YouTube</a>
                 </div>
 
                 <div class="pantalla-cine-wrapper">
                     <iframe 
                         id="reproductorCine" 
                         src="" 
-                        title="Proyector Sala Cine" 
+                        title="Proyector Sala Cine Simultáneo" 
                         referrerpolicy="strict-origin-when-cross-origin"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                         allowfullscreen>
                     </iframe>
-                </div>
-                <div class="aviso-local-youtube">
-                    * Nota: Si abres este archivo desde tu PC sin servidor (file://), YouTube muestra Error 153 hasta subirlo a GitHub Pages.
                 </div>
             </div>
 
@@ -837,39 +881,47 @@
             </form>
         </section>
 
-        <!-- Columna 2: Lista de Usuarios de la Sala -->
+        <!-- Columna 2: Lista de Usuarios + Acceso a galeria.html -->
         <aside class="panel-usuarios">
             <div class="header-usuarios">
                 <span>USUARIOS</span>
                 <span class="etiqueta-contador" id="etiquetaCantidad">1</span>
             </div>
-            <div class="ayuda-susurro">Clic en un nick para susurrar 🔒</div>
+
+            <!-- Botón principal hacia el archivo galeria.html -->
+            <div class="caja-acceso-galeria">
+                <a href="galeria.html" class="btn-ir-galeria" title="Entrar al mosaico de cámaras y salas de chat en vivo">
+                    📹 SALAS EN VIVO (galeria.html)
+                </a>
+            </div>
+
+            <div class="ayuda-susurro">Clic en nick: susurro | 📹: sala vivo</div>
             <ul id="listaUsuarios"></ul>
         </aside>
 
-        <!-- Columna 3: Dos Bloques Grandes de Imágenes (Protegidos contra bloqueos) -->
+        <!-- Columna 3: Búsquedas al azar de 'romance' e 'ia drama romance' -->
         <aside class="panel-lateral-derecho">
-            <!-- Bloque 1: Romance -->
+            <!-- Bloque 1: Búsqueda al azar de "romance" -->
             <div class="caja-anuncio">
                 <div class="header-anuncio">
-                    <span>💘 ROMANCE</span>
-                    <button type="button" id="btnSigBanner1" style="cursor: pointer; font-size: 0.65rem; padding: 0 4px;">↻</button>
+                    <span>💘 romance</span>
+                    <button type="button" id="btnSigBanner1" style="cursor: pointer; font-size: 0.65rem; padding: 0 4px;" title="Buscar otra imagen al azar">↻</button>
                 </div>
                 <div class="cuerpo-banner">
-                    <img id="imgBanner1" class="img-banner-galeria" referrerpolicy="no-referrer" alt="Banner Romance">
-                    <div class="micro-texto-banner" id="txtBanner1">#velacion</div>
+                    <img id="imgBanner1" class="img-banner-galeria" referrerpolicy="no-referrer" alt="romance">
+                    <div class="micro-texto-banner" id="txtBanner1">romance</div>
                 </div>
             </div>
 
-            <!-- Bloque 2: Drama Romance -->
+            <!-- Bloque 2: Búsqueda al azar de "ia drama romance" -->
             <div class="caja-anuncio">
                 <div class="header-anuncio drama">
-                    <span>💔 DRAMA ROMANCE</span>
-                    <button type="button" id="btnSigBanner2" style="cursor: pointer; font-size: 0.65rem; padding: 0 4px;">↻</button>
+                    <span>💔 ia drama romance</span>
+                    <button type="button" id="btnSigBanner2" style="cursor: pointer; font-size: 0.65rem; padding: 0 4px;" title="Buscar otra imagen al azar">↻</button>
                 </div>
                 <div class="cuerpo-banner">
-                    <img id="imgBanner2" class="img-banner-galeria" referrerpolicy="no-referrer" alt="Drama Romance">
-                    <div class="micro-texto-banner" id="txtBanner2">drama & romance</div>
+                    <img id="imgBanner2" class="img-banner-galeria" referrerpolicy="no-referrer" alt="ia drama romance">
+                    <div class="micro-texto-banner" id="txtBanner2">ia drama romance</div>
                 </div>
             </div>
         </aside>
@@ -884,7 +936,14 @@
         const VIDEO_BASE_CINE = 'a13lpRMqdYA';
 
         let salaActual = 'chatzona';
-        let videoActualCine = VIDEO_BASE_CINE;
+        // Estado compartido del cine simultáneo
+        let estadoCineGlobal = {
+            videoId: VIDEO_BASE_CINE,
+            inicioTimestamp: Date.now(),
+            autor: 'Sistema'
+        };
+        let ultimoIframeCargadoKey = '';
+
         let destinatarioSusurro = null;
         let usuarioActual = {
             nick: 'Anonimo',
@@ -901,6 +960,7 @@
         const moduloCine = document.getElementById('moduloCine');
         const reproductorCine = document.getElementById('reproductorCine');
         const linkRespaldoYoutube = document.getElementById('linkRespaldoYoutube');
+        const estadoTiempoCine = document.getElementById('estadoTiempoCine');
         const barraModoSusurro = document.getElementById('barraModoSusurro');
         const textoDestinoSusurro = document.getElementById('textoDestinoSusurro');
 
@@ -913,20 +973,17 @@
             etiquetaPorcentajeVol.textContent = `${visual}%`;
 
             // 0% visual -> 0.20 (20% real); 100% visual -> 1.00 (100% real)
-            const volumenReal = 0.20 + (visual / 100) * 0.80;
-            streamRadio.volume = volumenReal;
+            streamRadio.volume = 0.20 + (visual / 100) * 0.80;
         }
 
         function iniciarRadioPermanente() {
             aplicarVolumenRadio(sliderVolumenRadio.value);
-            streamRadio.play().catch(err => console.log("Esperando clic para audio:", err));
+            streamRadio.play().catch(err => console.log("Esperando interacción para audio:", err));
         }
 
         sliderVolumenRadio.addEventListener('input', (e) => {
             aplicarVolumenRadio(e.target.value);
-            if (streamRadio.paused) {
-                iniciarRadioPermanente();
-            }
+            if (streamRadio.paused) iniciarRadioPermanente();
         });
 
         document.body.addEventListener('click', () => {
@@ -936,7 +993,7 @@
         }, { once: true });
 
         // =========================================================
-        // 3. LÓGICA DE SALA #CINE
+        // 3. CINE SIMULTÁNEO SINCRONIZADO POR MARCA DE TIEMPO REAL
         // =========================================================
         function extraerIdYoutube(url) {
             const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([^"&?\/\s]{11})/;
@@ -944,39 +1001,56 @@
             return match ? match[1] : null;
         }
 
-        function cargarVideoEnProyector(videoId) {
-            videoActualCine = videoId;
-            const originParam = window.location.protocol.startsWith('http') ? `&origin=${encodeURIComponent(window.location.origin)}` : '';
-            reproductorCine.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0${originParam}`;
-            linkRespaldoYoutube.href = `https://www.youtube.com/watch?v=${videoId}`;
+        function formatearSegundos(totalSeg) {
+            const min = Math.floor(totalSeg / 60);
+            const seg = totalSeg % 60;
+            return `${String(min).padStart(2, '0')}:${String(seg).padStart(2, '0')}`;
         }
 
-        document.querySelectorAll('.btn-preset-video').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const vid = btn.dataset.vid;
-                cargarVideoEnProyector(vid);
-                agregarMensajeSistema(`Has cargado el video en el proyector.`);
-            });
+        function sincronizarProyectorSimultaneo(forzarRecarga = false) {
+            if (salaActual !== 'cine') return;
+
+            const segundosTranscurridos = Math.max(0, Math.floor((Date.now() - estadoCineGlobal.inicioTimestamp) / 1000));
+            estadoTiempoCine.textContent = `Minuto vivo: ${formatearSegundos(segundosTranscurridos)}`;
+
+            const claveEmision = `${estadoCineGlobal.videoId}_${estadoCineGlobal.inicioTimestamp}`;
+            if (forzarRecarga || ultimoIframeCargadoKey !== claveEmision) {
+                ultimoIframeCargadoKey = claveEmision;
+                const originParam = window.location.protocol.startsWith('http') ? `&origin=${encodeURIComponent(window.location.origin)}` : '';
+                reproductorCine.src = `https://www.youtube.com/embed/${estadoCineGlobal.videoId}?autoplay=1&rel=0&start=${segundosTranscurridos}${originParam}`;
+                linkRespaldoYoutube.href = `https://www.youtube.com/watch?v=${estadoCineGlobal.videoId}&t=${segundosTranscurridos}s`;
+            }
+        }
+
+        // Actualizar el reloj de minuto en vivo cada segundo cuando se está en #cine
+        setInterval(() => {
+            if (salaActual === 'cine') {
+                const seg = Math.max(0, Math.floor((Date.now() - estadoCineGlobal.inicioTimestamp) / 1000));
+                estadoTiempoCine.textContent = `Minuto vivo: ${formatearSegundos(seg)}`;
+            }
+        }, 1000);
+
+        document.getElementById('btnSincronizarCine').addEventListener('click', () => {
+            sincronizarProyectorSimultaneo(true);
+            agregarMensajeSistema(`Proyector re-sincronizado al segundo exacto de la sala.`);
         });
 
-        document.getElementById('formSubirVideo').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const urlIngresada = document.getElementById('inputUrlYoutube').value.trim();
-            const videoId = extraerIdYoutube(urlIngresada);
-
-            if (!videoId) {
-                alert("❌ Enlace no válido. Pega una URL de YouTube.");
-                return;
-            }
-
-            cargarVideoEnProyector(videoId);
-            document.getElementById('inputUrlYoutube').value = '';
-
+        async function transmitirNuevoVideoATodos(videoId) {
+            const ahoraMs = Date.now();
             const nombreFormateado = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
             const fechaActual = obtenerFechaActual();
-            const payloadVideo = `[#cine] [VIDEO:${videoId}]`;
 
-            renderizarMensajeVideo(nombreFormateado, videoId, fechaActual);
+            estadoCineGlobal = {
+                videoId: videoId,
+                inicioTimestamp: ahoraMs,
+                autor: nombreFormateado
+            };
+
+            sincronizarProyectorSimultaneo(true);
+
+            // Guardamos el ID y el timestamp exacto de inicio para que todos entren en el mismo segundo
+            const payloadVideo = `[#cine] [VIDEO:${videoId}|${ahoraMs}]`;
+            renderizarMensajeVideo(nombreFormateado, videoId, ahoraMs, fechaActual);
             listaMensajes.scrollTop = listaMensajes.scrollHeight;
 
             try {
@@ -992,8 +1066,28 @@
                     })
                 });
             } catch (error) {
-                console.error('Error guardando video en hoja3:', error);
+                console.error('Error guardando transmisión simultánea:', error);
             }
+        }
+
+        document.querySelectorAll('.btn-preset-video[data-vid]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                transmitirNuevoVideoATodos(btn.dataset.vid);
+            });
+        });
+
+        document.getElementById('formSubirVideo').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const urlIngresada = document.getElementById('inputUrlYoutube').value.trim();
+            const videoId = extraerIdYoutube(urlIngresada);
+
+            if (!videoId) {
+                alert("❌ Enlace no válido. Pega una URL de YouTube.");
+                return;
+            }
+
+            document.getElementById('inputUrlYoutube').value = '';
+            transmitirNuevoVideoATodos(videoId);
         });
 
         // =========================================================
@@ -1011,16 +1105,18 @@
             });
 
             document.getElementById('nombreSalaTop').textContent = `#${nuevaSala}`;
-            document.getElementById('marqueeTexto').textContent = `*** SALA AISLADA: #${nuevaSala.toUpperCase()} *** NOCHES DE PELUCHEO EN VIVO *** CLIC EN UN USUARIO PARA SUSURRAR ***`;
+            document.getElementById('marqueeTexto').textContent = `*** SALA AISLADA: #${nuevaSala.toUpperCase()} *** NOCHES DE PELUCHEO EN VIVO *** SALAS EN VIVO EN GALERIA.HTML ***`;
             inputMensaje.placeholder = `Escribe en #${nuevaSala}...`;
 
             if (nuevaSala === 'cine') {
                 moduloCine.style.display = 'block';
                 aplicarVolumenRadio(0); // Visualmente 0%, sonando al 20%
-                cargarVideoEnProyector(videoActualCine);
+                ultimoIframeCargadoKey = ''; // Forzar cálculo del segundo exacto actual
+                sincronizarProyectorSimultaneo(true);
             } else {
                 moduloCine.style.display = 'none';
                 reproductorCine.src = 'about:blank';
+                ultimoIframeCargadoKey = '';
             }
 
             cargarMensajesYUsuarios();
@@ -1131,7 +1227,7 @@
             iniciarRadioPermanente();
             if (salaActual === 'cine') {
                 aplicarVolumenRadio(0);
-                cargarVideoEnProyector(videoActualCine);
+                sincronizarProyectorSimultaneo(true);
             }
             agregarMensajeSistema(mensajeBienvenida);
             cargarMensajesYUsuarios();
@@ -1160,7 +1256,7 @@
         document.getElementById('btnCancelarSusurro').addEventListener('click', cancelarSusurro);
 
         // =========================================================
-        // 7. LECTURA Y ENVÍO DE MENSAJES Y VIDEOS EN HOJA3
+        // 7. LECTURA Y SINCRONIZACIÓN EN VIVO CON HOJA3
         // =========================================================
         async function cargarMensajesYUsuarios() {
             try {
@@ -1172,7 +1268,7 @@
                 const miNombre = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
                 const usuariosEnEstaSala = new Set([miNombre]);
                 const etiquetaSala = `[#${salaActual}]`;
-                let ultimoVideoDetectado = null;
+                let ultimaTransmisionCine = null;
 
                 registros.forEach(fila => {
                     const autor = fila.name || 'Anónimo';
@@ -1183,11 +1279,13 @@
                         const contenidoSinSala = textoCrudo.replace(etiquetaSala, '').trim();
                         usuariosEnEstaSala.add(autor);
 
-                        const matchVideo = contenidoSinSala.match(/^\[VIDEO:([^\]]+)\]$/);
+                        // Formato simultáneo: [VIDEO:ID|TIMESTAMP] o antiguo [VIDEO:ID]
+                        const matchVideo = contenidoSinSala.match(/^\[VIDEO:([^|\]]+)(?:\|(\d+))?\]$/);
                         if (matchVideo && salaActual === 'cine') {
                             const vid = matchVideo[1];
-                            ultimoVideoDetectado = vid;
-                            renderizarMensajeVideo(autor, vid, fecha);
+                            const tsInicio = matchVideo[2] ? Number(matchVideo[2]) : Date.now();
+                            ultimaTransmisionCine = { videoId: vid, inicioTimestamp: tsInicio, autor };
+                            renderizarMensajeVideo(autor, vid, tsInicio, fecha);
                             return;
                         }
 
@@ -1207,8 +1305,16 @@
                     }
                 });
 
-                if (salaActual === 'cine' && ultimoVideoDetectado && ultimoVideoDetectado !== videoActualCine) {
-                    cargarVideoEnProyector(ultimoVideoDetectado);
+                // Sincronizar automáticamente si otro usuario puso un video nuevo en #cine
+                if (salaActual === 'cine' && ultimaTransmisionCine) {
+                    const cambioDeEmision =
+                        estadoCineGlobal.videoId !== ultimaTransmisionCine.videoId ||
+                        estadoCineGlobal.inicioTimestamp !== ultimaTransmisionCine.inicioTimestamp;
+
+                    if (cambioDeEmision) {
+                        estadoCineGlobal = ultimaTransmisionCine;
+                        sincronizarProyectorSimultaneo(true);
+                    }
                 }
 
                 actualizarListaUsuarios(Array.from(usuariosEnEstaSala));
@@ -1239,13 +1345,13 @@
             listaMensajes.appendChild(div);
         }
 
-        function renderizarMensajeVideo(autor, videoId, fecha) {
+        function renderizarMensajeVideo(autor, videoId, tsInicio, fecha) {
             const div = document.createElement('div');
             div.className = 'msg-linea msg-video-compartido';
             div.innerHTML = `
-                <span style="color:#ccc;">[${fecha}]</span> 🎬 <strong>${autor}</strong> proyectó un video: 
-                <button type="button" onclick="cargarVideoEnProyector('${videoId}')" style="background:#ffea00; color:#000; border:1px solid #fff; padding:2px 6px; font-weight:bold; cursor:pointer; margin-left:6px;">
-                    ▶ Ver (${videoId})
+                <span style="color:#ccc;">[${fecha}]</span> 📡 <strong>${autor}</strong> inició transmisión simultánea: 
+                <button type="button" onclick="estadoCineGlobal={videoId:'${videoId}',inicioTimestamp:${tsInicio},autor:'${autor}'};sincronizarProyectorSimultaneo(true);" style="background:#ffea00; color:#000; border:1px solid #fff; padding:2px 6px; font-weight:bold; cursor:pointer; margin-left:6px;">
+                    ▶ Unirse en vivo
                 </button>
             `;
             listaMensajes.appendChild(div);
@@ -1275,16 +1381,15 @@
                 const nombreLimpio = user.replace(/^[@~]/, '');
 
                 li.innerHTML = `
-                    <div>
+                    <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                         <span class="icono-rol ${esInv ? 'rol-inv' : 'rol-reg'}">${simbolo}</span>
-                        <span>${nombreLimpio}</span>
+                        <span style="cursor:pointer;" onclick="activarSusurro('${user}')" title="Susurrar a ${user}">${nombreLimpio}</span>
                     </div>
-                    ${user !== miNombre ? `<button type="button" class="btn-mini-susurro">Susurrar</button>` : `<span style="font-size:0.7rem;color:#666;">(Tú)</span>`}
+                    <div class="acciones-usuario-item">
+                        ${user !== miNombre ? `<button type="button" class="btn-mini-susurro" onclick="activarSusurro('${user}')" title="Susurrar">💬</button>` : ''}
+                        <a href="galeria.html?user=${encodeURIComponent(nombreLimpio)}" class="btn-mini-vivo" title="Entrar a sala de chat en vivo en galeria.html">📹 Vivo</a>
+                    </div>
                 `;
-
-                if (user !== miNombre) {
-                    li.addEventListener('click', () => activarSusurro(user));
-                }
                 listaUsuarios.appendChild(li);
             });
         }
@@ -1329,82 +1434,66 @@
         document.getElementById('btnRecargarChat').addEventListener('click', cargarMensajesYUsuarios);
 
         // =========================================================
-        // 8. BANNERS CON IMÁGENES GARANTIZADAS + ESPACIO PARA TUS URLS
+        // 8. BÚSQUEDA REAL AL AZAR DE "romance" E "ia drama romance"
         // =========================================================
-        // Función de respaldo visual SVG por si alguna URL de Google llega a caer
-        function crearRespaldoVisual(titulo, color1, color2) {
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">
-                <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${color1}"/><stop offset="100%" stop-color="${color2}"/></linearGradient></defs>
-                <rect width="100%" height="100%" fill="url(#g)"/>
-                <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#ffea00" font-family="Courier New" font-weight="bold" font-size="22">${titulo}</text>
-            </svg>`;
-            return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+        async function buscarImagenAlAzar(terminoBusqueda, imgElemento, txtElemento, terminoRespaldo) {
+            try {
+                // Desplazamiento aleatorio para que cada recarga o clic traiga resultados distintos
+                const offsetAleatorio = Math.floor(Math.random() * 25);
+                const apiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(terminoBusqueda)}&gsrnamespace=6&gsrlimit=15&gsroffset=${offsetAleatorio}&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&origin=*`;
+
+                const respuesta = await fetch(apiUrl);
+                const datos = await respuesta.json();
+                const paginas = datos?.query?.pages ? Object.values(datos.query.pages) : [];
+
+                // Filtrar únicamente fotografías/ilustraciones válidas (jpg, png, webp, gif)
+                const imagenesValidas = paginas.filter(p => {
+                    const url = p.imageinfo?.[0]?.thumburl || p.imageinfo?.[0]?.url || '';
+                    return /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i.test(url);
+                });
+
+                if (imagenesValidas.length > 0) {
+                    const elegida = imagenesValidas[Math.floor(Math.random() * imagenesValidas.length)];
+                    const urlFinal = elegida.imageinfo[0].thumburl || elegida.imageinfo[0].url;
+                    imgElemento.src = urlFinal;
+                    txtElemento.textContent = terminoBusqueda;
+                } else if (terminoRespaldo) {
+                    // Si la búsqueda exacta con "ia drama romance" no tiene coincidencias literales en ese offset, intenta respaldo
+                    buscarImagenAlAzar(terminoRespaldo, imgElemento, txtElemento, null);
+                }
+            } catch (error) {
+                console.error(`Error buscando "${terminoBusqueda}":`, error);
+            }
         }
 
-        // PEGA AQUÍ LAS URLS DE GOOGLE IMÁGENES (Clic derecho -> Copiar dirección de imagen)
-        const galeriaRomance = [
-            {
-                img: "https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=500",
-                txt: "#velacion"
-            },
-            {
-                img: "https://images.pexels.com/photos/931177/pexels-photo-931177.jpeg?auto=compress&cs=tinysrgb&w=500",
-                txt: "noches de pelucheo"
-            },
-            {
-                img: "https://images.pexels.com/photos/1415131/pexels-photo-1415131.jpeg?auto=compress&cs=tinysrgb&w=500",
-                txt: "susurros"
-            }
-        ];
-
-        const galeriaDramaRomance = [
-            {
-                img: "https://images.pexels.com/photos/3052361/pexels-photo-3052361.jpeg?auto=compress&cs=tinysrgb&w=500",
-                txt: "drama & romance"
-            },
-            {
-                img: "https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg?auto=compress&cs=tinysrgb&w=500",
-                txt: "madrugada"
-            },
-            {
-                img: "https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=500",
-                txt: "encuentros"
-            }
-        ];
-
-        let idxB1 = 0;
-        let idxB2 = 0;
         const imgBanner1 = document.getElementById('imgBanner1');
+        const txtBanner1 = document.getElementById('txtBanner1');
         const imgBanner2 = document.getElementById('imgBanner2');
+        const txtBanner2 = document.getElementById('txtBanner2');
 
-        imgBanner1.onerror = () => { imgBanner1.src = crearRespaldoVisual("💘 ROMANCE #VELACION", "#800020", "#2b003e"); };
-        imgBanner2.onerror = () => { imgBanner2.src = crearRespaldoVisual("💔 DRAMA ROMANCE", "#1a0033", "#4b0082"); };
-
-        function mostrarBanner1() {
-            imgBanner1.src = galeriaRomance[idxB1].img;
-            document.getElementById('txtBanner1').textContent = galeriaRomance[idxB1].txt;
-            idxB1 = (idxB1 + 1) % galeriaRomance.length;
+        function cargarBannerRomance() {
+            buscarImagenAlAzar('romance', imgBanner1, txtBanner1, 'love romance');
         }
 
-        function mostrarBanner2() {
-            imgBanner2.src = galeriaDramaRomance[idxB2].img;
-            document.getElementById('txtBanner2').textContent = galeriaDramaRomance[idxB2].txt;
-            idxB2 = (idxB2 + 1) % galeriaDramaRomance.length;
+        function cargarBannerIaDramaRomance() {
+            buscarImagenAlAzar('ia drama romance', imgBanner2, txtBanner2, 'drama romance');
         }
 
-        document.getElementById('btnSigBanner1').addEventListener('click', mostrarBanner1);
-        imgBanner1.addEventListener('click', mostrarBanner1);
+        document.getElementById('btnSigBanner1').addEventListener('click', cargarBannerRomance);
+        imgBanner1.addEventListener('click', cargarBannerRomance);
 
-        document.getElementById('btnSigBanner2').addEventListener('click', mostrarBanner2);
-        imgBanner2.addEventListener('click', mostrarBanner2);
+        document.getElementById('btnSigBanner2').addEventListener('click', cargarBannerIaDramaRomance);
+        imgBanner2.addEventListener('click', cargarBannerIaDramaRomance);
 
-        // Inicialización inmediata de las imágenes al abrir
-        mostrarBanner1();
-        mostrarBanner2();
-        setInterval(mostrarBanner1, 8000);
-        setInterval(mostrarBanner2, 9500);
+        // Ejecución inicial
+        cargarBannerRomance();
+        cargarBannerIaDramaRomance();
+        setInterval(cargarBannerRomance, 12000);
+        setInterval(cargarBannerIaDramaRomance, 14000);
+
         cargarMensajesYUsuarios();
-        setInterval(cargarMensajesYUsuarios, 10000);
+        // Refresco rápido cada 5 segundos para mantener sincronizado el cine y el chat
+        setInterval(cargarMensajesYUsuarios, 5000);
     </script>
 </body>
 </html>
