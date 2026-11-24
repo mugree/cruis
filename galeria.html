@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Net Art - Galería de Espacios Cruissing</title>
+    <title>Net Art - Galería Simultánea 3x3</title>
     <style>
         * {
             margin: 0;
@@ -20,14 +20,14 @@
             overflow: hidden;
         }
 
-        /* Rejilla 3x3 para colocar múltiples espacios */
+        /* Rejilla 3x3 a pantalla completa */
         .grid-galeria {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
             width: 100vw;
             height: 100vh;
-            gap: 2px;
+            gap: 3px;
             background-color: #111;
         }
 
@@ -38,37 +38,48 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid #222;
-            transition: border-color 0.3s;
+            border: 1px solid #1a1a1a;
+            transition: border-color 0.25s ease;
         }
 
         .celda:hover {
             border-color: #ff0055;
         }
 
-        /* Iframe embebido con cámara borrosa */
+        /* Transmisión en vivo desenfocada */
         .iframe-camara {
             width: 100%;
             height: 100%;
             border: none;
-            filter: blur(10px);
+            filter: blur(11px);
             transform: scale(1.08);
-            pointer-events: none; /* Evita clics dentro del iframe desenfocado */
+            pointer-events: none;
         }
 
-        /* Botón/Capa de selección interactiva sobre cada celda */
+        /* Identificador fijo discreto en cada celda */
+        .indicador-fijo {
+            position: absolute;
+            top: 8px;
+            left: 10px;
+            z-index: 4;
+            font-size: 0.72rem;
+            color: rgba(255, 234, 0, 0.65);
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+
+        /* Capa interactiva al pasar el cursor */
         .capa-interactiva {
             position: absolute;
             inset: 0;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 10px;
+            padding: 12px;
             z-index: 5;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.55);
             opacity: 0;
-            transition: opacity 0.3s;
-            cursor: pointer;
+            transition: opacity 0.25s ease;
         }
 
         .celda:hover .capa-interactiva {
@@ -76,78 +87,98 @@
         }
 
         .etiqueta-sala {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
+            font-weight: bold;
             color: #ffea00;
-            text-shadow: 0 0 5px #ffea00;
+            text-shadow: 0 0 6px #ffea00;
         }
 
-        .btn-conectar {
-            align-self: flex-end;
-            background: #ff0055;
-            color: #fff;
-            border: none;
+        .acciones-sala {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .btn-accion {
+            background: #000;
+            color: #ffea00;
+            border: 1px solid #ffea00;
             padding: 5px 10px;
             font-size: 0.75rem;
             font-family: inherit;
+            font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 0 8px #ff0055;
+            transition: all 0.2s;
+        }
+
+        .btn-accion:hover {
+            background: #ffea00;
+            color: #000;
+        }
+
+        .btn-entrar {
+            background: #ff0055;
+            color: #fff;
+            border: 1px solid #ff0055;
+            box-shadow: 0 0 8px rgba(255, 0, 85, 0.6);
+        }
+
+        .btn-entrar:hover {
+            background: #fff;
+            color: #ff0055;
         }
     </style>
 </head>
 <body>
 
-    <div class="grid-galeria" id="gridGaleria">
-        <!-- Generado dinámicamente o estructurado para 9 celdas (3x3) -->
-    </div>
+    <div class="grid-galeria" id="gridGaleria"></div>
 
     <script>
-        // Configuración de las 9 celdas de la rejilla 3x3
-        // Puedes agregar las URLs de las salas activas que desees monitorear
-        const salas = [
-            { id: "sala-1", url: "cruissing.html?room=1", activa: true },
-            { id: "sala-2", url: "cruissing.html?room=2", activa: true },
-            { id: "sala-3", url: "", activa: false },
-            { id: "sala-4", url: "", activa: false },
-            { id: "sala-5", url: "", activa: false },
-            { id: "sala-6", url: "", activa: false },
-            { id: "sala-7", url: "", activa: false },
-            { id: "sala-8", url: "", activa: false },
-            { id: "sala-9", url: "", activa: false }
-        ];
-
+        // Las 9 salas independientes ejecutándose de forma simultánea
+        const totalSalas = 9;
         const grid = document.getElementById('gridGaleria');
 
-        salas.forEach((sala, index) => {
+        for (let i = 1; i <= totalSalas; i++) {
             const celda = document.createElement('div');
             celda.className = 'celda';
 
-            if (sala.activa && sala.url) {
-                // Se agrega allow="camera; microphone" indispensable para habilitar el vídeo en vivo dentro del iframe
-                celda.innerHTML = `
-                    <iframe src="${sala.url}" 
-                            class="iframe-camara" 
-                            allow="camera; microphone; display-capture" 
-                            title="${sala.id}">
-                    </iframe>
-                    <div class="capa-interactiva" onclick="unirseASala('${sala.url}')">
-                        <span class="etiqueta-sala">ESPACIO #${index + 1} EN VIVO</span>
-                        <button class="btn-conectar">ENTRAR</button>
+            // preview=1 evita que la galería ocupe un puesto de cámara en la sala
+            const urlPreview = `cruissing.html?room=${i}&preview=1`;
+            const urlSalaDirecta = `cruissing.html?room=${i}`;
+
+            celda.innerHTML = `
+                <span class="indicador-fijo">● SALA #0${i}</span>
+                <iframe src="${urlPreview}"
+                        class="iframe-camara"
+                        allow="camera; microphone; autoplay"
+                        title="Sala en vivo ${i}">
+                </iframe>
+                <div class="capa-interactiva">
+                    <span class="etiqueta-sala">ESPACIO #0${i} — CONEXIÓN SIMULTÁNEA</span>
+                    <div class="acciones-sala">
+                        <button class="btn-accion" onclick="copiarEnlace(event, '${urlSalaDirecta}', this)">COPIAR LINK</button>
+                        <button class="btn-accion btn-entrar" onclick="unirseASala('${urlSalaDirecta}')">ENTRAR</button>
                     </div>
-                `;
-            } else {
-                celda.innerHTML = `
-                    <div class="capa-interactiva">
-                        <span class="etiqueta-sala" style="color: #555;">DISPONIBLE #${index + 1}</span>
-                    </div>
-                `;
-            }
+                </div>
+            `;
 
             grid.appendChild(celda);
-        });
+        }
 
-        // Permite al usuario seleccionar el espacio para entrar e interactuar directamente
         function unirseASala(url) {
             window.location.href = url;
+        }
+
+        function copiarEnlace(evento, rutaRelativa, boton) {
+            evento.stopPropagation();
+            const urlCompleta = new URL(rutaRelativa, window.location.href).href;
+            navigator.clipboard.writeText(urlCompleta).then(() => {
+                const textoOriginal = boton.textContent;
+                boton.textContent = '¡COPIADO!';
+                setTimeout(() => {
+                    boton.textContent = textoOriginal;
+                }, 1500);
+            });
         }
     </script>
 </body>
