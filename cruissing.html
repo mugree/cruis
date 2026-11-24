@@ -139,7 +139,7 @@
 			gap: 18px;
 		}
 
-		/* Control de volumen de la radio (mínimo 20%) */
+		/* Control de volumen de la radio (mínimo 20% real) */
 		.radio-control {
 			display: flex;
 			align-items: center;
@@ -217,8 +217,8 @@
 </head>
 <body>
 
-	<!-- RADIO EN VIVO SINCRONIZADA PARA TODOS LOS CONECTADOS -->
-	<audio id="radioSala" src="https://stream.zeno.fm/f3wvbbqmdg8uv" preload="auto"></audio>
+	<!-- EMISORA NOCHES DE PELUCHEO EN VIVO -->
+	<audio id="radioSala" src="https://az13.yesstreaming.net/listen/noches_de_pelucheo/radio.mp3" preload="auto"></audio>
 
 	<!-- SECCIÓN SUPERIOR CON PANTALLAS DIVIDIDAS Y CORAZÓN CENTRAL -->
 	<div class="contenedor-superior">
@@ -245,10 +245,10 @@
 		<div class="chat-header">
 			<span>💬 CHAT EN VIVO</span>
 			<div class="controles-header">
-				<div class="radio-control" title="Volumen de radio en vivo (mínimo 20%)">
+				<div class="radio-control" title="Volumen de Noches de Pelucheo">
 					<span>📻</span>
-					<input type="range" id="controlVolumen" min="20" max="100" value="35">
-					<span id="textoVolumen">35%</span>
+					<input type="range" id="controlVolumen" min="0" max="100" value="20">
+					<span id="textoVolumen">20%</span>
 				</div>
 				<span id="estadoSala">Conectando sala...</span>
 			</div>
@@ -279,9 +279,17 @@
 		let radioIniciada = false;
 
 		// =========================================================
-		// 1. MÚSICA DE FONDO EN VIVO (VOLUMEN MÍNIMO 20%)
+		// 1. MÚSICA DE FONDO: NOCHES DE PELUCHEO (MÍNIMO 20% REAL)
 		// =========================================================
-		radioSala.volume = 0.35;
+		function actualizarVolumen(valorVisual) {
+			const v = Math.max(0, Math.min(100, Number(valorVisual)));
+			// 0% visual equivale a 20% (0.20) de volumen real
+			const volumenReal = 0.20 + (v / 100) * 0.80;
+			radioSala.volume = volumenReal;
+			textoVolumen.textContent = `${v}%`;
+		}
+
+		actualizarVolumen(controlVolumen.value);
 
 		function iniciarRadio() {
 			if (!radioIniciada) {
@@ -293,7 +301,6 @@
 			}
 		}
 
-		// Intentar arrancar al entrar y asegurar inicio al primer toque/clic/tecla
 		iniciarRadio();
 		['click', 'keydown', 'touchstart'].forEach(evento => {
 			document.addEventListener(evento, iniciarRadio);
@@ -301,9 +308,7 @@
 
 		controlVolumen.addEventListener('input', (e) => {
 			iniciarRadio();
-			const valor = Math.max(20, Math.min(100, Number(e.target.value)));
-			radioSala.volume = valor / 100;
-			textoVolumen.textContent = `${valor}%`;
+			actualizarVolumen(e.target.value);
 		});
 
 		// =========================================================
