@@ -4,6 +4,8 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Net Art - Transmisión & Chat</title>
+	<!-- Librería PeerJS para conexión WebRTC entre navegadores -->
+	<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 	<style>
 		* {
 			margin: 0;
@@ -53,7 +55,7 @@
 			width: 100%;
 			height: 100%;
 			object-fit: cover;
-			transform: scaleX(-1); /* EFECTO ESPEJO */
+			transform: scaleX(-1);
 		}
 
 		/* Div de Carga / GIF en bucle */
@@ -124,6 +126,13 @@
 			color: #ff0055;
 			margin-bottom: 8px;
 			font-weight: bold;
+			display: flex;
+			justify-content: space-between;
+		}
+
+		#estadoSala {
+			color: #ffea00;
+			font-size: 0.85rem;
 		}
 
 		#chatMensajes {
@@ -199,14 +208,16 @@
 				<img src="https://i.pinimg.com/originals/fb/f4/b4/fbf4b4b5b982c142d6b25d8bf45daa40.gif" alt="Esperando...">
 				<div class="texto-esperando">esperando...</div>
 			</div>
-			<!-- El video remoto empieza oculto (display: none) -->
 			<video id="webcam2" autoplay playsinline style="display: none;"></video>
 		</div>
 	</div>
 
 	<!-- SECCIÓN INFERIOR: CHAT -->
 	<div class="contenedor-chat">
-		<div class="chat-header">💬 CHAT EN VIVO</div>
+		<div class="chat-header">
+			<span>💬 CHAT EN VIVO</span>
+			<span id="estadoSala">Conectando sala...</span>
+		</div>
 		<div id="chatMensajes">
 			<div class="mensaje-item">Sistema: Sala de chat iniciada.</div>
 		</div>
@@ -220,32 +231,143 @@
 		const webcam1 = document.getElementById('webcam1');
 		const webcam2 = document.getElementById('webcam2');
 		const pantallaCarga = document.getElementById('pantallaCarga');
+		const estadoSala = document.getElementById('estadoSala');
 		const gifCorazon = document.getElementById('gifCorazon');
 		const formChat = document.getElementById('formChat');
 		const inputChat = document.getElementById('inputChat');
 		const chatMensajes = document.getElementById('chatMensajes');
 
-		// 1. Activar cámara local con efecto espejo
-		async function iniciarCamaraLocal() {
-			try {
-				const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-				webcam1.srcObject = stream;
-			} catch (e) {
-				console.log('No se pudo acceder a la cámara:', e);
-			}
-		}
-		iniciarCamaraLocal();
+		// Leer el número de sala desde la URL (?room=1)
+		const params = new URLSearchParams(window.location.search);
+		const roomId = params.get('room') || '1';
+		const hostPeerId = `mugree-cruis-sala-${roomId}`;
 
-		// 2. Función para ocultar el GIF y activar el video cuando se conecta un usuario remoto
+		const rtcConfig = {
+			config: {
+				iceServers: [
+					{ urls: 'stun:stun.l.google.com:19302' },
+					{ urls: 'stun:stun1.l.google.com:19302' }
+				]
+			}
+		};
+
+		let localStream = null;
+		let conexionChat = null;
+
+		// Flujo negro de respaldo por si un usuario entra sin cámara física
+		function crearStreamRespaldo() {
+			const canvas = document.createElement('canvas');
+			canvas.width = 2;
+			canvas.height = 2;
+			const ctx = canvas.getContext('2d');
+			ctx.fillStyle = '#000';
+			ctx.fillRect(0, 0, 2, 2);
+			return canvas.captureStream(1);
+		}
+
+		// 1. Activar cámara local y luego iniciar conexión P2P
+		async function iniciarTodo() {
+			try {
+				localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+				webcam1.srcObject = localStream;
+			} catch (e) {
+				agregarMensaje("Sistema", "⚠️ Sin acceso a cámara local (modo espectador).");
+				localStream = crearStreamRespaldo();
+			}
+			iniciarConexionSala();
+		}
+
+		// 2. Emparejamiento automático por sala (?room=1)
+		function iniciarConexionSala() {
+			// Intentar abrir la sala como Anfitrión (primer usuario)
+			const peer = new Peer(hostPeerId, rtcConfig);
+
+			peer.on('open', () => {
+				estadoSala.textContent = `SALA #${roomId} — Esperando pareja`;
+				agregarMensaje("Sistema", `Conectado a Sala #${roomId}. Esperando a otra persona...`);
+			});
+
+			// Recibir videollamada del segundo usuario
+			peer.on('call', (call) => {
+				call.answer(localStream);
+				call.on('stream', (remoteStream) => {
+					conectarUsuarioRemoto(remoteStream);
+				});
+				call.on('close', desconectarUsuarioRemoto);
+			});
+
+			// Recibir canal de chat del segundo usuario
+			peer.on('connection', (conn) => {
+				configurarChatP2P(conn);
+			});
+
+			// Si el ID ya está ocupado, significa que ya hay alguien esperando: entrar como Invitado y llamarlo
+			peer.on('error', (err) => {
+				if (err.type === 'unavailable-id') {
+					peer.destroy();
+					conectarComoInvitado();
+				} else {
+					console.error('Error PeerJS:', err);
+				}
+			});
+		}
+
+		function conectarComoInvitado() {
+			const guestPeer = new Peer(rtcConfig);
+
+			guestPeer.on('open', () => {
+				estadoSala.textContent = `SALA #${roomId} — Conectando...`;
+				const call = guestPeer.call(hostPeerId, localStream);
+
+				call.on('stream', (remoteStream) => {
+					conectarUsuarioRemoto(remoteStream);
+				});
+				call.on('close', desconectarUsuarioRemoto);
+
+				const conn = guestPeer.connect(hostPeerId);
+				configurarChatP2P(conn);
+			});
+		}
+
+		function configurarChatP2P(conn) {
+			conexionChat = conn;
+			conn.on('open', () => {
+				estadoSala.textContent = `SALA #${roomId} — EN VIVO`;
+				agregarMensaje("Sistema", "🟢 Pareja conectada en la sala.");
+			});
+			conn.on('data', (datos) => {
+				if (datos.tipo === 'chat') {
+					agregarMensaje("Extraño", datos.texto);
+				} else if (datos.tipo === 'latido') {
+					agregarMensaje("Sistema", "❤️ La otra persona envió un latido.");
+				}
+			});
+			conn.on('close', desconectarUsuarioRemoto);
+		}
+
+		// Mostrar video remoto y ocultar el GIF
 		function conectarUsuarioRemoto(streamRemoto) {
 			pantallaCarga.style.display = 'none';
 			webcam2.style.display = 'block';
 			webcam2.srcObject = streamRemoto;
+			webcam2.play().catch(() => {});
+		}
+
+		// Volver al GIF en bucle si la otra persona cierra la pestaña
+		function desconectarUsuarioRemoto() {
+			webcam2.style.display = 'none';
+			webcam2.srcObject = null;
+			pantallaCarga.style.display = 'flex';
+			estadoSala.textContent = `SALA #${roomId} — Esperando pareja`;
+			agregarMensaje("Sistema", "🔴 La otra persona salió de la sala.");
 		}
 
 		// Interacción con el GIF del Corazón
 		gifCorazon.addEventListener('click', () => {
 			agregarMensaje("Sistema", "❤️ ¡Enviaste un latido!");
+			if (conexionChat && conexionChat.open) {
+				conexionChat.send({ tipo: 'latido' });
+			}
 		});
 
 		// Funcionalidad del Chat
@@ -262,9 +384,14 @@
 			const texto = inputChat.value.trim();
 			if (texto !== '') {
 				agregarMensaje("Tú", texto);
+				if (conexionChat && conexionChat.open) {
+					conexionChat.send({ tipo: 'chat', texto: texto });
+				}
 				inputChat.value = '';
 			}
 		});
+
+		iniciarTodo();
 	</script>
 
 </body>
