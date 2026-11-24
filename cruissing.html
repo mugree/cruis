@@ -128,6 +128,31 @@
 			font-weight: bold;
 			display: flex;
 			justify-content: space-between;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: 10px;
+		}
+
+		.controles-header {
+			display: flex;
+			align-items: center;
+			gap: 18px;
+		}
+
+		/* Control de volumen de la radio (mínimo 20%) */
+		.radio-control {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			color: #ffea00;
+			font-size: 0.85rem;
+		}
+
+		#controlVolumen {
+			width: 90px;
+			accent-color: #ffea00;
+			cursor: pointer;
+			background: transparent;
 		}
 
 		#estadoSala {
@@ -192,6 +217,9 @@
 </head>
 <body>
 
+	<!-- RADIO EN VIVO SINCRONIZADA PARA TODOS LOS CONECTADOS -->
+	<audio id="radioSala" src="https://stream.zeno.fm/f3wvbbqmdg8uv" preload="auto"></audio>
+
 	<!-- SECCIÓN SUPERIOR CON PANTALLAS DIVIDIDAS Y CORAZÓN CENTRAL -->
 	<div class="contenedor-superior">
 		<!-- LADO IZQUIERDO: CÁMARA LOCAL EN ESPEJO -->
@@ -216,7 +244,14 @@
 	<div class="contenedor-chat">
 		<div class="chat-header">
 			<span>💬 CHAT EN VIVO</span>
-			<span id="estadoSala">Conectando sala...</span>
+			<div class="controles-header">
+				<div class="radio-control" title="Volumen de radio en vivo (mínimo 20%)">
+					<span>📻</span>
+					<input type="range" id="controlVolumen" min="20" max="100" value="35">
+					<span id="textoVolumen">35%</span>
+				</div>
+				<span id="estadoSala">Conectando sala...</span>
+			</div>
 		</div>
 		<div id="chatMensajes">
 			<div class="mensaje-item">Sistema: Sala de chat iniciada.</div>
@@ -237,7 +272,43 @@
 		const inputChat = document.getElementById('inputChat');
 		const chatMensajes = document.getElementById('chatMensajes');
 
-		// Leer el número de sala desde la URL (?room=1)
+		// Elementos de la Radio
+		const radioSala = document.getElementById('radioSala');
+		const controlVolumen = document.getElementById('controlVolumen');
+		const textoVolumen = document.getElementById('textoVolumen');
+		let radioIniciada = false;
+
+		// =========================================================
+		// 1. MÚSICA DE FONDO EN VIVO (VOLUMEN MÍNIMO 20%)
+		// =========================================================
+		radioSala.volume = 0.35;
+
+		function iniciarRadio() {
+			if (!radioIniciada) {
+				radioSala.play().then(() => {
+					radioIniciada = true;
+				}).catch(() => {
+					// El navegador esperará el primer clic o tecla del usuario
+				});
+			}
+		}
+
+		// Intentar arrancar al entrar y asegurar inicio al primer toque/clic/tecla
+		iniciarRadio();
+		['click', 'keydown', 'touchstart'].forEach(evento => {
+			document.addEventListener(evento, iniciarRadio);
+		});
+
+		controlVolumen.addEventListener('input', (e) => {
+			iniciarRadio();
+			const valor = Math.max(20, Math.min(100, Number(e.target.value)));
+			radioSala.volume = valor / 100;
+			textoVolumen.textContent = `${valor}%`;
+		});
+
+		// =========================================================
+		// 2. CONEXIÓN DE CÁMARAS Y SALA P2P (?room=1)
+		// =========================================================
 		const params = new URLSearchParams(window.location.search);
 		const roomId = params.get('room') || '1';
 		const hostPeerId = `mugree-cruis-sala-${roomId}`;
@@ -254,7 +325,6 @@
 		let localStream = null;
 		let conexionChat = null;
 
-		// Flujo negro de respaldo por si un usuario entra sin cámara física
 		function crearStreamRespaldo() {
 			const canvas = document.createElement('canvas');
 			canvas.width = 2;
@@ -265,7 +335,6 @@
 			return canvas.captureStream(1);
 		}
 
-		// 1. Activar cámara local y luego iniciar conexión P2P
 		async function iniciarTodo() {
 			try {
 				localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
@@ -277,9 +346,7 @@
 			iniciarConexionSala();
 		}
 
-		// 2. Emparejamiento automático por sala (?room=1)
 		function iniciarConexionSala() {
-			// Intentar abrir la sala como Anfitrión (primer usuario)
 			const peer = new Peer(hostPeerId, rtcConfig);
 
 			peer.on('open', () => {
@@ -287,7 +354,6 @@
 				agregarMensaje("Sistema", `Conectado a Sala #${roomId}. Esperando a otra persona...`);
 			});
 
-			// Recibir videollamada del segundo usuario
 			peer.on('call', (call) => {
 				call.answer(localStream);
 				call.on('stream', (remoteStream) => {
@@ -296,12 +362,10 @@
 				call.on('close', desconectarUsuarioRemoto);
 			});
 
-			// Recibir canal de chat del segundo usuario
 			peer.on('connection', (conn) => {
 				configurarChatP2P(conn);
 			});
 
-			// Si el ID ya está ocupado, significa que ya hay alguien esperando: entrar como Invitado y llamarlo
 			peer.on('error', (err) => {
 				if (err.type === 'unavailable-id') {
 					peer.destroy();
@@ -345,7 +409,6 @@
 			conn.on('close', desconectarUsuarioRemoto);
 		}
 
-		// Mostrar video remoto y ocultar el GIF
 		function conectarUsuarioRemoto(streamRemoto) {
 			pantallaCarga.style.display = 'none';
 			webcam2.style.display = 'block';
@@ -353,7 +416,6 @@
 			webcam2.play().catch(() => {});
 		}
 
-		// Volver al GIF en bucle si la otra persona cierra la pestaña
 		function desconectarUsuarioRemoto() {
 			webcam2.style.display = 'none';
 			webcam2.srcObject = null;
@@ -364,6 +426,7 @@
 
 		// Interacción con el GIF del Corazón
 		gifCorazon.addEventListener('click', () => {
+			iniciarRadio();
 			agregarMensaje("Sistema", "❤️ ¡Enviaste un latido!");
 			if (conexionChat && conexionChat.open) {
 				conexionChat.send({ tipo: 'latido' });
@@ -381,6 +444,7 @@
 
 		formChat.addEventListener('submit', (e) => {
 			e.preventDefault();
+			iniciarRadio();
 			const texto = inputChat.value.trim();
 			if (texto !== '') {
 				agregarMensaje("Tú", texto);
