@@ -288,6 +288,13 @@
             font-size: 0.92rem;
         }
 
+        .nota-id-unico {
+            font-size: 0.74rem;
+            color: #444;
+            margin-top: 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
         .caja-reglas {
             background-color: #ffffcc;
             border: 2px solid #cc9900;
@@ -503,7 +510,6 @@
             z-index: 99 !important;
         }
 
-        /* Silueta de corazón recortada por clip-path */
         .silueta-corazon-rojo {
             width: 108px;
             height: 98px;
@@ -906,18 +912,19 @@
                     <button type="button" class="tab-btn" id="tabRegistrado">🔑 Nick Registrado</button>
                 </div>
 
-                <!-- Formulario Invitado -->
+                <!-- Formulario Invitado (Identidad única por sesión) -->
                 <form id="formInvitado" class="caja-formulario-pop2">
                     <div class="campo-grupo">
-                        <label for="invUsername">Nick de Invitado (Sugerido: Anonimo):</label>
-                        <input type="text" id="invUsername" value="Anonimo" placeholder="Anonimo" required>
+                        <label for="invUsername">Nick de Invitado (Se asigna ID único):</label>
+                        <input type="text" id="invUsername" placeholder="Ej: Anonimo o tu apodo" required>
+                        <div class="nota-id-unico" id="previewNickUnico">Tu identidad única será: ~Anonimo#0000</div>
                     </div>
-                    <button type="submit" class="btn-3d btn-3d-verde" style="width: 100%; padding: 8px;">
-                        ENTRAR COMO ANONIMO & NOCHES DE PELUCHEO >>
+                    <button type="submit" id="btnSubmitInv" class="btn-3d btn-3d-verde" style="width: 100%; padding: 8px;">
+                        ENTRAR COMO INVITADO ÚNICO & NOCHES DE PELUCHEO >>
                     </button>
                 </form>
 
-                <!-- Formulario Registrado (Hoja1: username casilla A, contraseña casilla B) -->
+                <!-- Formulario Registrado (Hoja1: username casilla A, contrasena casilla B) -->
                 <form id="formRegistrado" class="caja-formulario-pop2" style="display: none;">
                     <div class="campo-grupo">
                         <label for="regUsername">Nick / Usuario (username):</label>
@@ -935,7 +942,7 @@
                 <div class="caja-reglas">
                     <h4>⚠️ Reglas de la Red (#chatzona | #velacion | #cine):</h4>
                     <ul>
-                        <li>En <strong>#cine</strong> la reproducción es <strong>simultánea</strong> para todos los conectados.</li>
+                        <li>Cada invitado recibe un <strong>identificador único (#ID)</strong> para diferenciarse aunque entren varios anónimos.</li>
                         <li>En <strong>#velacion</strong> las velas y corazones binarios aparecen al azar y puedes <strong>moverlos libremente</strong>.</li>
                         <li>Entra a las <strong>Salas Romance en Vivo</strong> desde el panel de usuarios (<a href="galeria.html" style="color:#b30000;font-weight:bold;">galeria.html</a>).</li>
                     </ul>
@@ -1012,7 +1019,7 @@
 
             <div id="listaMensajes">
                 <div class="msg-linea msg-sistema">
-                    Conectando con la base de datos de la sala...
+                    Conectando con la base de datos de Google Sheets...
                 </div>
             </div>
 
@@ -1077,12 +1084,10 @@
 
     <script>
         // =========================================================
-        // 1. CONFIGURACIÓN DE ENDPOINTS SHEETY (HOJA1, HOJA3, HOJA4 Y HOJA5)
+        // 1. CONEXIÓN DIRECTA CON GOOGLE APPS SCRIPT (SIN SHEETY)
+        //    Pega aquí la URL de tu implementación Web App (/exec)
         // =========================================================
-        const URL_HOJA1_USUARIOS = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja1';
-        const URL_HOJA3_CHAT = 'https://api.sheety.co/3bf2b2add58e4c4d360e0b269fb830d8/hojadeC/hoja3';
-        const URL_HOJA4_VELACION = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja4';
-        const URL_HOJA5_FOTOS = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja5';
+        const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/REEMPLAZA_CON_TU_ID_DE_IMPLEMENTACION/exec';
         const VIDEO_BASE_CINE = 'a13lpRMqdYA';
 
         let salaActual = 'chatzona';
@@ -1098,9 +1103,18 @@
         const cacheCorazonesBinarios = {};
         let zIndexObjetoActual = 10;
 
+        // =========================================================
+        // IDENTIDAD ÚNICA DE SESIÓN PARA CADA INVITADO / ANÓNIMO
+        // =========================================================
+        let codigoUnicoSesion = sessionStorage.getItem('chatzona_uid');
+        if (!codigoUnicoSesion) {
+            codigoUnicoSesion = String(Math.floor(1000 + Math.random() * 9000));
+            sessionStorage.setItem('chatzona_uid', codigoUnicoSesion);
+        }
+
         let destinatarioSusurro = null;
         let usuarioActual = {
-            nick: 'Anonimo',
+            nick: `Anonimo#${codigoUnicoSesion}`,
             esInvitado: true
         };
 
@@ -1118,6 +1132,41 @@
         const estadoTiempoCine = document.getElementById('estadoTiempoCine');
         const barraModoSusurro = document.getElementById('barraModoSusurro');
         const textoDestinoSusurro = document.getElementById('textoDestinoSusurro');
+
+        // Funciones auxiliares para leer y escribir en Google Apps Script
+        async function leerHojaSheets(nombreHoja) {
+            const url = `${URL_APPS_SCRIPT}?hoja=${encodeURIComponent(nombreHoja)}&t=${Date.now()}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            return data[nombreHoja] || [];
+        }
+
+        async function guardarEnSheets(payloadObjeto) {
+            const res = await fetch(URL_APPS_SCRIPT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payloadObjeto)
+            });
+            return await res.json();
+        }
+
+        // Vista previa de nick único en el modal de invitado
+        const invUsernameInput = document.getElementById('invUsername');
+        const previewNickUnico = document.getElementById('previewNickUnico');
+
+        function construirNickInvitadoUnico(textoIngresado) {
+            const baseLimpia = (textoIngresado || 'Anonimo')
+                .replace(/[#@~]/g, '')
+                .trim() || 'Anonimo';
+            return `${baseLimpia}#${codigoUnicoSesion}`;
+        }
+
+        invUsernameInput.value = `Anonimo`;
+        previewNickUnico.textContent = `Tu identidad única será: ~${construirNickInvitadoUnico(invUsernameInput.value)}`;
+
+        invUsernameInput.addEventListener('input', () => {
+            previewNickUnico.textContent = `Tu identidad única será: ~${construirNickInvitadoUnico(invUsernameInput.value)}`;
+        });
 
         // =========================================================
         // 2. VOLUMEN VISUAL EN 0% QUE EQUIVALE AL 20% REAL DE AUDIO
@@ -1205,19 +1254,15 @@
             listaMensajes.scrollTop = listaMensajes.scrollHeight;
 
             try {
-                await fetch(URL_HOJA3_CHAT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        hoja3: {
-                            name: nombreFormateado,
-                            comentario: payloadVideo,
-                            fecha: fechaActual
-                        }
-                    })
+                await guardarEnSheets({
+                    hoja3: {
+                        name: nombreFormateado,
+                        comentario: payloadVideo,
+                        fecha: fechaActual
+                    }
                 });
             } catch (error) {
-                console.error('Error guardando transmisión simultánea:', error);
+                console.error('Error guardando transmisión simultánea en hoja3:', error);
             }
         }
 
@@ -1296,7 +1341,7 @@
         });
 
         // =========================================================
-        // 5. LOGIN Y ACCESO DESDE #POP2 (HOJA1: username A, contraseña B)
+        // 5. LOGIN Y ACCESO ÚNICO DESDE #POP2 (HOJA1 EN APPS SCRIPT)
         // =========================================================
         const tabRegistrado = document.getElementById('tabRegistrado');
         const tabInvitado = document.getElementById('tabInvitado');
@@ -1326,12 +1371,15 @@
             return ahora.toLocaleDateString('es-CO') + ' ' + ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
         }
 
-        formInvitado.addEventListener('submit', (e) => {
+        // Acceso como invitado único (~Nick#ID)
+        formInvitado.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const nickInv = document.getElementById('invUsername').value.trim() || 'Anonimo';
-            completarAcceso(nickInv, true, `Has entrado como invitado ~${nickInv} a #${salaActual}`);
+            const nickUnico = construirNickInvitadoUnico(invUsernameInput.value);
+            await anunciarPresenciaEnSala(nickUnico, true);
+            completarAcceso(nickUnico, true, `Has entrado como invitado único ~${nickUnico} a #${salaActual}`);
         });
 
+        // Acceso como usuario registrado en hoja1
         formRegistrado.addEventListener('submit', async (e) => {
             e.preventDefault();
             const nick = document.getElementById('regUsername').value.trim();
@@ -1340,12 +1388,10 @@
 
             if (!nick || !pass) return;
             btnSubmit.disabled = true;
-            btnSubmit.textContent = "VERIFICANDO...";
+            btnSubmit.textContent = "VERIFICANDO EN SHEETS...";
 
             try {
-                const res = await fetch(URL_HOJA1_USUARIOS);
-                const data = await res.json();
-                const usuariosGuardados = data.hoja1 || [];
+                const usuariosGuardados = await leerHojaSheets('hoja1');
 
                 const usuarioExistente = usuariosGuardados.find(
                     u => u.username && String(u.username).trim().toLowerCase() === nick.toLowerCase()
@@ -1357,6 +1403,7 @@
                         : usuarioExistente['contraseña'];
 
                     if (String(passGuardada) === pass) {
+                        await anunciarPresenciaEnSala(usuarioExistente.username, false);
                         completarAcceso(usuarioExistente.username, false, `Conectado como @${usuarioExistente.username} en #${salaActual}`);
                     } else {
                         alert("❌ Contraseña incorrecta para @" + usuarioExistente.username);
@@ -1365,26 +1412,49 @@
                         return;
                     }
                 } else {
-                    await fetch(URL_HOJA1_USUARIOS, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            hoja1: {
-                                username: nick,
-                                contrasena: pass
-                            }
-                        })
+                    const respuestaPost = await guardarEnSheets({
+                        hoja1: {
+                            username: nick,
+                            contrasena: pass,
+                            fecha: obtenerFechaActual()
+                        }
                     });
+
+                    if (respuestaPost.status === 'duplicado') {
+                        alert("❌ Ese usuario ya fue registrado. Inicia sesión con su contraseña.");
+                        btnSubmit.disabled = false;
+                        btnSubmit.textContent = "CONECTAR CON CONTRASEÑA & RADIO EN VIVO >>";
+                        return;
+                    }
+
+                    await anunciarPresenciaEnSala(nick, false);
                     completarAcceso(nick, false, `Nuevo nick registrado: @${nick} en #${salaActual}`);
                 }
             } catch (error) {
                 console.error("Error de autenticación:", error);
-                alert("Error conectando con Google Sheets.");
+                alert("Error conectando con Google Apps Script.");
             } finally {
                 btnSubmit.disabled = false;
                 btnSubmit.textContent = "CONECTAR CON CONTRASEÑA & RADIO EN VIVO >>";
             }
         });
+
+        // Registra la entrada del usuario en hoja3 para que aparezca inmediatamente como persona única en la lista
+        async function anunciarPresenciaEnSala(nick, esInvitado) {
+            const nombreFormateado = esInvitado ? `~${nick}` : `@${nick}`;
+            const salaDestino = salaActual === 'velacion' ? 'chatzona' : salaActual;
+            try {
+                await guardarEnSheets({
+                    hoja3: {
+                        name: nombreFormateado,
+                        comentario: `[#${salaDestino}] [PRESENCIA] se ha conectado a la sala`,
+                        fecha: obtenerFechaActual()
+                    }
+                });
+            } catch (err) {
+                console.error('Error anunciando presencia:', err);
+            }
+        }
 
         function completarAcceso(nick, esInvitado, mensajeBienvenida) {
             usuarioActual = { nick, esInvitado };
@@ -1480,7 +1550,6 @@
             elemento.addEventListener('pointercancel', finalizarArrastre);
         }
 
-        // Convierte una foto (URL o Base64) en una matriz binaria roja (1s y 0s)
         function convertirFotoABinarioRojo(urlFoto) {
             if (cacheCorazonesBinarios[urlFoto]) {
                 return Promise.resolve(cacheCorazonesBinarios[urlFoto]);
@@ -1520,7 +1589,6 @@
                         cacheCorazonesBinarios[urlFoto] = htmlBinario;
                         resolve(htmlBinario);
                     } catch (err) {
-                        // Si CORS bloquea getImageData, generamos matriz binaria determinista desde la cadena de la foto
                         const fallback = generarBinarioDeterminista(urlFoto, cols, rows);
                         cacheCorazonesBinarios[urlFoto] = fallback;
                         resolve(fallback);
@@ -1633,47 +1701,29 @@
             if (document.querySelector('.objeto-vela-movil.arrastrando, .objeto-corazon-binario.arrastrando')) return;
 
             try {
-                // Consultar simultáneamente Hoja 4 (peticion) y Hoja 5 (foto)
-                const [resHoja4, resHoja5] = await Promise.all([
-                    fetch(URL_HOJA4_VELACION),
-                    fetch(URL_HOJA5_FOTOS)
+                const [filas4, filas5] = await Promise.all([
+                    leerHojaSheets('hoja4'),
+                    leerHojaSheets('hoja5')
                 ]);
-
-                const json4 = await resHoja4.json();
-                const json5 = await resHoja5.json();
-
-                const claveRaiz4 = Object.keys(json4).find(k => Array.isArray(json4[k])) || 'hoja4';
-                const filas4 = json4[claveRaiz4] || [];
-
-                const claveRaiz5 = Object.keys(json5).find(k => Array.isArray(json5[k])) || 'hoja5';
-                const filas5 = json5[claveRaiz5] || [];
 
                 listaMensajes.innerHTML = '<div class="aviso-altar-flotante">🕯️❤️ Arrastra las velas y corazones binarios</div>';
                 const miNombre = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
                 actualizarListaUsuarios([miNombre]);
 
-                // 1. Renderizar velas desde Hoja 4 (Celda C: "peticion")
+                // 1. Velas desde Hoja 4 (Celda C: "peticion")
                 let contadorVelas = 0;
                 filas4.forEach(fila => {
-                    const clavePeticion = Object.keys(fila).find(
-                        k => k.trim().toLowerCase() === 'peticion'
-                    );
-                    const textoPeticion = clavePeticion ? fila[clavePeticion] : '';
-
+                    const textoPeticion = fila.peticion;
                     if (textoPeticion && String(textoPeticion).trim() !== '') {
                         crearObjetoVelaAlAzar(String(textoPeticion).trim(), contadorVelas);
                         contadorVelas++;
                     }
                 });
 
-                // 2. Renderizar corazones binarios rojos desde Hoja 5 (Celda A: "foto")
+                // 2. Corazones binarios rojos desde Hoja 5 (Celda A: "foto")
                 let contadorFotos = 0;
                 for (const fila of filas5) {
-                    const claveFoto = Object.keys(fila).find(
-                        k => k.trim().toLowerCase() === 'foto'
-                    );
-                    const urlFoto = claveFoto ? fila[claveFoto] : '';
-
+                    const urlFoto = fila.foto;
                     if (urlFoto && String(urlFoto).trim() !== '') {
                         await crearObjetoCorazonBinarioAlAzar(String(urlFoto).trim(), contadorFotos);
                         contadorFotos++;
@@ -1684,7 +1734,7 @@
                     crearObjetoVelaAlAzar('Sin peticiones ni fotos encendidas aún', 0);
                 }
             } catch (error) {
-                console.error('Error al leer hoja4 / hoja5 en #velacion:', error);
+                console.error('Error al leer hoja4 / hoja5 en Apps Script:', error);
             }
         }
 
@@ -1695,9 +1745,7 @@
             }
 
             try {
-                const response = await fetch(URL_HOJA3_CHAT);
-                const json = await response.json();
-                const registros = json.hoja3 || [];
+                const registros = await leerHojaSheets('hoja3');
 
                 listaMensajes.innerHTML = '';
                 const miNombre = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
@@ -1707,12 +1755,17 @@
 
                 registros.forEach(fila => {
                     const autor = fila.name || 'Anónimo';
-                    const textoCrudo = fila.comentario || '';
+                    const textoCrudo = String(fila.comentario || '');
                     const fecha = fila.fecha || '';
 
                     if (textoCrudo.startsWith(etiquetaSala)) {
                         const contenidoSinSala = textoCrudo.replace(etiquetaSala, '').trim();
                         usuariosEnEstaSala.add(autor);
+
+                        // Mensaje interno de presencia para registrar usuario único en la lista
+                        if (contenidoSinSala.startsWith('[PRESENCIA]')) {
+                            return;
+                        }
 
                         const matchVideo = contenidoSinSala.match(/^\[VIDEO:([^|\]]+)(?:\|(\d+))?\]$/);
                         if (matchVideo && salaActual === 'cine') {
@@ -1753,7 +1806,7 @@
                 actualizarListaUsuarios(Array.from(usuariosEnEstaSala));
                 listaMensajes.scrollTop = listaMensajes.scrollHeight;
             } catch (error) {
-                console.error('Error al leer hoja3:', error);
+                console.error('Error al leer hoja3 desde Apps Script:', error);
             }
         }
 
@@ -1849,19 +1902,15 @@
             listaMensajes.scrollTop = listaMensajes.scrollHeight;
 
             try {
-                await fetch(URL_HOJA3_CHAT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        hoja3: {
-                            name: nombreFormateado,
-                            comentario: payloadTexto,
-                            fecha: fechaActual
-                        }
-                    })
+                await guardarEnSheets({
+                    hoja3: {
+                        name: nombreFormateado,
+                        comentario: payloadTexto,
+                        fecha: fechaActual
+                    }
                 });
             } catch (error) {
-                console.error('Error guardando en hoja3:', error);
+                console.error('Error guardando mensaje en hoja3:', error);
             }
         });
 
