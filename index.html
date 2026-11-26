@@ -112,7 +112,6 @@
 			background-color: #000;
 		}
 
-		/* Imagen del mapa oscurecida */
 		#mapaContenedor img {
 			width: 100%;
 			height: auto;
@@ -121,7 +120,6 @@
 			user-select: none;
 		}
 
-		/* Capa de niebla atmosférica */
 		.capa-niebla {
 			position: absolute;
 			top: -50%;
@@ -144,7 +142,6 @@
 			100% { transform: translate(-2%, 2%) scale(1.02); }
 		}
 
-		/* Máscara de oscuridad con circunferencia 115px y centro más claro */
 		#capaOscuridadLinterna {
 			position: absolute;
 			top: 0;
@@ -207,7 +204,6 @@
 			text-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
 		}
 
-		/* Formulario Popup al hacer clic en el mapa */
 		#popupComentario {
 			display: none;
 			position: absolute;
@@ -418,7 +414,7 @@
 		const div1 = document.getElementById('div1');
 		const div2 = document.getElementById('div2');
 
-		// PEGA AQUÍ LA NUEVA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
+		// Tu URL de Google Apps Script
 		const urlAppsScript = 'https://script.google.com/macros/s/AKfycbyrYVZHzCHFViXz4IXX3roOu-c-21vu8m_r8PNG63Jo4yZwdFs9IaY2kWVqWfHKe0c07g/exec';
 
 		// ----------------------------------------------------
@@ -532,13 +528,14 @@
 			popupComentario.style.display = 'none';
 			inputTextoMapa.value = '';
 
-			// Si localmente ya alcanzó 25, reinicia de inmediato
 			if (guardadosLocal.length >= LIMITE_INTERACCIONES) {
 				setTimeout(reiniciarSistema, 600);
 			}
 
+			// Envío con mode: 'no-cors' para evitar bloqueos CORS desde GitHub Pages
 			fetch(urlAppsScript, {
 				method: 'POST',
+				mode: 'no-cors',
 				headers: { 'Content-Type': 'text/plain;charset=utf-8' },
 				body: JSON.stringify({
 					hoja2: {
@@ -549,15 +546,10 @@
 					}
 				})
 			})
-			.then(res => res.json())
-			.then(data => {
-				console.log('Respuesta Google Sheets:', data);
-				// Si el servidor confirma el reinicio en el registro 25, limpia la pantalla
-				if (data.status === 'reset' || (data.total && data.total >= LIMITE_INTERACCIONES)) {
-					reiniciarSistema();
-				}
+			.then(() => {
+				console.log('Petición enviada a Google Sheets');
 			})
-			.catch(err => console.error('Error al enviar a Apps Script:', err));
+			.catch(err => console.error('Error de red al enviar:', err));
 		}
 
 		btnGuardarPin.addEventListener('click', (e) => {
@@ -606,13 +598,11 @@
 			.then(json => {
 				const datos = json.hoja2 || [];
 
-				// Si la base de datos en Google Sheets ya tiene 25 o más, limpia localStorage y no dibuja nada
 				if (datos.length >= LIMITE_INTERACCIONES) {
 					reiniciarSistema();
 					return;
 				}
 
-				// Sincronizar con la nube si la hoja está vacía
 				if (datos.length === 0) {
 					localStorage.removeItem('pines_cruissing_unal');
 					mapaUnicos.clear();
