@@ -272,8 +272,8 @@
 		const inputChat = document.getElementById('inputChat');
 		const chatMensajes = document.getElementById('chatMensajes');
 
-		// PEGA AQUÍ LA URL (/exec) DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
-		const APPS_SCRIPT_URL = 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
+		// URL directa de tu aplicación web de Google Apps Script
+		const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzW9Iuo398m0cvtIAWltc_4Kh6ebqrQhYio1Fgg2tvPSc2pYkEHyoRMqr1LPi-R2otAYQ/exec';
 
 		// Elementos de la Radio
 		const radioSala = document.getElementById('radioSala');
@@ -436,7 +436,7 @@
 			const canvas = document.createElement('canvas');
 			const anchoMitad = 240;
 			const alto = 180;
-			canvas.width = anchoMitad * 2; // 480x180 para respetar el límite de 50,000 caracteres de celda
+			canvas.width = anchoMitad * 2; // 480x180 para respetar el límite de 50,000 caracteres por celda
 			canvas.height = alto;
 
 			const ctx = canvas.getContext('2d');
