@@ -1,540 +1,1949 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Net Art - Transmisión & Chat</title>
-	<!-- Librería PeerJS para conexión WebRTC entre navegadores -->
-	<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-	<style>
-		* {
-			margin: 0;
-			padding: 0;
-			box-sizing: border-box;
-		}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatZona Net Art - Cine Simultáneo, Velación & Salas Romance</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-		body {
-			background-color: #000;
-			color: #fff;
-			font-family: 'Courier New', Courier, monospace;
-			width: 100vw;
-			height: 100vh;
-			display: flex;
-			flex-direction: column;
-			justify-content: space-between;
-			padding: 15px;
-			overflow: hidden;
-		}
+        body {
+            background-color: #2b003e;
+            background-image: radial-gradient(#ff0055 1px, transparent 1px), radial-gradient(#ffea00 1px, #2b003e 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #000;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-		/* SECCIÓN SUPERIOR: PANTALLAS DIVIDIDAS */
-		.contenedor-superior {
-			position: relative;
-			display: flex;
-			width: 100%;
-			height: 60vh;
-			gap: 20px;
-		}
+        /* =========================================================
+           1. BARRA SUPERIOR (PORTAL + SALAS + VOLUMEN 0%=20%)
+           ========================================================= */
+        .topbar-portal {
+            background: linear-gradient(90deg, #b30000 0%, #590059 50%, #1a0033 100%);
+            border-bottom: 3px solid #ffea00;
+            color: #fff;
+            padding: 6px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+            z-index: 10;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
 
-		.caja-pantalla {
-			flex: 1;
-			height: 100%;
-			background-color: #000;
-			border: none;
-			border-radius: 0;
-			box-shadow: none;
-			overflow: hidden;
-			position: relative;
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			align-items: center;
-		}
+        .logo-zona {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-		/* Videos en vivo con efecto espejo */
-		.caja-pantalla video {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-			transform: scaleX(-1);
-		}
+        .logo-zona h1 {
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 0px #000;
+            color: #ffea00;
+        }
 
-		/* Div de Carga / GIF en bucle */
-		.pantalla-carga {
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			align-items: center;
-			width: 100%;
-			height: 100%;
-			background-color: #000;
-		}
+        .badge-online {
+            background-color: #00cc44;
+            color: #000;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 0.82rem;
+            padding: 3px 8px;
+            border: 2px outset #fff;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
 
-		.pantalla-carga img {
-			max-width: 150px;
-			max-height: 150px;
-			object-fit: contain;
-			margin-bottom: 10px;
-		}
+        .punto-verde {
+            width: 8px;
+            height: 8px;
+            background: #003300;
+            border-radius: 50%;
+            display: inline-block;
+            animation: parpadeo 1s infinite alternate;
+        }
 
-		.texto-esperando {
-			color: #ffea00;
-			font-size: 1.3rem;
-			font-weight: bold;
-			text-shadow: 0 0 10px #ffea00;
-			letter-spacing: 2px;
-			animation: parpadeo 1.5s infinite alternate;
-		}
+        @keyframes parpadeo {
+            from { opacity: 0.3; }
+            to { opacity: 1; }
+        }
 
-		@keyframes parpadeo {
-			from { opacity: 0.4; }
-			to { opacity: 1; }
-		}
+        .salas-rapidas {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
 
-		/* GIF del Corazón interactivo en el centro */
-		#gifCorazon {
-			position: absolute;
-			left: 50%;
-			top: 50%;
-			transform: translate(-50%, -50%);
-			z-index: 10;
-			width: 80px;
-			height: 80px;
-			cursor: pointer;
-			border-radius: 50%;
-			transition: transform 0.2s ease;
-		}
+        .btn-sala-top {
+            background: #222;
+            color: #ffea00;
+            border: 2px outset #666;
+            padding: 3px 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-		#gifCorazon:hover {
-			transform: translate(-50%, -50%) scale(1.2);
-		}
+        .btn-sala-top.activa {
+            background: #ffea00;
+            color: #000;
+            border: 2px inset #fff;
+        }
 
-		/* SECCIÓN INFERIOR: CHAT */
-		.contenedor-chat {
-			width: 100%;
-			height: 32vh;
-			background-color: #000;
-			border: none;
-			border-radius: 0;
-			box-shadow: none;
-			display: flex;
-			flex-direction: column;
-			padding: 12px;
-		}
+        .nav-links-retro {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
 
-		.chat-header {
-			font-size: 1rem;
-			color: #ff0055;
-			margin-bottom: 8px;
-			font-weight: bold;
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			flex-wrap: wrap;
-			gap: 10px;
-		}
+        .control-volumen-box {
+            background: #111;
+            border: 2px inset #808080;
+            padding: 3px 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.78rem;
+            color: #ffea00;
+        }
 
-		.controles-header {
-			display: flex;
-			align-items: center;
-			gap: 18px;
-		}
+        .control-volumen-box input[type="range"] {
+            width: 75px;
+            cursor: pointer;
+            accent-color: #ff0055;
+        }
 
-		/* Control de volumen de la radio (mínimo 20% real) */
-		.radio-control {
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			color: #ffea00;
-			font-size: 0.85rem;
-		}
+        .btn-3d {
+            background-color: #d4d0c8;
+            color: #000;
+            border: 2px outset #ffffff;
+            padding: 4px 10px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+        }
 
-		#controlVolumen {
-			width: 90px;
-			accent-color: #ffea00;
-			cursor: pointer;
-			background: transparent;
-		}
+        .btn-3d:active {
+            border: 2px inset #ffffff;
+        }
 
-		#estadoSala {
-			color: #ffea00;
-			font-size: 0.85rem;
-		}
+        .btn-3d-rojo {
+            background-color: #cc0033;
+            color: #fff;
+            border: 2px outset #ff6688;
+        }
 
-		#chatMensajes {
-			flex: 1;
-			overflow-y: auto;
-			display: flex;
-			flex-direction: column;
-			gap: 8px;
-			padding-right: 5px;
-			margin-bottom: 10px;
-		}
+        .btn-3d-verde {
+            background-color: #00cc44;
+            color: #000;
+            border: 2px outset #99ffbb;
+        }
 
-		.mensaje-item {
-			background: transparent;
-			padding: 6px 0;
-			border: none;
-			border-radius: 0;
-			font-size: 0.95rem;
-			color: #fff;
-		}
+        /* =========================================================
+           2. MODAL DE LOGIN (#pop2)
+           ========================================================= */
+        #pop2-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.88);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 15px;
+        }
 
-		.chat-form {
-			display: flex;
-			gap: 10px;
-		}
+        .ventana-pop2 {
+            background-color: #f0f0f0;
+            border: 3px outset #ffffff;
+            width: 100%;
+            max-width: 540px;
+            box-shadow: 0 0 25px rgba(255, 234, 0, 0.5);
+        }
 
-		#inputChat {
-			flex: 1;
-			padding: 10px 15px;
-			background: #111;
-			border: none;
-			border-radius: 0;
-			color: #fff;
-			font-family: inherit;
-			outline: none;
-			box-shadow: none;
-		}
+        .barra-titulo-ventana {
+            background: linear-gradient(90deg, #000080, #1084d0);
+            color: #fff;
+            padding: 6px 10px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-		#btnEnviar {
-			padding: 10px 20px;
-			background: #222;
-			color: #ffea00;
-			border: none;
-			border-radius: 0;
-			font-family: inherit;
-			font-weight: bold;
-			cursor: pointer;
-			box-shadow: none;
-			transition: all 0.2s;
-		}
+        .contenido-pop2 {
+            padding: 15px;
+        }
 
-		#btnEnviar:hover {
-			background: #ffea00;
-			color: #000;
-		}
-	</style>
+        .selector-salas-pop2 {
+            background: #e0e0e0;
+            border: 2px inset #808080;
+            padding: 10px;
+            margin-bottom: 12px;
+        }
+
+        .selector-salas-pop2 label {
+            display: block;
+            font-weight: bold;
+            font-size: 0.82rem;
+            margin-bottom: 6px;
+            color: #000080;
+        }
+
+        .grid-salas {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .opcion-sala {
+            background: #d4d0c8;
+            border: 2px outset #fff;
+            padding: 6px;
+            text-align: center;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.82rem;
+            font-weight: bold;
+        }
+
+        .opcion-sala.seleccionada {
+            background: #000080;
+            color: #ffea00;
+            border: 2px inset #fff;
+        }
+
+        .opcion-sala span {
+            display: block;
+            font-family: Arial, sans-serif;
+            font-size: 0.7rem;
+            font-weight: normal;
+            margin-top: 2px;
+            opacity: 0.85;
+        }
+
+        .tabs-acceso {
+            display: flex;
+            gap: 4px;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn {
+            padding: 6px 12px;
+            background: #c0c0c0;
+            border: 2px outset #fff;
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .tab-btn.activo {
+            background: #ffffff;
+            color: #b30000;
+            padding-bottom: 8px;
+        }
+
+        .caja-formulario-pop2 {
+            background: #ffffff;
+            border: 2px inset #808080;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .campo-grupo {
+            margin-bottom: 8px;
+        }
+
+        .campo-grupo label {
+            display: block;
+            font-weight: bold;
+            font-size: 0.82rem;
+            margin-bottom: 3px;
+        }
+
+        .campo-grupo input {
+            width: 100%;
+            padding: 6px;
+            border: 2px inset #ccc;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.92rem;
+        }
+
+        .caja-reglas {
+            background-color: #ffffcc;
+            border: 2px solid #cc9900;
+            padding: 8px 10px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 0.85rem;
+            color: #333;
+        }
+
+        .caja-reglas h4 {
+            font-family: Arial, sans-serif;
+            color: #b30000;
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .caja-reglas ul {
+            margin-left: 18px;
+            line-height: 1.25;
+        }
+
+        /* =========================================================
+           3. ÁREA PRINCIPAL DE 3 COLUMNAS
+           ========================================================= */
+        .contenedor-webchat {
+            flex: 1;
+            display: flex;
+            gap: 8px;
+            padding: 8px;
+            overflow: hidden;
+        }
+
+        .panel-mensajes {
+            flex: 1;
+            background: #ffffff;
+            border: 2px solid #000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .marquee-sala {
+            background: #ffea00;
+            color: #000;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.82rem;
+            font-weight: bold;
+            padding: 4px;
+            border-bottom: 2px solid #000;
+        }
+
+        /* Módulo Exclusivo de Sala #cine SIMULTÁNEO */
+        #moduloCine {
+            display: none;
+            background: #111;
+            border-bottom: 3px solid #ff0055;
+            padding: 8px;
+            color: #fff;
+        }
+
+        .cine-controles {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+
+        .cine-controles input {
+            flex: 1;
+            min-width: 180px;
+            padding: 4px 8px;
+            border: 2px inset #666;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.82rem;
+        }
+
+        .cine-presets {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 6px;
+            align-items: center;
+            font-size: 0.75rem;
+            font-family: 'Courier New', Courier, monospace;
+            flex-wrap: wrap;
+        }
+
+        .badge-vivo-cine {
+            background: #ff0033;
+            color: #fff;
+            padding: 2px 6px;
+            font-weight: bold;
+            border-radius: 2px;
+            animation: parpadeo 1s infinite alternate;
+        }
+
+        .btn-preset-video {
+            background: #333;
+            color: #ffea00;
+            border: 1px solid #ffea00;
+            padding: 2px 6px;
+            cursor: pointer;
+            font-size: 0.72rem;
+        }
+
+        .btn-preset-video:hover {
+            background: #ffea00;
+            color: #000;
+        }
+
+        .pantalla-cine-wrapper {
+            width: 100%;
+            max-width: 560px;
+            margin: 0 auto;
+            aspect-ratio: 16 / 9;
+            max-height: 220px;
+            background: #000;
+            border: 2px solid #444;
+            position: relative;
+        }
+
+        .pantalla-cine-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        #listaMensajes {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 0.92rem;
+            line-height: 1.4;
+            background-color: #fafafa;
+            position: relative;
+        }
+
+        /* =========================================================
+           ESPACIO INTERACTIVO DE OBJETOS ARRASTRABLES (#VELACION)
+           ========================================================= */
+        #listaMensajes.modo-velacion {
+            background-color: #09000f;
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(255, 0, 51, 0.10) 0%, transparent 70%),
+                radial-gradient(#2a0022 1px, transparent 1px);
+            background-size: 100% 100%, 24px 24px;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .aviso-altar-flotante {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.72rem;
+            color: rgba(255, 204, 102, 0.75);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .objeto-vela-movil {
+            position: absolute;
+            width: 135px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: grab;
+            touch-action: none;
+            border-radius: 6px;
+            background: radial-gradient(circle, rgba(255, 153, 0, 0.14) 0%, rgba(0, 0, 0, 0) 75%);
+            transition: transform 0.1s ease, filter 0.2s ease;
+        }
+
+        .objeto-vela-movil:hover {
+            filter: drop-shadow(0 0 8px rgba(255, 200, 0, 0.65));
+            z-index: 50 !important;
+        }
+
+        .objeto-vela-movil.arrastrando {
+            cursor: grabbing;
+            transform: scale(1.08);
+            filter: drop-shadow(0 0 12px rgba(255, 234, 0, 0.9));
+            z-index: 99 !important;
+        }
+
+        /* Objeto Corazón Binario Rojo (mismo tamaño compacto que la vela) */
+        .objeto-corazon-binario {
+            position: absolute;
+            width: 120px;
+            height: 112px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            touch-action: none;
+            filter: drop-shadow(0 0 6px rgba(255, 0, 40, 0.75));
+            transition: transform 0.1s ease, filter 0.2s ease;
+        }
+
+        .objeto-corazon-binario:hover {
+            filter: drop-shadow(0 0 12px rgba(255, 20, 60, 0.95));
+            z-index: 50 !important;
+        }
+
+        .objeto-corazon-binario.arrastrando {
+            cursor: grabbing;
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 15px rgba(255, 0, 68, 1));
+            z-index: 99 !important;
+        }
+
+        /* Silueta de corazón recortada por clip-path */
+        .silueta-corazon-rojo {
+            width: 108px;
+            height: 98px;
+            background-color: #120004;
+            clip-path: path('M 54 94 C 54 94 4 63 4 30 C 4 12 18 2 33 2 C 43 2 50 8 54 15 C 58 8 65 2 75 2 C 90 2 104 12 104 30 C 104 63 54 94 54 94 Z');
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            pointer-events: none;
+            padding-top: 6px;
+        }
+
+        .matriz-binaria-roja {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 5.5px;
+            line-height: 5.6px;
+            letter-spacing: 0.4px;
+            font-weight: bold;
+            color: #ff0033;
+            text-shadow: 0 0 3px #ff0022;
+            white-space: pre;
+            text-align: center;
+            user-select: none;
+        }
+
+        .bit-tenue {
+            color: #660014;
+            text-shadow: none;
+        }
+
+        .arte-vela-ascii {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.68rem;
+            line-height: 1.02;
+            color: #ffcc33;
+            text-shadow: 0 0 6px #ff6600;
+            white-space: pre;
+            pointer-events: none;
+        }
+
+        .llama-vela {
+            color: #ffea00;
+            animation: parpadeo 0.75s infinite alternate;
+        }
+
+        .texto-objeto-peticion {
+            margin-top: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.7rem;
+            line-height: 1.2;
+            color: #ffe8b3;
+            text-shadow: 1px 1px 2px #000, 0 0 4px #000;
+            word-break: break-word;
+            max-width: 130px;
+            pointer-events: none;
+        }
+
+        .msg-linea {
+            margin-bottom: 6px;
+            padding: 3px 5px;
+            border-bottom: 1px dotted #ddd;
+            word-wrap: break-word;
+        }
+
+        .msg-hora {
+            color: #666;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.78rem;
+        }
+
+        .msg-nick {
+            font-weight: bold;
+            color: #0000ee;
+            cursor: pointer;
+        }
+
+        .msg-nick:hover {
+            text-decoration: underline;
+        }
+
+        .msg-nick.invitado {
+            color: #008000;
+        }
+
+        .msg-susurro {
+            background-color: #ffe6f2;
+            border-left: 4px solid #ff0066;
+            color: #800033;
+            font-style: italic;
+        }
+
+        .msg-video-compartido {
+            background-color: #1a0033;
+            color: #ffea00;
+            border-left: 4px solid #ff0055;
+            padding: 6px 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+        }
+
+        .msg-sistema {
+            background: #eef6ff;
+            border-left: 3px solid #000080;
+            padding: 4px 8px;
+            color: #000080;
+            font-style: italic;
+        }
+
+        #barraModoSusurro {
+            display: none;
+            background: #ff0066;
+            color: #fff;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .barra-envio {
+            background: #d4d0c8;
+            border-top: 2px solid #808080;
+            padding: 8px;
+            display: flex;
+            gap: 6px;
+        }
+
+        #inputMensaje {
+            flex: 1;
+            padding: 6px 10px;
+            border: 2px inset #fff;
+            font-family: Arial, sans-serif;
+            font-size: 0.95rem;
+        }
+
+        /* =========================================================
+           COLUMNA 2: USUARIOS + BLOQUE GRANDE SALAS ROMANCE EN VIVO
+           ========================================================= */
+        .panel-usuarios {
+            width: 230px;
+            background: #e8e8e8;
+            border: 2px solid #000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-usuarios {
+            background: #000080;
+            color: #fff;
+            padding: 6px 8px;
+            font-size: 0.82rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .etiqueta-contador {
+            background: #ff0055;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8rem;
+        }
+
+        .caja-acceso-galeria {
+            background: linear-gradient(180deg, #33001b 0%, #140024 100%);
+            padding: 10px 8px;
+            border-bottom: 3px solid #ffea00;
+            text-align: center;
+        }
+
+        .btn-ir-galeria {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #ff0055 0%, #990033 100%);
+            color: #ffea00;
+            border: 2px outset #ff88aa;
+            padding: 11px 8px;
+            font-family: 'Courier New', Courier, monospace;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.6);
+            transition: transform 0.15s ease, background 0.2s ease;
+        }
+
+        .btn-ir-galeria:hover {
+            background: #ffea00;
+            color: #000;
+            border-color: #fff;
+            transform: scale(1.02);
+        }
+
+        .btn-ir-galeria .titulo-romance-vivo {
+            display: block;
+            font-size: 0.86rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .btn-ir-galeria .subtitulo-romance-vivo {
+            display: block;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.72rem;
+            font-weight: normal;
+            line-height: 1.25;
+            color: #ffffff;
+        }
+
+        .btn-ir-galeria:hover .subtitulo-romance-vivo {
+            color: #220011;
+            font-weight: bold;
+        }
+
+        .ayuda-susurro {
+            background: #ffffcc;
+            font-size: 0.72rem;
+            padding: 4px 6px;
+            border-bottom: 1px solid #999;
+            color: #333;
+            text-align: center;
+        }
+
+        #listaUsuarios {
+            flex: 1;
+            list-style: none;
+            padding: 4px;
+            overflow-y: auto;
+            font-size: 0.84rem;
+        }
+
+        #listaUsuarios li {
+            padding: 5px 6px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 4px;
+        }
+
+        #listaUsuarios li:hover {
+            background: #d0d8ff;
+        }
+
+        .acciones-usuario-item {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+
+        .btn-mini-susurro {
+            background: #ff0066;
+            color: #fff;
+            border: none;
+            font-size: 0.66rem;
+            padding: 2px 5px;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        .icono-rol {
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            margin-right: 3px;
+        }
+
+        .rol-reg { color: #cc0000; }
+        .rol-inv { color: #008000; }
+
+        /* =========================================================
+           4. COLUMNA DERECHA: BÚSQUEDAS AL AZAR DE ROMANCE Y DRAMA
+           ========================================================= */
+        .panel-lateral-derecho {
+            width: 280px;
+            background: #111;
+            border: 2px solid #000;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 5px;
+        }
+
+        .caja-anuncio {
+            flex: 1;
+            border: 2px ridge #ff0066;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+        }
+
+        .header-anuncio {
+            background: rgba(179, 0, 0, 0.9);
+            color: #ffea00;
+            font-size: 0.68rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .header-anuncio.drama {
+            background: rgba(75, 0, 130, 0.9);
+            color: #00ffff;
+        }
+
+        .cuerpo-banner {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #1a0022;
+        }
+
+        .img-banner-galeria {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .img-banner-galeria:hover {
+            transform: scale(1.03);
+        }
+
+        .micro-texto-banner {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.45);
+            color: rgba(255, 255, 255, 0.72);
+            font-family: Arial, sans-serif;
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: none;
+        }
+
+        @media (max-width: 850px) {
+            .panel-lateral-derecho { display: none; }
+        }
+        @media (max-width: 620px) {
+            .panel-usuarios { width: 175px; }
+        }
+    </style>
 </head>
 <body>
 
-	<!-- EMISORA NOCHES DE PELUCHEO EN VIVO -->
-	<audio id="radioSala" src="https://az13.yesstreaming.net/listen/noches_de_pelucheo/radio.mp3" preload="auto"></audio>
+    <!-- Emisora en vivo: Noches de Pelucheo -->
+    <audio id="streamRadio" preload="none">
+        <source src="https://az13.yesstreaming.net/listen/noches_de_pelucheo/radio.mp3" type="audio/mpeg">
+    </audio>
 
-	<!-- SECCIÓN SUPERIOR CON PANTALLAS DIVIDIDAS Y CORAZÓN CENTRAL -->
-	<div class="contenedor-superior">
-		<!-- LADO IZQUIERDO: CÁMARA LOCAL EN ESPEJO -->
-		<div class="caja-pantalla">
-			<video id="webcam1" autoplay playsinline muted></video>
-		</div>
+    <!-- =========================================================
+         VENTANA MODAL DE INICIO DE SESIÓN (#pop2)
+         ========================================================= -->
+    <div id="pop2-overlay">
+        <div class="ventana-pop2" id="pop2">
+            <div class="barra-titulo-ventana">
+                <span>💬 Acceso a Red de Salas [POP-2]</span>
+                <span class="badge-online"><span class="punto-verde"></span> <span id="contadorPop">1</span> en sala</span>
+            </div>
 
-		<!-- CORAZÓN EN LA MITAD DE LAS DOS PANTALLAS -->
-		<img id="gifCorazon" src="https://i.pinimg.com/originals/e2/5a/a0/e25aa0b26167091d4561ab78d3e43743.gif" alt="Corazón Interactivo">
+            <div class="contenido-pop2">
+                <div class="selector-salas-pop2">
+                    <label>1. Elige la sala temática a la que deseas entrar:</label>
+                    <div class="grid-salas">
+                        <div class="opcion-sala seleccionada" data-sala="chatzona">
+                            #chatzona
+                            <span>Sala General</span>
+                        </div>
+                        <div class="opcion-sala" data-sala="velacion">
+                            #velacion
+                            <span>Velas & Corazones</span>
+                        </div>
+                        <div class="opcion-sala" data-sala="cine">
+                            #cine
+                            <span>Cine Simultáneo</span>
+                        </div>
+                    </div>
+                </div>
 
-		<!-- LADO DERECHO: GIF EN BUCLE HASTA QUE SE CONECTE OTRO USUARIO -->
-		<div class="caja-pantalla">
-			<div id="pantallaCarga" class="pantalla-carga">
-				<img src="https://i.pinimg.com/originals/fb/f4/b4/fbf4b4b5b982c142d6b25d8bf45daa40.gif" alt="Esperando...">
-				<div class="texto-esperando">esperando...</div>
-			</div>
-			<video id="webcam2" autoplay playsinline style="display: none;"></video>
-		</div>
-	</div>
+                <div class="tabs-acceso">
+                    <button type="button" class="tab-btn activo" id="tabInvitado">👤 Entrar como Invitado</button>
+                    <button type="button" class="tab-btn" id="tabRegistrado">🔑 Nick Registrado</button>
+                </div>
 
-	<!-- SECCIÓN INFERIOR: CHAT -->
-	<div class="contenedor-chat">
-		<div class="chat-header">
-			<span>💬 CHAT EN VIVO</span>
-			<div class="controles-header">
-				<div class="radio-control" title="Volumen de Noches de Pelucheo">
-					<span>📻</span>
-					<input type="range" id="controlVolumen" min="0" max="100" value="20">
-					<span id="textoVolumen">20%</span>
-				</div>
-				<span id="estadoSala">Conectando sala...</span>
-			</div>
-		</div>
-		<div id="chatMensajes">
-			<div class="mensaje-item">Sistema: Sala de chat iniciada.</div>
-		</div>
-		<form id="formChat" class="chat-form">
-			<input type="text" id="inputChat" placeholder="Escribe un mensaje..." autocomplete="off" required>
-			<button type="submit" id="btnEnviar">Enviar</button>
-		</form>
-	</div>
+                <!-- Formulario Invitado -->
+                <form id="formInvitado" class="caja-formulario-pop2">
+                    <div class="campo-grupo">
+                        <label for="invUsername">Nick de Invitado (Sugerido: Anonimo):</label>
+                        <input type="text" id="invUsername" value="Anonimo" placeholder="Anonimo" required>
+                    </div>
+                    <button type="submit" class="btn-3d btn-3d-verde" style="width: 100%; padding: 8px;">
+                        ENTRAR COMO ANONIMO & NOCHES DE PELUCHEO >>
+                    </button>
+                </form>
 
-	<script>
-		const webcam1 = document.getElementById('webcam1');
-		const webcam2 = document.getElementById('webcam2');
-		const pantallaCarga = document.getElementById('pantallaCarga');
-		const estadoSala = document.getElementById('estadoSala');
-		const gifCorazon = document.getElementById('gifCorazon');
-		const formChat = document.getElementById('formChat');
-		const inputChat = document.getElementById('inputChat');
-		const chatMensajes = document.getElementById('chatMensajes');
+                <!-- Formulario Registrado (Hoja1: username casilla A, contraseña casilla B) -->
+                <form id="formRegistrado" class="caja-formulario-pop2" style="display: none;">
+                    <div class="campo-grupo">
+                        <label for="regUsername">Nick / Usuario (username):</label>
+                        <input type="text" id="regUsername" placeholder="Ej: Elpepe697" required>
+                    </div>
+                    <div class="campo-grupo">
+                        <label for="regPassword">Contraseña de Nick:</label>
+                        <input type="password" id="regPassword" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" id="btnSubmitReg" class="btn-3d btn-3d-rojo" style="width: 100%; padding: 8px;">
+                        CONECTAR CON CONTRASEÑA & RADIO EN VIVO >>
+                    </button>
+                </form>
 
-		// Endpoint exacto de Sheety para hoja5 (columna A: foto)
-		const SHEETY_HOJA5_URL = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja5';
+                <div class="caja-reglas">
+                    <h4>⚠️ Reglas de la Red (#chatzona | #velacion | #cine):</h4>
+                    <ul>
+                        <li>En <strong>#cine</strong> la reproducción es <strong>simultánea</strong> para todos los conectados.</li>
+                        <li>En <strong>#velacion</strong> las velas y corazones binarios aparecen al azar y puedes <strong>moverlos libremente</strong>.</li>
+                        <li>Entra a las <strong>Salas Romance en Vivo</strong> desde el panel de usuarios (<a href="galeria.html" style="color:#b30000;font-weight:bold;">galeria.html</a>).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
-		// Elementos de la Radio
-		const radioSala = document.getElementById('radioSala');
-		const controlVolumen = document.getElementById('controlVolumen');
-		const textoVolumen = document.getElementById('textoVolumen');
-		let radioIniciada = false;
+    <!-- =========================================================
+         BARRA SUPERIOR ESTILO PORTAL + CONTROL VOLUMEN (0% = 20% REAL)
+         ========================================================= -->
+    <header class="topbar-portal">
+        <div class="logo-zona">
+            <h1>⚡ CHATZONA</h1>
+            <span class="badge-online">
+                <span class="punto-verde"></span>
+                <span id="contadorTop">1</span> en <strong id="nombreSalaTop">#chatzona</strong>
+            </span>
+        </div>
 
-		// =========================================================
-		// 1. MÚSICA DE FONDO: NOCHES DE PELUCHEO (MÍNIMO 20% REAL)
-		// =========================================================
-		function actualizarVolumen(valorVisual) {
-			const v = Math.max(0, Math.min(100, Number(valorVisual)));
-			const volumenReal = 0.20 + (v / 100) * 0.80;
-			radioSala.volume = volumenReal;
-			textoVolumen.textContent = `${v}%`;
-		}
+        <div class="salas-rapidas">
+            <button type="button" class="btn-sala-top activa" data-sala="chatzona">#chatzona</button>
+            <button type="button" class="btn-sala-top" data-sala="velacion">#velacion</button>
+            <button type="button" class="btn-sala-top" data-sala="cine">#cine</button>
+        </div>
 
-		actualizarVolumen(controlVolumen.value);
+        <div class="nav-links-retro">
+            <div class="control-volumen-box" title="Control de Audio de la Sala">
+                <span>📻 Vol:</span>
+                <input type="range" id="sliderVolumenRadio" min="0" max="100" value="30">
+                <span id="etiquetaPorcentajeVol">30%</span>
+            </div>
+            <button type="button" id="btnRecargarChat" class="btn-3d">🔄</button>
+            <button type="button" id="btnAbrirPop2" class="btn-3d btn-3d-rojo">🔑 Nick</button>
+        </div>
+    </header>
 
-		function iniciarRadio() {
-			if (!radioIniciada) {
-				radioSala.play().then(() => {
-					radioIniciada = true;
-				}).catch(() => {});
-			}
-		}
+    <!-- =========================================================
+         INTERFAZ PRINCIPAL DE 3 COLUMNAS
+         ========================================================= -->
+    <main class="contenedor-webchat">
+        <!-- Columna 1: Cine Simultáneo / Chat / Espacio Arrastrable Velación -->
+        <section class="panel-mensajes">
+            <marquee class="marquee-sala" id="marqueeTexto" behavior="scroll" direction="left">
+                *** SALA ACTIVA: #CHATZONA *** SINTONIZANDO: NOCHES DE PELUCHEO EN VIVO *** SALAS ROMANCE EN VIVO EN GALERIA.HTML ***
+            </marquee>
 
-		iniciarRadio();
-		['click', 'keydown', 'touchstart'].forEach(evento => {
-			document.addEventListener(evento, iniciarRadio);
-		});
+            <!-- PANEL DE PROYECCIÓN SIMULTÁNEA DE LA SALA #CINE -->
+            <div id="moduloCine">
+                <form id="formSubirVideo" class="cine-controles">
+                    <input type="text" id="inputUrlYoutube" placeholder="Pega un enlace de YouTube para transmitir en simultáneo a todos..." required>
+                    <button type="submit" class="btn-3d btn-3d-rojo">📡 Transmitir a Todos</button>
+                </form>
 
-		controlVolumen.addEventListener('input', (e) => {
-			iniciarRadio();
-			actualizarVolumen(e.target.value);
-		});
+                <div class="cine-presets">
+                    <span class="badge-vivo-cine">● EN VIVO SIMULTÁNEO</span>
+                    <span id="estadoTiempoCine" style="color:#00ffcc;">Minuto: 00:00</span>
+                    <button type="button" id="btnSincronizarCine" class="btn-preset-video">🔄 Sincronizar minuto exacto</button>
+                    <button type="button" class="btn-preset-video" data-vid="a13lpRMqdYA">Video Base</button>
+                    <a id="linkRespaldoYoutube" href="https://www.youtube.com/watch?v=a13lpRMqdYA" target="_blank" style="color:#00ffff; margin-left:auto; text-decoration:underline;">↗ YouTube</a>
+                </div>
 
-		// =========================================================
-		// 2. CONEXIÓN DE CÁMARAS Y SALA P2P (?room=1)
-		// =========================================================
-		const params = new URLSearchParams(window.location.search);
-		const roomId = params.get('room') || '1';
-		const hostPeerId = `mugree-cruis-sala-${roomId}`;
+                <div class="pantalla-cine-wrapper">
+                    <iframe 
+                        id="reproductorCine" 
+                        src="" 
+                        title="Proyector Sala Cine Simultáneo" 
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
 
-		const rtcConfig = {
-			config: {
-				iceServers: [
-					{ urls: 'stun:stun.l.google.com:19302' },
-					{ urls: 'stun:stun1.l.google.com:19302' }
-				]
-			}
-		};
+            <div id="listaMensajes">
+                <div class="msg-linea msg-sistema">
+                    Conectando con la base de datos de la sala...
+                </div>
+            </div>
 
-		let localStream = null;
-		let conexionChat = null;
+            <!-- Indicador de Susurro Privado Activo -->
+            <div id="barraModoSusurro">
+                <span id="textoDestinoSusurro">🔒 Susurrando en privado a @usuario</span>
+                <button type="button" id="btnCancelarSusurro" style="background:#000; color:#fff; border:1px solid #fff; padding:2px 6px; cursor:pointer; font-size:0.75rem;">
+                    ✖ Volver al chat público
+                </button>
+            </div>
 
-		function crearStreamRespaldo() {
-			const canvas = document.createElement('canvas');
-			canvas.width = 2;
-			canvas.height = 2;
-			const ctx = canvas.getContext('2d');
-			ctx.fillStyle = '#000';
-			ctx.fillRect(0, 0, 2, 2);
-			return canvas.captureStream(1);
-		}
+            <!-- Barra de envío de comentarios (se oculta automáticamente en #velacion) -->
+            <form id="formChat" class="barra-envio">
+                <input type="text" id="inputMensaje" placeholder="Escribe en #chatzona..." autocomplete="off" required>
+                <button type="submit" class="btn-3d btn-3d-rojo" id="btnEnviarMsg">Enviar</button>
+            </form>
+        </section>
 
-		async function iniciarTodo() {
-			try {
-				localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-				webcam1.srcObject = localStream;
-			} catch (e) {
-				agregarMensaje("Sistema", "⚠️ Sin acceso a cámara local (modo espectador).");
-				localStream = crearStreamRespaldo();
-			}
-			iniciarConexionSala();
-		}
+        <!-- Columna 2: Lista de Usuarios + Bloque Grande Salas Romance en Vivo -->
+        <aside class="panel-usuarios">
+            <div class="header-usuarios">
+                <span>USUARIOS</span>
+                <span class="etiqueta-contador" id="etiquetaCantidad">1</span>
+            </div>
 
-		function iniciarConexionSala() {
-			const peer = new Peer(hostPeerId, rtcConfig);
+            <div class="caja-acceso-galeria">
+                <a href="galeria.html" class="btn-ir-galeria" title="Entrar a las Salas Romance en Vivo">
+                    <span class="titulo-romance-vivo">💋 SALAS ROMANCE EN VIVO</span>
+                    <span class="subtitulo-romance-vivo">Encuéntrate a escondidas con tu pareja</span>
+                </a>
+            </div>
 
-			peer.on('open', () => {
-				estadoSala.textContent = `SALA #${roomId} — Esperando pareja`;
-				agregarMensaje("Sistema", `Conectado a Sala #${roomId}. Esperando a otra persona...`);
-			});
+            <div class="ayuda-susurro">Clic en un nick para susurrar 🔒</div>
+            <ul id="listaUsuarios"></ul>
+        </aside>
 
-			peer.on('call', (call) => {
-				call.answer(localStream);
-				call.on('stream', (remoteStream) => {
-					conectarUsuarioRemoto(remoteStream);
-				});
-				call.on('close', desconectarUsuarioRemoto);
-			});
+        <!-- Columna 3: Búsquedas al azar de Romance y Drama Romántico -->
+        <aside class="panel-lateral-derecho">
+            <div class="caja-anuncio">
+                <div class="header-anuncio">
+                    <span>💘 </span>
+                    <button type="button" id="btnSigBanner1" style="cursor: pointer; font-size: 0.65rem; padding: 0 4px;" title="Buscar otra imagen de romance al azar">↻</button>
+                </div>
+                <div class="cuerpo-banner">
+                    <img id="imgBanner1" class="img-banner-galeria" referrerpolicy="no-referrer" alt="romance">
+                    <div class="micro-texto-banner" id="txtBanner1">romance</div>
+                </div>
+            </div>
 
-			peer.on('connection', (conn) => {
-				configurarChatP2P(conn);
-			});
+            <div class="caja-anuncio">
+                <div class="header-anuncio drama">
+                    <span>💔 </span>
+                    <button type="button" id="btnSigBanner2" style="cursor: pointer; font-size: 0.65rem; padding: 0 4px;" title="Buscar otra imagen de drama romántico al azar">↻</button>
+                </div>
+                <div class="cuerpo-banner">
+                    <img id="imgBanner2" class="img-banner-galeria" referrerpolicy="no-referrer" alt="drama romantico">
+                    <div class="micro-texto-banner" id="txtBanner2">drama romantico</div>
+                </div>
+            </div>
+        </aside>
+    </main>
 
-			peer.on('error', (err) => {
-				if (err.type === 'unavailable-id') {
-					peer.destroy();
-					conectarComoInvitado();
-				} else {
-					console.error('Error PeerJS:', err);
-				}
-			});
-		}
+    <script>
+        // =========================================================
+        // 1. CONFIGURACIÓN DE ENDPOINTS SHEETY (HOJA1, HOJA3, HOJA4 Y HOJA5)
+        // =========================================================
+        const URL_HOJA1_USUARIOS = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja1';
+        const URL_HOJA3_CHAT = 'https://api.sheety.co/3bf2b2add58e4c4d360e0b269fb830d8/hojadeC/hoja3';
+        const URL_HOJA4_VELACION = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja4';
+        const URL_HOJA5_FOTOS = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja5';
+        const VIDEO_BASE_CINE = 'a13lpRMqdYA';
 
-		function conectarComoInvitado() {
-			const guestPeer = new Peer(rtcConfig);
+        let salaActual = 'chatzona';
+        let estadoCineGlobal = {
+            videoId: VIDEO_BASE_CINE,
+            inicioTimestamp: Date.now(),
+            autor: 'Sistema'
+        };
+        let ultimoIframeCargadoKey = '';
 
-			guestPeer.on('open', () => {
-				estadoSala.textContent = `SALA #${roomId} — Conectando...`;
-				const call = guestPeer.call(hostPeerId, localStream);
+        // Coordenadas y caché binario para objetos en #velacion
+        const posicionesObjetosVelacion = {};
+        const cacheCorazonesBinarios = {};
+        let zIndexObjetoActual = 10;
 
-				call.on('stream', (remoteStream) => {
-					conectarUsuarioRemoto(remoteStream);
-				});
-				call.on('close', desconectarUsuarioRemoto);
+        let destinatarioSusurro = null;
+        let usuarioActual = {
+            nick: 'Anonimo',
+            esInvitado: true
+        };
 
-				const conn = guestPeer.connect(hostPeerId);
-				configurarChatP2P(conn);
-			});
-		}
+        const streamRadio = document.getElementById('streamRadio');
+        const sliderVolumenRadio = document.getElementById('sliderVolumenRadio');
+        const etiquetaPorcentajeVol = document.getElementById('etiquetaPorcentajeVol');
+        const pop2Overlay = document.getElementById('pop2-overlay');
+        const listaMensajes = document.getElementById('listaMensajes');
+        const listaUsuarios = document.getElementById('listaUsuarios');
+        const formChat = document.getElementById('formChat');
+        const inputMensaje = document.getElementById('inputMensaje');
+        const moduloCine = document.getElementById('moduloCine');
+        const reproductorCine = document.getElementById('reproductorCine');
+        const linkRespaldoYoutube = document.getElementById('linkRespaldoYoutube');
+        const estadoTiempoCine = document.getElementById('estadoTiempoCine');
+        const barraModoSusurro = document.getElementById('barraModoSusurro');
+        const textoDestinoSusurro = document.getElementById('textoDestinoSusurro');
 
-		function configurarChatP2P(conn) {
-			conexionChat = conn;
-			conn.on('open', () => {
-				estadoSala.textContent = `SALA #${roomId} — EN VIVO`;
-				agregarMensaje("Sistema", "🟢 Pareja conectada en la sala.");
-			});
-			conn.on('data', (datos) => {
-				if (datos.tipo === 'chat') {
-					agregarMensaje("Extraño", datos.texto);
-				} else if (datos.tipo === 'latido') {
-					agregarMensaje("Sistema", "❤️ La otra persona envió un latido.");
-				}
-			});
-			conn.on('close', desconectarUsuarioRemoto);
-		}
+        // =========================================================
+        // 2. VOLUMEN VISUAL EN 0% QUE EQUIVALE AL 20% REAL DE AUDIO
+        // =========================================================
+        function aplicarVolumenRadio(valorVisual) {
+            const visual = Math.max(0, Math.min(100, Number(valorVisual)));
+            sliderVolumenRadio.value = visual;
+            etiquetaPorcentajeVol.textContent = `${visual}%`;
+            streamRadio.volume = 0.20 + (visual / 100) * 0.80;
+        }
 
-		function conectarUsuarioRemoto(streamRemoto) {
-			pantallaCarga.style.display = 'none';
-			webcam2.style.display = 'block';
-			webcam2.srcObject = streamRemoto;
-			webcam2.play().catch(() => {});
-		}
+        function iniciarRadioPermanente() {
+            aplicarVolumenRadio(sliderVolumenRadio.value);
+            streamRadio.play().catch(err => console.log("Esperando interacción para audio:", err));
+        }
 
-		function desconectarUsuarioRemoto() {
-			webcam2.style.display = 'none';
-			webcam2.srcObject = null;
-			pantallaCarga.style.display = 'flex';
-			estadoSala.textContent = `SALA #${roomId} — Esperando pareja`;
-			agregarMensaje("Sistema", "🔴 La otra persona salió de la sala.");
-		}
+        sliderVolumenRadio.addEventListener('input', (e) => {
+            aplicarVolumenRadio(e.target.value);
+            if (streamRadio.paused) iniciarRadioPermanente();
+        });
 
-		// =========================================================
-		// 3. CAPTURAR AMBAS CÁMARAS JUNTAS EN BASE64 Y ENVIAR A SHEETY
-		// =========================================================
-		function capturarCamarasBase64() {
-			const canvas = document.createElement('canvas');
-			const anchoMitad = 240;
-			const alto = 180;
-			canvas.width = anchoMitad * 2; // 480x180 para que Base64 quepa en la celda A de Sheets
-			canvas.height = alto;
+        document.body.addEventListener('click', () => {
+            if (pop2Overlay.style.display === 'none' && streamRadio.paused) {
+                iniciarRadioPermanente();
+            }
+        }, { once: true });
 
-			const ctx = canvas.getContext('2d');
-			ctx.fillStyle = '#000';
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // =========================================================
+        // 3. CINE SIMULTÁNEO SINCRONIZADO POR MARCA DE TIEMPO REAL
+        // =========================================================
+        function extraerIdYoutube(url) {
+            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([^"&?\/\s]{11})/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
+        }
 
-			// Cámara 1 (Izquierda) en espejo
-			if (webcam1.readyState >= 2) {
-				ctx.save();
-				ctx.translate(anchoMitad, 0);
-				ctx.scale(-1, 1);
-				ctx.drawImage(webcam1, 0, 0, anchoMitad, alto);
-				ctx.restore();
-			}
+        function formatearSegundos(totalSeg) {
+            const min = Math.floor(totalSeg / 60);
+            const seg = totalSeg % 60;
+            return `${String(min).padStart(2, '0')}:${String(seg).padStart(2, '0')}`;
+        }
 
-			// Cámara 2 (Derecha) en espejo si está conectada
-			if (webcam2.style.display !== 'none' && webcam2.readyState >= 2) {
-				ctx.save();
-				ctx.translate(anchoMitad * 2, 0);
-				ctx.scale(-1, 1);
-				ctx.drawImage(webcam2, 0, 0, anchoMitad, alto);
-				ctx.restore();
-			} else {
-				ctx.fillStyle = '#ffea00';
-				ctx.font = 'bold 14px Courier New';
-				ctx.textAlign = 'center';
-				ctx.fillText('esperando...', anchoMitad + (anchoMitad / 2), alto / 2);
-			}
+        function sincronizarProyectorSimultaneo(forzarRecarga = false) {
+            if (salaActual !== 'cine') return;
 
-			return canvas.toDataURL('image/jpeg', 0.65);
-		}
+            const segundosTranscurridos = Math.max(0, Math.floor((Date.now() - estadoCineGlobal.inicioTimestamp) / 1000));
+            estadoTiempoCine.textContent = `Minuto vivo: ${formatearSegundos(segundosTranscurridos)}`;
 
-		async function guardarLatidoEnSheets() {
-			const imagenBase64 = capturarCamarasBase64();
+            const claveEmision = `${estadoCineGlobal.videoId}_${estadoCineGlobal.inicioTimestamp}`;
+            if (forzarRecarga || ultimoIframeCargadoKey !== claveEmision) {
+                ultimoIframeCargadoKey = claveEmision;
+                const originParam = window.location.protocol.startsWith('http') ? `&origin=${encodeURIComponent(window.location.origin)}` : '';
+                reproductorCine.src = `https://www.youtube.com/embed/${estadoCineGlobal.videoId}?autoplay=1&rel=0&start=${segundosTranscurridos}${originParam}`;
+                linkRespaldoYoutube.href = `https://www.youtube.com/watch?v=${estadoCineGlobal.videoId}&t=${segundosTranscurridos}s`;
+            }
+        }
 
-			// Solo envía el campo 'foto' correspondiente a la columna A de hoja5
-			const body = {
-				hoja5: {
-					foto: imagenBase64
-				}
-			};
+        setInterval(() => {
+            if (salaActual === 'cine') {
+                const seg = Math.max(0, Math.floor((Date.now() - estadoCineGlobal.inicioTimestamp) / 1000));
+                estadoTiempoCine.textContent = `Minuto vivo: ${formatearSegundos(seg)}`;
+            }
+        }, 1000);
 
-			try {
-				const response = await fetch(SHEETY_HOJA5_URL, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify(body)
-				});
+        document.getElementById('btnSincronizarCine').addEventListener('click', () => {
+            sincronizarProyectorSimultaneo(true);
+            agregarMensajeSistema(`Proyector re-sincronizado al segundo exacto de la sala.`);
+        });
 
-				if (!response.ok) {
-					throw new Error('error');
-				}
+        async function transmitirNuevoVideoATodos(videoId) {
+            const ahoraMs = Date.now();
+            const nombreFormateado = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
+            const fechaActual = obtenerFechaActual();
 
-				const json = await response.json();
-				console.log('Guardado en hoja5:', json);
-				agregarMensaje("Sistema", "💾 Captura doble.");
-			} catch (err) {
-				console.error('Error al guardar en hoja5:', err);
-				agregarMensaje("Sistema", "error");
-			}
-		}
+            estadoCineGlobal = {
+                videoId: videoId,
+                inicioTimestamp: ahoraMs,
+                autor: nombreFormateado
+            };
 
-		// Interacción con el GIF del Corazón
-		gifCorazon.addEventListener('click', () => {
-			iniciarRadio();
-			agregarMensaje("Sistema", "❤️ ¡Enviaste un latido!");
-			if (conexionChat && conexionChat.open) {
-				conexionChat.send({ tipo: 'latido' });
-			}
-			guardarLatidoEnSheets();
-		});
+            sincronizarProyectorSimultaneo(true);
 
-		// Funcionalidad del Chat
-		function agregarMensaje(usuario, texto) {
-			const div = document.createElement('div');
-			div.className = 'mensaje-item';
-			div.innerHTML = `<strong>${usuario}:</strong> ${texto}`;
-			chatMensajes.appendChild(div);
-			chatMensajes.scrollTop = chatMensajes.scrollHeight;
-		}
+            const payloadVideo = `[#cine] [VIDEO:${videoId}|${ahoraMs}]`;
+            renderizarMensajeVideo(nombreFormateado, videoId, ahoraMs, fechaActual);
+            listaMensajes.scrollTop = listaMensajes.scrollHeight;
 
-		formChat.addEventListener('submit', (e) => {
-			e.preventDefault();
-			iniciarRadio();
-			const texto = inputChat.value.trim();
-			if (texto !== '') {
-				agregarMensaje("Tú", texto);
-				if (conexionChat && conexionChat.open) {
-					conexionChat.send({ tipo: 'chat', texto: texto });
-				}
-				inputChat.value = '';
-			}
-		});
+            try {
+                await fetch(URL_HOJA3_CHAT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        hoja3: {
+                            name: nombreFormateado,
+                            comentario: payloadVideo,
+                            fecha: fechaActual
+                        }
+                    })
+                });
+            } catch (error) {
+                console.error('Error guardando transmisión simultánea:', error);
+            }
+        }
 
-		iniciarTodo();
-	</script>
+        document.querySelectorAll('.btn-preset-video[data-vid]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                transmitirNuevoVideoATodos(btn.dataset.vid);
+            });
+        });
 
+        document.getElementById('formSubirVideo').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const urlIngresada = document.getElementById('inputUrlYoutube').value.trim();
+            const videoId = extraerIdYoutube(urlIngresada);
+
+            if (!videoId) {
+                alert("❌ Enlace no válido. Pega una URL de YouTube.");
+                return;
+            }
+
+            document.getElementById('inputUrlYoutube').value = '';
+            transmitirNuevoVideoATodos(videoId);
+        });
+
+        // =========================================================
+        // 4. SELECTOR DE SALAS AISLADAS (#chatzona, #velacion, #cine)
+        // =========================================================
+        function cambiarDeSala(nuevaSala) {
+            salaActual = nuevaSala;
+            cancelarSusurro();
+
+            document.querySelectorAll('.opcion-sala').forEach(el => {
+                el.classList.toggle('seleccionada', el.dataset.sala === nuevaSala);
+            });
+            document.querySelectorAll('.btn-sala-top').forEach(btn => {
+                btn.classList.toggle('activa', btn.dataset.sala === nuevaSala);
+            });
+
+            document.getElementById('nombreSalaTop').textContent = `#${nuevaSala}`;
+            document.getElementById('marqueeTexto').textContent = `*** SALA AISLADA: #${nuevaSala.toUpperCase()} *** NOCHES DE PELUCHEO EN VIVO *** SALAS ROMANCE EN VIVO EN GALERIA.HTML ***`;
+            inputMensaje.placeholder = `Escribe en #${nuevaSala}...`;
+
+            if (nuevaSala === 'velacion') {
+                formChat.style.display = 'none';
+                barraModoSusurro.style.display = 'none';
+                listaMensajes.classList.add('modo-velacion');
+            } else {
+                formChat.style.display = 'flex';
+                listaMensajes.classList.remove('modo-velacion');
+            }
+
+            if (nuevaSala === 'cine') {
+                moduloCine.style.display = 'block';
+                aplicarVolumenRadio(0);
+                ultimoIframeCargadoKey = '';
+                sincronizarProyectorSimultaneo(true);
+            } else {
+                moduloCine.style.display = 'none';
+                reproductorCine.src = 'about:blank';
+                ultimoIframeCargadoKey = '';
+            }
+
+            cargarMensajesYUsuarios();
+        }
+
+        document.querySelectorAll('.opcion-sala').forEach(el => {
+            el.addEventListener('click', () => cambiarDeSala(el.dataset.sala));
+        });
+
+        document.querySelectorAll('.btn-sala-top').forEach(btn => {
+            btn.addEventListener('click', () => {
+                cambiarDeSala(btn.dataset.sala);
+                if (btn.dataset.sala !== 'velacion') {
+                    agregarMensajeSistema(`Te has cambiado a la sala aislada #${btn.dataset.sala}`);
+                }
+            });
+        });
+
+        // =========================================================
+        // 5. LOGIN Y ACCESO DESDE #POP2 (HOJA1: username A, contraseña B)
+        // =========================================================
+        const tabRegistrado = document.getElementById('tabRegistrado');
+        const tabInvitado = document.getElementById('tabInvitado');
+        const formRegistrado = document.getElementById('formRegistrado');
+        const formInvitado = document.getElementById('formInvitado');
+
+        tabInvitado.addEventListener('click', () => {
+            tabInvitado.classList.add('activo');
+            tabRegistrado.classList.remove('activo');
+            formInvitado.style.display = 'block';
+            formRegistrado.style.display = 'none';
+        });
+
+        tabRegistrado.addEventListener('click', () => {
+            tabRegistrado.classList.add('activo');
+            tabInvitado.classList.remove('activo');
+            formRegistrado.style.display = 'block';
+            formInvitado.style.display = 'none';
+        });
+
+        document.getElementById('btnAbrirPop2').addEventListener('click', () => {
+            pop2Overlay.style.display = 'flex';
+        });
+
+        function obtenerFechaActual() {
+            const ahora = new Date();
+            return ahora.toLocaleDateString('es-CO') + ' ' + ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        formInvitado.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nickInv = document.getElementById('invUsername').value.trim() || 'Anonimo';
+            completarAcceso(nickInv, true, `Has entrado como invitado ~${nickInv} a #${salaActual}`);
+        });
+
+        formRegistrado.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nick = document.getElementById('regUsername').value.trim();
+            const pass = document.getElementById('regPassword').value.trim();
+            const btnSubmit = document.getElementById('btnSubmitReg');
+
+            if (!nick || !pass) return;
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = "VERIFICANDO...";
+
+            try {
+                const res = await fetch(URL_HOJA1_USUARIOS);
+                const data = await res.json();
+                const usuariosGuardados = data.hoja1 || [];
+
+                const usuarioExistente = usuariosGuardados.find(
+                    u => u.username && String(u.username).trim().toLowerCase() === nick.toLowerCase()
+                );
+
+                if (usuarioExistente) {
+                    const passGuardada = usuarioExistente.contrasena !== undefined
+                        ? usuarioExistente.contrasena
+                        : usuarioExistente['contraseña'];
+
+                    if (String(passGuardada) === pass) {
+                        completarAcceso(usuarioExistente.username, false, `Conectado como @${usuarioExistente.username} en #${salaActual}`);
+                    } else {
+                        alert("❌ Contraseña incorrecta para @" + usuarioExistente.username);
+                        btnSubmit.disabled = false;
+                        btnSubmit.textContent = "CONECTAR CON CONTRASEÑA & RADIO EN VIVO >>";
+                        return;
+                    }
+                } else {
+                    await fetch(URL_HOJA1_USUARIOS, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            hoja1: {
+                                username: nick,
+                                contrasena: pass
+                            }
+                        })
+                    });
+                    completarAcceso(nick, false, `Nuevo nick registrado: @${nick} en #${salaActual}`);
+                }
+            } catch (error) {
+                console.error("Error de autenticación:", error);
+                alert("Error conectando con Google Sheets.");
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = "CONECTAR CON CONTRASEÑA & RADIO EN VIVO >>";
+            }
+        });
+
+        function completarAcceso(nick, esInvitado, mensajeBienvenida) {
+            usuarioActual = { nick, esInvitado };
+            pop2Overlay.style.display = 'none';
+            iniciarRadioPermanente();
+            if (salaActual === 'cine') {
+                aplicarVolumenRadio(0);
+                sincronizarProyectorSimultaneo(true);
+            }
+            if (salaActual !== 'velacion') {
+                agregarMensajeSistema(mensajeBienvenida);
+            }
+            cargarMensajesYUsuarios();
+        }
+
+        // =========================================================
+        // 6. SISTEMA DE SUSURROS (MENSAJES PRIVADOS)
+        // =========================================================
+        function activarSusurro(nickDestino) {
+            if (salaActual === 'velacion') return;
+            const miNombreCompleto = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
+            if (nickDestino === miNombreCompleto) return;
+
+            destinatarioSusurro = nickDestino;
+            barraModoSusurro.style.display = 'flex';
+            textoDestinoSusurro.textContent = `🔒 Susurro privado para ${nickDestino}`;
+            inputMensaje.placeholder = `Escribe un mensaje privado para ${nickDestino}...`;
+            inputMensaje.focus();
+        }
+
+        function cancelarSusurro() {
+            destinatarioSusurro = null;
+            barraModoSusurro.style.display = 'none';
+            inputMensaje.placeholder = `Escribe en #${salaActual}...`;
+        }
+
+        document.getElementById('btnCancelarSusurro').addEventListener('click', cancelarSusurro);
+
+        // =========================================================
+        // 7. OBJETOS ARRASTRABLES EN #VELACION:
+        //    - HOJA 4 (Celda C: "peticion") -> Velas ASCII
+        //    - HOJA 5 (Celda A: "foto") -> Corazones en Código Binario Rojo
+        // =========================================================
+        function hacerObjetoArrastrable(elemento, claveObjeto) {
+            let arrastrando = false;
+            let offsetX = 0;
+            let offsetY = 0;
+
+            elemento.addEventListener('pointerdown', (e) => {
+                arrastrando = true;
+                elemento.setPointerCapture(e.pointerId);
+                elemento.classList.add('arrastrando');
+                zIndexObjetoActual++;
+                elemento.style.zIndex = zIndexObjetoActual;
+
+                const rectObj = elemento.getBoundingClientRect();
+                offsetX = e.clientX - rectObj.left;
+                offsetY = e.clientY - rectObj.top;
+            });
+
+            elemento.addEventListener('pointermove', (e) => {
+                if (!arrastrando) return;
+                const rectContenedor = listaMensajes.getBoundingClientRect();
+
+                let nuevoLeft = e.clientX - rectContenedor.left - offsetX;
+                let nuevoTop = e.clientY - rectContenedor.top - offsetY;
+
+                const maxLeft = Math.max(0, rectContenedor.width - elemento.offsetWidth);
+                const maxTop = Math.max(0, rectContenedor.height - elemento.offsetHeight);
+
+                nuevoLeft = Math.max(0, Math.min(maxLeft, nuevoLeft));
+                nuevoTop = Math.max(0, Math.min(maxTop, nuevoTop));
+
+                elemento.style.left = `${nuevoLeft}px`;
+                elemento.style.top = `${nuevoTop}px`;
+
+                posicionesObjetosVelacion[claveObjeto] = {
+                    left: nuevoLeft,
+                    top: nuevoTop
+                };
+            });
+
+            const finalizarArrastre = (e) => {
+                if (!arrastrando) return;
+                arrastrando = false;
+                elemento.classList.remove('arrastrando');
+                if (elemento.hasPointerCapture(e.pointerId)) {
+                    elemento.releasePointerCapture(e.pointerId);
+                }
+            };
+
+            elemento.addEventListener('pointerup', finalizarArrastre);
+            elemento.addEventListener('pointercancel', finalizarArrastre);
+        }
+
+        // Convierte una foto (URL o Base64) en una matriz binaria roja (1s y 0s)
+        function convertirFotoABinarioRojo(urlFoto) {
+            if (cacheCorazonesBinarios[urlFoto]) {
+                return Promise.resolve(cacheCorazonesBinarios[urlFoto]);
+            }
+
+            return new Promise((resolve) => {
+                const cols = 28;
+                const rows = 17;
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+
+                img.onload = () => {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = cols;
+                        canvas.height = rows;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, cols, rows);
+
+                        const pixels = ctx.getImageData(0, 0, cols, rows).data;
+                        let htmlBinario = '';
+
+                        for (let y = 0; y < rows; y++) {
+                            let fila = '';
+                            for (let x = 0; x < cols; x++) {
+                                const idx = (y * cols + x) * 4;
+                                const brillo = (pixels[idx] + pixels[idx + 1] + pixels[idx + 2]) / 3;
+                                if (brillo > 115) {
+                                    fila += '1';
+                                } else {
+                                    fila += '<span class="bit-tenue">0</span>';
+                                }
+                            }
+                            htmlBinario += fila + (y < rows - 1 ? '\n' : '');
+                        }
+
+                        cacheCorazonesBinarios[urlFoto] = htmlBinario;
+                        resolve(htmlBinario);
+                    } catch (err) {
+                        // Si CORS bloquea getImageData, generamos matriz binaria determinista desde la cadena de la foto
+                        const fallback = generarBinarioDeterminista(urlFoto, cols, rows);
+                        cacheCorazonesBinarios[urlFoto] = fallback;
+                        resolve(fallback);
+                    }
+                };
+
+                img.onerror = () => {
+                    const fallback = generarBinarioDeterminista(urlFoto, cols, rows);
+                    cacheCorazonesBinarios[urlFoto] = fallback;
+                    resolve(fallback);
+                };
+
+                img.src = urlFoto;
+            });
+        }
+
+        function generarBinarioDeterminista(textoSemilla, cols, rows) {
+            let hash = 0;
+            for (let i = 0; i < textoSemilla.length; i++) {
+                hash = ((hash << 5) - hash) + textoSemilla.charCodeAt(i);
+                hash |= 0;
+            }
+
+            let htmlBinario = '';
+            for (let y = 0; y < rows; y++) {
+                let fila = '';
+                for (let x = 0; x < cols; x++) {
+                    const bit = Math.abs((hash + x * 17 + y * 31) ^ (x * y)) % 2;
+                    fila += bit === 1 ? '1' : '<span class="bit-tenue">0</span>';
+                }
+                htmlBinario += fila + (y < rows - 1 ? '\n' : '');
+            }
+            return htmlBinario;
+        }
+
+        function crearObjetoVelaAlAzar(textoPeticion, indice) {
+            const claveObjeto = `vela_${indice}_${textoPeticion.slice(0, 12)}`;
+            const objeto = document.createElement('div');
+            objeto.className = 'objeto-vela-movil';
+            objeto.title = 'Arrastra esta vela para moverla por la sala';
+
+            if (!posicionesObjetosVelacion[claveObjeto]) {
+                const anchoDisponible = Math.max(180, (listaMensajes.clientWidth || 520) - 145);
+                const altoDisponible = Math.max(160, (listaMensajes.clientHeight || 380) - 125);
+                posicionesObjetosVelacion[claveObjeto] = {
+                    left: Math.floor(Math.random() * anchoDisponible) + 8,
+                    top: Math.floor(Math.random() * altoDisponible) + 18
+                };
+            }
+
+            objeto.style.left = `${posicionesObjetosVelacion[claveObjeto].left}px`;
+            objeto.style.top = `${posicionesObjetosVelacion[claveObjeto].top}px`;
+            objeto.style.zIndex = 10 + indice;
+
+            const velaPre = document.createElement('pre');
+            velaPre.className = 'arte-vela-ascii';
+            velaPre.innerHTML =
+`   <span class="llama-vela">( )</span>
+   <span class="llama-vela"> ) </span>
+  .---.
+  |   |
+  |   |
+ [_____]`;
+
+            const textoDiv = document.createElement('div');
+            textoDiv.className = 'texto-objeto-peticion';
+            textoDiv.textContent = textoPeticion;
+
+            objeto.appendChild(velaPre);
+            objeto.appendChild(textoDiv);
+
+            hacerObjetoArrastrable(objeto, claveObjeto);
+            listaMensajes.appendChild(objeto);
+        }
+
+        async function crearObjetoCorazonBinarioAlAzar(urlFoto, indice) {
+            const claveObjeto = `corazon_${indice}_${urlFoto.slice(-14)}`;
+            const objeto = document.createElement('div');
+            objeto.className = 'objeto-corazon-binario';
+            objeto.title = 'Foto en código binario rojo (arrastra para mover)';
+
+            if (!posicionesObjetosVelacion[claveObjeto]) {
+                const anchoDisponible = Math.max(180, (listaMensajes.clientWidth || 520) - 135);
+                const altoDisponible = Math.max(160, (listaMensajes.clientHeight || 380) - 125);
+                posicionesObjetosVelacion[claveObjeto] = {
+                    left: Math.floor(Math.random() * anchoDisponible) + 10,
+                    top: Math.floor(Math.random() * altoDisponible) + 18
+                };
+            }
+
+            objeto.style.left = `${posicionesObjetosVelacion[claveObjeto].left}px`;
+            objeto.style.top = `${posicionesObjetosVelacion[claveObjeto].top}px`;
+            objeto.style.zIndex = 12 + indice;
+
+            const silueta = document.createElement('div');
+            silueta.className = 'silueta-corazon-rojo';
+
+            const matrizPre = document.createElement('pre');
+            matrizPre.className = 'matriz-binaria-roja';
+            matrizPre.innerHTML = await convertirFotoABinarioRojo(urlFoto);
+
+            silueta.appendChild(matrizPre);
+            objeto.appendChild(silueta);
+
+            hacerObjetoArrastrable(objeto, claveObjeto);
+            listaMensajes.appendChild(objeto);
+        }
+
+        async function cargarPeticionesVelacion() {
+            if (document.querySelector('.objeto-vela-movil.arrastrando, .objeto-corazon-binario.arrastrando')) return;
+
+            try {
+                // Consultar simultáneamente Hoja 4 (peticion) y Hoja 5 (foto)
+                const [resHoja4, resHoja5] = await Promise.all([
+                    fetch(URL_HOJA4_VELACION),
+                    fetch(URL_HOJA5_FOTOS)
+                ]);
+
+                const json4 = await resHoja4.json();
+                const json5 = await resHoja5.json();
+
+                const claveRaiz4 = Object.keys(json4).find(k => Array.isArray(json4[k])) || 'hoja4';
+                const filas4 = json4[claveRaiz4] || [];
+
+                const claveRaiz5 = Object.keys(json5).find(k => Array.isArray(json5[k])) || 'hoja5';
+                const filas5 = json5[claveRaiz5] || [];
+
+                listaMensajes.innerHTML = '<div class="aviso-altar-flotante">🕯️❤️ Arrastra las velas y corazones binarios</div>';
+                const miNombre = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
+                actualizarListaUsuarios([miNombre]);
+
+                // 1. Renderizar velas desde Hoja 4 (Celda C: "peticion")
+                let contadorVelas = 0;
+                filas4.forEach(fila => {
+                    const clavePeticion = Object.keys(fila).find(
+                        k => k.trim().toLowerCase() === 'peticion'
+                    );
+                    const textoPeticion = clavePeticion ? fila[clavePeticion] : '';
+
+                    if (textoPeticion && String(textoPeticion).trim() !== '') {
+                        crearObjetoVelaAlAzar(String(textoPeticion).trim(), contadorVelas);
+                        contadorVelas++;
+                    }
+                });
+
+                // 2. Renderizar corazones binarios rojos desde Hoja 5 (Celda A: "foto")
+                let contadorFotos = 0;
+                for (const fila of filas5) {
+                    const claveFoto = Object.keys(fila).find(
+                        k => k.trim().toLowerCase() === 'foto'
+                    );
+                    const urlFoto = claveFoto ? fila[claveFoto] : '';
+
+                    if (urlFoto && String(urlFoto).trim() !== '') {
+                        await crearObjetoCorazonBinarioAlAzar(String(urlFoto).trim(), contadorFotos);
+                        contadorFotos++;
+                    }
+                }
+
+                if (contadorVelas === 0 && contadorFotos === 0) {
+                    crearObjetoVelaAlAzar('Sin peticiones ni fotos encendidas aún', 0);
+                }
+            } catch (error) {
+                console.error('Error al leer hoja4 / hoja5 en #velacion:', error);
+            }
+        }
+
+        async function cargarMensajesYUsuarios() {
+            if (salaActual === 'velacion') {
+                await cargarPeticionesVelacion();
+                return;
+            }
+
+            try {
+                const response = await fetch(URL_HOJA3_CHAT);
+                const json = await response.json();
+                const registros = json.hoja3 || [];
+
+                listaMensajes.innerHTML = '';
+                const miNombre = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
+                const usuariosEnEstaSala = new Set([miNombre]);
+                const etiquetaSala = `[#${salaActual}]`;
+                let ultimaTransmisionCine = null;
+
+                registros.forEach(fila => {
+                    const autor = fila.name || 'Anónimo';
+                    const textoCrudo = fila.comentario || '';
+                    const fecha = fila.fecha || '';
+
+                    if (textoCrudo.startsWith(etiquetaSala)) {
+                        const contenidoSinSala = textoCrudo.replace(etiquetaSala, '').trim();
+                        usuariosEnEstaSala.add(autor);
+
+                        const matchVideo = contenidoSinSala.match(/^\[VIDEO:([^|\]]+)(?:\|(\d+))?\]$/);
+                        if (matchVideo && salaActual === 'cine') {
+                            const vid = matchVideo[1];
+                            const tsInicio = matchVideo[2] ? Number(matchVideo[2]) : Date.now();
+                            ultimaTransmisionCine = { videoId: vid, inicioTimestamp: tsInicio, autor };
+                            renderizarMensajeVideo(autor, vid, tsInicio, fecha);
+                            return;
+                        }
+
+                        const matchSusurro = contenidoSinSala.match(/^\[SUSURRO:([^\]]+)\]\s*(.*)$/);
+                        if (matchSusurro) {
+                            const destino = matchSusurro[1];
+                            const mensajePrivado = matchSusurro[2];
+                            if (autor === miNombre || destino === miNombre) {
+                                renderizarMensaje(autor, mensajePrivado, fecha, destino);
+                            }
+                            return;
+                        }
+
+                        if (contenidoSinSala !== '') {
+                            renderizarMensaje(autor, contenidoSinSala, fecha, null);
+                        }
+                    }
+                });
+
+                if (salaActual === 'cine' && ultimaTransmisionCine) {
+                    const cambioDeEmision =
+                        estadoCineGlobal.videoId !== ultimaTransmisionCine.videoId ||
+                        estadoCineGlobal.inicioTimestamp !== ultimaTransmisionCine.inicioTimestamp;
+
+                    if (cambioDeEmision) {
+                        estadoCineGlobal = ultimaTransmisionCine;
+                        sincronizarProyectorSimultaneo(true);
+                    }
+                }
+
+                actualizarListaUsuarios(Array.from(usuariosEnEstaSala));
+                listaMensajes.scrollTop = listaMensajes.scrollHeight;
+            } catch (error) {
+                console.error('Error al leer hoja3:', error);
+            }
+        }
+
+        function renderizarMensaje(autor, texto, fecha, destinoPrivado) {
+            const div = document.createElement('div');
+            div.className = 'msg-linea' + (destinoPrivado ? ' msg-susurro' : '');
+            const esInv = autor.startsWith('~');
+
+            if (destinoPrivado) {
+                div.innerHTML = `
+                    <span class="msg-hora">[${fecha}]</span>
+                    <strong>🔒 [Susurro de ${autor} para ${destinoPrivado}]:</strong>
+                    <span>${texto}</span>
+                `;
+            } else {
+                div.innerHTML = `
+                    <span class="msg-hora">[${fecha}]</span>
+                    <span class="msg-nick ${esInv ? 'invitado' : ''}" onclick="activarSusurro('${autor}')" title="Clic para susurrar">&lt;${autor}&gt;</span>
+                    <span>${texto}</span>
+                `;
+            }
+            listaMensajes.appendChild(div);
+        }
+
+        function renderizarMensajeVideo(autor, videoId, tsInicio, fecha) {
+            const div = document.createElement('div');
+            div.className = 'msg-linea msg-video-compartido';
+            div.innerHTML = `
+                <span style="color:#ccc;">[${fecha}]</span> 📡 <strong>${autor}</strong> inició transmisión simultánea: 
+                <button type="button" onclick="estadoCineGlobal={videoId:'${videoId}',inicioTimestamp:${tsInicio},autor:'${autor}'};sincronizarProyectorSimultaneo(true);" style="background:#ffea00; color:#000; border:1px solid #fff; padding:2px 6px; font-weight:bold; cursor:pointer; margin-left:6px;">
+                    ▶ Unirse en vivo
+                </button>
+            `;
+            listaMensajes.appendChild(div);
+        }
+
+        function agregarMensajeSistema(texto) {
+            const div = document.createElement('div');
+            div.className = 'msg-linea msg-sistema';
+            div.textContent = `*** ${texto} ***`;
+            listaMensajes.appendChild(div);
+            listaMensajes.scrollTop = listaMensajes.scrollHeight;
+        }
+
+        function actualizarListaUsuarios(usuarios) {
+            const cantidad = usuarios.length;
+            document.getElementById('contadorTop').textContent = cantidad;
+            document.getElementById('contadorPop').textContent = cantidad;
+            document.getElementById('etiquetaCantidad').textContent = cantidad;
+
+            const miNombre = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
+            listaUsuarios.innerHTML = '';
+
+            usuarios.forEach(user => {
+                const li = document.createElement('li');
+                const esInv = user.startsWith('~');
+                const simbolo = esInv ? '~' : '@';
+                const nombreLimpio = user.replace(/^[@~]/, '');
+
+                li.innerHTML = `
+                    <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        <span class="icono-rol ${esInv ? 'rol-inv' : 'rol-reg'}">${simbolo}</span>
+                        <span style="cursor:pointer;" onclick="activarSusurro('${user}')" title="Susurrar a ${user}">${nombreLimpio}</span>
+                    </div>
+                    <div class="acciones-usuario-item">
+                        ${user !== miNombre ? `<button type="button" class="btn-mini-susurro" onclick="activarSusurro('${user}')" title="Susurrar">💬</button>` : ''}
+                    </div>
+                `;
+                listaUsuarios.appendChild(li);
+            });
+        }
+
+        formChat.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (salaActual === 'velacion') return;
+
+            const texto = inputMensaje.value.trim();
+            if (!texto) return;
+
+            const nombreFormateado = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
+            const fechaActual = obtenerFechaActual();
+
+            let payloadTexto = `[#${salaActual}] `;
+            if (destinatarioSusurro) {
+                payloadTexto += `[SUSURRO:${destinatarioSusurro}] ${texto}`;
+                renderizarMensaje(nombreFormateado, texto, fechaActual, destinatarioSusurro);
+            } else {
+                payloadTexto += texto;
+                renderizarMensaje(nombreFormateado, texto, fechaActual, null);
+            }
+
+            inputMensaje.value = '';
+            listaMensajes.scrollTop = listaMensajes.scrollHeight;
+
+            try {
+                await fetch(URL_HOJA3_CHAT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        hoja3: {
+                            name: nombreFormateado,
+                            comentario: payloadTexto,
+                            fecha: fechaActual
+                        }
+                    })
+                });
+            } catch (error) {
+                console.error('Error guardando en hoja3:', error);
+            }
+        });
+
+        document.getElementById('btnRecargarChat').addEventListener('click', cargarMensajesYUsuarios);
+
+        // =========================================================
+        // 8. BÚSQUEDA REAL AL AZAR DE ROMANCE Y DRAMA ROMÁNTICO
+        // =========================================================
+        const consultasRomance = [
+            'romantic couple',
+            'romance love',
+            'lovers embrace',
+            'romantic sunset couple',
+            'romance painting'
+        ];
+
+        const consultasDramaRomantico = [
+            'romantic drama',
+            'dramatic romance',
+            'tragic lovers',
+            'heartbreak love',
+            'melodrama romance'
+        ];
+
+        async function buscarImagenRomanticaAlAzar(listaConsultas, imgElemento, txtElemento) {
+            const terminoElegido = listaConsultas[Math.floor(Math.random() * listaConsultas.length)];
+            try {
+                const offsetAleatorio = Math.floor(Math.random() * 20);
+                const apiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(terminoElegido)}&gsrnamespace=6&gsrlimit=18&gsroffset=${offsetAleatorio}&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&origin=*`;
+
+                const respuesta = await fetch(apiUrl);
+                const datos = await respuesta.json();
+                const paginas = datos?.query?.pages ? Object.values(datos.query.pages) : [];
+
+                const imagenesValidas = paginas.filter(p => {
+                    const url = p.imageinfo?.[0]?.thumburl || p.imageinfo?.[0]?.url || '';
+                    const titulo = (p.title || '').toLowerCase();
+                    const esFormatoImagen = /\.(jpg|jpeg|png|webp)(\?.*)?$/i.test(url);
+                    const noEsDiagrama = !/(logo|icon|map|chart|graph|diagram|flag|svg)/i.test(titulo);
+                    return esFormatoImagen && noEsDiagrama;
+                });
+
+                if (imagenesValidas.length > 0) {
+                    const elegida = imagenesValidas[Math.floor(Math.random() * imagenesValidas.length)];
+                    const urlFinal = elegida.imageinfo[0].thumburl || elegida.imageinfo[0].url;
+                    imgElemento.src = urlFinal;
+                    txtElemento.textContent = terminoElegido;
+                } else if (terminoElegido !== 'romance love') {
+                    buscarImagenRomanticaAlAzar(['romance love'], imgElemento, txtElemento);
+                }
+            } catch (error) {
+                console.error(`Error buscando "${terminoElegido}":`, error);
+            }
+        }
+
+        const imgBanner1 = document.getElementById('imgBanner1');
+        const txtBanner1 = document.getElementById('txtBanner1');
+        const imgBanner2 = document.getElementById('imgBanner2');
+        const txtBanner2 = document.getElementById('txtBanner2');
+
+        function cargarBannerRomance() {
+            buscarImagenRomanticaAlAzar(consultasRomance, imgBanner1, txtBanner1);
+        }
+
+        function cargarBannerDramaRomantico() {
+            buscarImagenRomanticaAlAzar(consultasDramaRomantico, imgBanner2, txtBanner2);
+        }
+
+        document.getElementById('btnSigBanner1').addEventListener('click', cargarBannerRomance);
+        imgBanner1.addEventListener('click', cargarBannerRomance);
+
+        document.getElementById('btnSigBanner2').addEventListener('click', cargarBannerDramaRomantico);
+        imgBanner2.addEventListener('click', cargarBannerDramaRomantico);
+
+        // Ejecución inicial
+        cargarBannerRomance();
+        cargarBannerDramaRomantico();
+        setInterval(cargarBannerRomance, 12000);
+        setInterval(cargarBannerDramaRomantico, 14000);
+
+        cargarMensajesYUsuarios();
+        setInterval(cargarMensajesYUsuarios, 5000);
+    </script>
 </body>
 </html>
