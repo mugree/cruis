@@ -470,7 +470,7 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 						</tr>
 					</table>
 
-					<!-- CAJA DE COMENTARIOS DE TESTIMONIOS (COLUMNA B EN SHEETY) -->
+					<!-- CAJA DE COMENTARIOS DE TESTIMONIOS (COLUMNA B EN hoja4) -->
 					<fieldset style="border: 3px groove #6A0080; background-color: #FFFFCC; margin-top: 16px;">
 						<legend style="background-color: #6A0080; color: #FFFF00; font-family: 'Courier New', monospace; font-weight: bold; padding: 3px 10px; border: 2px solid #000;">
 							[ DEJAR NUEVO TESTIMONIO EN EL LIBRO ]
@@ -639,18 +639,19 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 	actualizarContadorReal();
 
 	/* ============================================================
-	   2. INTEGRACIÓN SHEETY (Columna A: velacion | B: comentarios | C: peticion)
+	   2. INTEGRACIÓN CON GOOGLE APPS SCRIPT (PESTAÑA hoja4)
+	   (Columna A: velacion | B: comentarios | C: peticion)
 	   ============================================================ */
-	const SHEETY_URL = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja4';
+	const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyzn-99WHOZSmoE78R5utJgOZTrCp2yjtEK9n0W3sTIhoxjQFjPzVKXJ2B54TIogsT-lQ/exec';
 
 	function esc(s) {
 		return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 	}
 
-	// Cargar registros previos desde Sheety al iniciar
-	async function cargarDatosSheety() {
+	// Cargar registros previos desde hoja4 al iniciar
+	async function cargarDatosSheets() {
 		try {
-			const res = await fetch(SHEETY_URL);
+			const res = await fetch(`${APPS_SCRIPT_URL}?hoja=hoja4`);
 			const data = await res.json();
 			const filas = data.hoja4 || [];
 
@@ -659,14 +660,12 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 
 			filas.forEach(fila => {
 				// Columna A: velacion -> va al Tablón de Milagros
-				const textoVelacion = fila.velacion || fila.a;
-				if (textoVelacion) {
-					tablon.innerHTML += `<br><br>• [MILAGRO] ${esc(textoVelacion)}`;
+				if (fila.velacion) {
+					tablon.innerHTML += `<br><br>• [MILAGRO] ${esc(fila.velacion)}`;
 				}
 
 				// Columna B: comentarios -> va a la tabla de Testimonios
-				const textoComentario = fila.comentarios || fila.b;
-				if (textoComentario) {
+				if (fila.comentarios) {
 					const tr = document.createElement('tr');
 					tr.innerHTML = `
 						<td style="width:28%; text-align:center;">
@@ -674,17 +673,17 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 						</td>
 						<td>
 							<span class="dato-mono">TESTIMONIO DE LA COMUNIDAD</span>
-							<div class="pegar">${esc(textoComentario)}</div>
+							<div class="pegar">${esc(fila.comentarios)}</div>
 						</td>
 					`;
 					tablaTest.appendChild(tr);
 				}
 			});
 		} catch (e) {
-			console.log('Nota: No se pudieron leer filas previas de Sheety:', e);
+			console.log('Error al leer filas desde Apps Script:', e);
 		}
 	}
-	cargarDatosSheety();
+	cargarDatosSheets();
 
 	// Formulario Veladora / Petición (Columna A o Columna C según selección)
 	document.getElementById('formVeladora').addEventListener('submit', async (e) => {
@@ -699,37 +698,32 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 		estado.textContent = 'Enviando al altar...';
 
 		const esMilagro = (motivo === 'Agradecimiento por Milagro');
-		const registroTexto = `${mensaje}`;
-
-		// Construir payload para Sheety (hoja4)
-		const payload = { hoja4: {} };
-		if (esMilagro) {
-			// Columna A: velacion
-			payload.hoja4.velacion = registroTexto;
-		} else {
-			// Columna C: peticion (Unión, Limpieza, Salud)
-			payload.hoja4.peticion = `[${motivo}] ${registroTexto}`;
-		}
+		const payload = {
+			hoja4: esMilagro
+				? { velacion: mensaje }
+				: { peticion: `[${motivo}] ${mensaje}` }
+		};
 
 		try {
-			const res = await fetch(SHEETY_URL, {
+			const res = await fetch(APPS_SCRIPT_URL, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: { 'Content-Type': 'text/plain;charset=utf-8' },
 				body: JSON.stringify(payload)
 			});
 
-			if (!res.ok) throw new Error('Error en respuesta Sheety');
+			const result = await res.json();
+			if (result.status !== 'ok') throw new Error('Error en Apps Script');
 
 			if (esMilagro) {
 				const tablon = document.getElementById('tablonMilagros');
-				tablon.innerHTML = `• [AHORA] ${esc(registroTexto)}<br><br>` + tablon.innerHTML;
+				tablon.innerHTML = `• [AHORA] ${esc(mensaje)}<br><br>` + tablon.innerHTML;
 				estado.textContent = '★ ¡Agradecimiento publicado en el Tablón de Milagros!';
 			} else {
 				estado.textContent = `★ Petición de "${motivo}" registrada en el altar.`;
 			}
 			document.getElementById('formVeladora').reset();
 		} catch (err) {
-			estado.textContent = 'Error al conectar con el servidor. Intenta de nuevo.';
+			estado.textContent = 'Error al conectar con Google Sheets. Verifica la implementación.';
 		} finally {
 			btn.disabled = false;
 		}
@@ -749,21 +743,19 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 
 		const comentarioCompleto = `${autor}\n\n${texto}`;
 		const payload = {
-			hoja4: {
-				comentarios: comentarioCompleto
-			}
+			hoja4: { comentarios: comentarioCompleto }
 		};
 
 		try {
-			const res = await fetch(SHEETY_URL, {
+			const res = await fetch(APPS_SCRIPT_URL, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: { 'Content-Type': 'text/plain;charset=utf-8' },
 				body: JSON.stringify(payload)
 			});
 
-			if (!res.ok) throw new Error('Error al guardar comentario');
+			const result = await res.json();
+			if (result.status !== 'ok') throw new Error('Error al guardar comentario');
 
-			// Añadir inmediatamente a la tabla de testimonios en pantalla
 			const tablaTest = document.getElementById('tablaTestimonios');
 			const tr = document.createElement('tr');
 			tr.innerHTML = `
