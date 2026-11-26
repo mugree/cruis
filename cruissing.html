@@ -228,7 +228,7 @@
 		</div>
 
 		<!-- CORAZÓN EN LA MITAD DE LAS DOS PANTALLAS -->
-		<img id="gifCorazon" src="https://i.pinimg.com/originals/e2/5a/a0/e25aa0b26167091d4561ab78d3e43743.gif" alt="Corazón Interactivo">
+		<img id="gifCorazon" src="https://i.pinimg.com/originals/e2/5a/a0/e25aa0b26167091d4561ab78d3e43743.gif" alt="Corazón Interactivo" title="Enviar latido y guardar captura en Sheets">
 
 		<!-- LADO DERECHO: GIF EN BUCLE HASTA QUE SE CONECTE OTRO USUARIO -->
 		<div class="caja-pantalla">
@@ -272,6 +272,9 @@
 		const inputChat = document.getElementById('inputChat');
 		const chatMensajes = document.getElementById('chatMensajes');
 
+		// Endpoint de Sheety para hoja5 de HojadeC
+		const SHEETY_HOJA5_URL = 'https://api.sheety.co/3bf2b2add58e4c4d360e0b269fb830d8/hojadeC/hoja5';
+
 		// Elementos de la Radio
 		const radioSala = document.getElementById('radioSala');
 		const controlVolumen = document.getElementById('controlVolumen');
@@ -283,7 +286,6 @@
 		// =========================================================
 		function actualizarVolumen(valorVisual) {
 			const v = Math.max(0, Math.min(100, Number(valorVisual)));
-			// 0% visual equivale a 20% (0.20) de volumen real
 			const volumenReal = 0.20 + (v / 100) * 0.80;
 			radioSala.volume = volumenReal;
 			textoVolumen.textContent = `${v}%`;
@@ -295,9 +297,7 @@
 			if (!radioIniciada) {
 				radioSala.play().then(() => {
 					radioIniciada = true;
-				}).catch(() => {
-					// El navegador esperará el primer clic o tecla del usuario
-				});
+				}).catch(() => {});
 			}
 		}
 
@@ -429,6 +429,83 @@
 			agregarMensaje("Sistema", "🔴 La otra persona salió de la sala.");
 		}
 
+		// =========================================================
+		// 3. CAPTURAR AMBAS CÁMARAS JUNTAS EN BASE64 Y ENVIAR A SHEETY
+		// =========================================================
+		function capturarCamarasBase64() {
+			const canvas = document.createElement('canvas');
+			// Resolución optimizada para que la cadena Base64 quepa en una celda de Google Sheets (< 50,000 caracteres)
+			const anchoMitad = 240;
+			const alto = 180;
+			canvas.width = anchoMitad * 2; // 480px total (ambas cámaras lado a lado)
+			canvas.height = alto;
+
+			const ctx = canvas.getContext('2d');
+			ctx.fillStyle = '#000';
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+			// Dibujar Cámara 1 (Izquierda) con efecto espejo igual que en pantalla
+			if (webcam1.readyState >= 2) {
+				ctx.save();
+				ctx.translate(anchoMitad, 0);
+				ctx.scale(-1, 1);
+				ctx.drawImage(webcam1, 0, 0, anchoMitad, alto);
+				ctx.restore();
+			}
+
+			// Dibujar Cámara 2 (Derecha) con efecto espejo si está conectada
+			if (webcam2.style.display !== 'none' && webcam2.readyState >= 2) {
+				ctx.save();
+				ctx.translate(anchoMitad * 2, 0);
+				ctx.scale(-1, 1);
+				ctx.drawImage(webcam2, 0, 0, anchoMitad, alto);
+				ctx.restore();
+			} else {
+				// Si aún no se conecta el segundo usuario, dejar marca visual en la mitad derecha
+				ctx.fillStyle = '#ffea00';
+				ctx.font = 'bold 14px Courier New';
+				ctx.textAlign = 'center';
+				ctx.fillText('esperando...', anchoMitad + (anchoMitad / 2), alto / 2);
+			}
+
+			// Convertir la imagen combinada a cadena de texto en formato Base64 (JPEG calidad 0.65)
+			return canvas.toDataURL('image/jpeg', 0.65);
+		}
+
+		async function guardarLatidoEnSheets() {
+			const imagenBase64 = capturarCamarasBase64();
+			const fechaActual = new Date().toLocaleString('es-CO');
+
+			const body = {
+				hoja5: {
+					foto: imagenBase64,
+					sala: `Sala #${roomId}`,
+					fecha: fechaActual
+				}
+			};
+
+			try {
+				const response = await fetch(SHEETY_HOJA5_URL, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(body)
+				});
+
+				if (!response.ok) {
+					throw new Error(`HTTP ${response.status}`);
+				}
+
+				const json = await response.json();
+				console.log('Guardado en hoja5:', json.hoja5);
+				agregarMensaje("Sistema", "💾 Captura doble guardada en Google Sheets (hoja5).");
+			} catch (error) {
+				console.error('Error al enviar a Sheety hoja5:', error);
+				agregarMensaje("Sistema", "⚠️ No se pudo guardar en Sheets. Verifica permisos POST en hoja5.");
+			}
+		}
+
 		// Interacción con el GIF del Corazón
 		gifCorazon.addEventListener('click', () => {
 			iniciarRadio();
@@ -436,6 +513,7 @@
 			if (conexionChat && conexionChat.open) {
 				conexionChat.send({ tipo: 'latido' });
 			}
+			guardarLatidoEnSheets();
 		});
 
 		// Funcionalidad del Chat
