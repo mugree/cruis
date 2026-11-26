@@ -272,8 +272,8 @@
 		const inputChat = document.getElementById('inputChat');
 		const chatMensajes = document.getElementById('chatMensajes');
 
-		// Endpoint exacto de Sheety para hoja5 (columna A: foto)
-		const SHEETY_HOJA5_URL = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja5';
+		// PEGA AQUÍ LA URL (/exec) DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
+		const APPS_SCRIPT_URL = 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
 
 		// Elementos de la Radio
 		const radioSala = document.getElementById('radioSala');
@@ -430,13 +430,13 @@
 		}
 
 		// =========================================================
-		// 3. CAPTURAR AMBAS CÁMARAS JUNTAS EN BASE64 Y ENVIAR A SHEETY
+		// 3. CAPTURAR AMBAS CÁMARAS EN BASE64 Y ENVIAR A APPS SCRIPT
 		// =========================================================
 		function capturarCamarasBase64() {
 			const canvas = document.createElement('canvas');
 			const anchoMitad = 240;
 			const alto = 180;
-			canvas.width = anchoMitad * 2; // 480x180 para que Base64 quepa en la celda A de Sheets
+			canvas.width = anchoMitad * 2; // 480x180 para respetar el límite de 50,000 caracteres de celda
 			canvas.height = alto;
 
 			const ctx = canvas.getContext('2d');
@@ -472,29 +472,36 @@
 		async function guardarLatidoEnSheets() {
 			const imagenBase64 = capturarCamarasBase64();
 
-			// Solo envía el campo 'foto' correspondiente a la columna A de hoja5
-			const body = {
+			const payload = {
 				hoja5: {
 					foto: imagenBase64
 				}
 			};
 
 			try {
-				const response = await fetch(SHEETY_HOJA5_URL, {
+				const response = await fetch(APPS_SCRIPT_URL, {
 					method: 'POST',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'text/plain;charset=utf-8'
 					},
-					body: JSON.stringify(body)
+					body: JSON.stringify(payload)
 				});
 
 				if (!response.ok) {
 					throw new Error('error');
 				}
 
-				const json = await response.json();
-				console.log('Guardado en hoja5:', json);
-				agregarMensaje("Sistema", "💾 Captura doble guardada.");
+				const data = await response.json();
+
+				if (data.status === 'error') {
+					throw new Error(data.mensaje);
+				}
+
+				if (data.status === 'reset') {
+					agregarMensaje("Sistema", "💾 Latido #50 guardado. Ciclo de hoja5 reiniciado.");
+				} else {
+					agregarMensaje("Sistema", `💾 Captura guardada (${data.total}/50).`);
+				}
 			} catch (err) {
 				console.error('Error al guardar en hoja5:', err);
 				agregarMensaje("Sistema", "error");
