@@ -283,6 +283,7 @@
 		// =========================================================
 		function actualizarVolumen(valorVisual) {
 			const v = Math.max(0, Math.min(100, Number(valorVisual)));
+			// 0% visual equivale a 20% (0.20) de volumen real
 			const volumenReal = 0.20 + (v / 100) * 0.80;
 			radioSala.volume = volumenReal;
 			textoVolumen.textContent = `${v}%`;
@@ -294,7 +295,9 @@
 			if (!radioIniciada) {
 				radioSala.play().then(() => {
 					radioIniciada = true;
-				}).catch(() => {});
+				}).catch(() => {
+					// El navegador esperará el primer clic o tecla del usuario
+				});
 			}
 		}
 
@@ -309,36 +312,18 @@
 		});
 
 		// =========================================================
-		// 2. CONEXIÓN DE CÁMARAS Y SALA P2P CON SERVIDORES STUN + TURN
+		// 2. CONEXIÓN DE CÁMARAS Y SALA P2P (?room=1)
 		// =========================================================
 		const params = new URLSearchParams(window.location.search);
 		const roomId = params.get('room') || '1';
 		const hostPeerId = `mugree-cruis-sala-${roomId}`;
 
-		// Configuración con STUN (Google) + TURN (OpenRelay) para atravesar redes móviles/NAT estrictas
 		const rtcConfig = {
-			debug: 1,
 			config: {
 				iceServers: [
 					{ urls: 'stun:stun.l.google.com:19302' },
-					{ urls: 'stun:stun1.l.google.com:19302' },
-					{
-						urls: 'turn:openrelay.metered.ca:80',
-						username: 'openrelayproject',
-						credential: 'openrelayproject'
-					},
-					{
-						urls: 'turn:openrelay.metered.ca:443',
-						username: 'openrelayproject',
-						credential: 'openrelayproject'
-					},
-					{
-						urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-						username: 'openrelayproject',
-						credential: 'openrelayproject'
-					}
-				],
-				iceCandidatePoolSize: 10
+					{ urls: 'stun:stun1.l.google.com:19302' }
+				]
 			}
 		};
 
@@ -366,19 +351,6 @@
 			iniciarConexionSala();
 		}
 
-		function monitorearICE(peerConnection) {
-			if (!peerConnection) return;
-			peerConnection.oniceconnectionstatechange = () => {
-				const estado = peerConnection.iceConnectionState;
-				if (estado === 'failed' || estado === 'disconnected') {
-					agregarMensaje("Sistema", "⚠️ Reconectando señal de video (red estricta)...");
-					if (peerConnection.restartIce) {
-						peerConnection.restartIce();
-					}
-				}
-			};
-		}
-
 		function iniciarConexionSala() {
 			const peer = new Peer(hostPeerId, rtcConfig);
 
@@ -389,7 +361,6 @@
 
 			peer.on('call', (call) => {
 				call.answer(localStream);
-				monitorearICE(call.peerConnection);
 				call.on('stream', (remoteStream) => {
 					conectarUsuarioRemoto(remoteStream);
 				});
@@ -416,7 +387,6 @@
 			guestPeer.on('open', () => {
 				estadoSala.textContent = `SALA #${roomId} — Conectando...`;
 				const call = guestPeer.call(hostPeerId, localStream);
-				monitorearICE(call.peerConnection);
 
 				call.on('stream', (remoteStream) => {
 					conectarUsuarioRemoto(remoteStream);
@@ -425,10 +395,6 @@
 
 				const conn = guestPeer.connect(hostPeerId);
 				configurarChatP2P(conn);
-			});
-
-			guestPeer.on('error', (err) => {
-				console.error('Error invitado PeerJS:', err);
 			});
 		}
 
