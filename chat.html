@@ -328,6 +328,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            position: relative;
         }
 
         .marquee-sala {
@@ -422,60 +423,86 @@
             font-size: 0.92rem;
             line-height: 1.4;
             background-color: #fafafa;
+            position: relative;
         }
 
-        /* Estilo ritual nocturno cuando se entra a #velacion */
+        /* =========================================================
+           ESPACIO INTERACTIVO DE OBJETOS ARRASTRABLES (#VELACION)
+           ========================================================= */
         #listaMensajes.modo-velacion {
-            background-color: #0d0014;
-            background-image: radial-gradient(#330022 1px, transparent 1px);
-            background-size: 20px 20px;
-            color: #f5e6cc;
+            background-color: #09000f;
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(255, 140, 0, 0.08) 0%, transparent 70%),
+                radial-gradient(#2a0022 1px, transparent 1px);
+            background-size: 100% 100%, 24px 24px;
+            overflow: hidden;
+            user-select: none;
         }
 
-        .tarjeta-vela-ascii {
+        .aviso-altar-flotante {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.72rem;
+            color: rgba(255, 204, 102, 0.7);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Pequeño objeto móvil puesto al azar (Vela ASCII + Petición) */
+        .objeto-vela-movil {
+            position: absolute;
+            width: 135px;
+            padding: 6px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 14px;
-            background: linear-gradient(90deg, #1a0024 0%, #09000d 100%);
-            border: 1px solid #662244;
-            border-left: 4px solid #ffaa00;
-            padding: 10px 14px;
-            margin-bottom: 10px;
-            box-shadow: 0 0 12px rgba(255, 170, 0, 0.15);
+            text-align: center;
+            cursor: grab;
+            touch-action: none;
+            border-radius: 6px;
+            background: radial-gradient(circle, rgba(255, 153, 0, 0.14) 0%, rgba(0, 0, 0, 0) 75%);
+            transition: transform 0.1s ease, filter 0.2s ease;
+        }
+
+        .objeto-vela-movil:hover {
+            filter: drop-shadow(0 0 8px rgba(255, 200, 0, 0.65));
+            z-index: 50 !important;
+        }
+
+        .objeto-vela-movil.arrastrando {
+            cursor: grabbing;
+            transform: scale(1.08);
+            filter: drop-shadow(0 0 12px rgba(255, 234, 0, 0.9));
+            z-index: 99 !important;
         }
 
         .arte-vela-ascii {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 0.75rem;
-            line-height: 1.05;
+            font-size: 0.68rem;
+            line-height: 1.02;
             color: #ffcc33;
             text-shadow: 0 0 6px #ff6600;
             white-space: pre;
-            flex-shrink: 0;
-            user-select: none;
+            pointer-events: none;
         }
 
         .llama-vela {
             color: #ffea00;
-            animation: parpadeo 0.8s infinite alternate;
+            animation: parpadeo 0.75s infinite alternate;
         }
 
-        .texto-peticion-vela {
-            font-family: 'Georgia', serif;
-            font-size: 0.98rem;
-            color: #fff3d6;
-            line-height: 1.45;
-            word-break: break-word;
-        }
-
-        .etiqueta-peticion-header {
-            display: block;
+        .texto-objeto-peticion {
+            margin-top: 4px;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 0.72rem;
-            color: #ff88aa;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 0.7rem;
+            line-height: 1.2;
+            color: #ffe8b3;
+            text-shadow: 1px 1px 2px #000, 0 0 4px #000;
+            word-break: break-word;
+            max-width: 130px;
+            pointer-events: none;
         }
 
         .msg-linea {
@@ -587,7 +614,6 @@
             font-size: 0.8rem;
         }
 
-        /* Bloque ampliado hacia Salas Romance en Vivo (galeria.html) */
         .caja-acceso-galeria {
             background: linear-gradient(180deg, #33001b 0%, #140024 100%);
             padding: 10px 8px;
@@ -809,7 +835,7 @@
                         </div>
                         <div class="opcion-sala" data-sala="velacion">
                             #velacion
-                            <span>Peticiones & Velas</span>
+                            <span>Velas & Objetos</span>
                         </div>
                         <div class="opcion-sala" data-sala="cine">
                             #cine
@@ -853,7 +879,7 @@
                     <h4>⚠️ Reglas de la Red (#chatzona | #velacion | #cine):</h4>
                     <ul>
                         <li>En <strong>#cine</strong> la reproducción es <strong>simultánea</strong> para todos los conectados.</li>
-                        <li>En <strong>#velacion</strong> se encienden velas con las peticiones registradas en el altar.</li>
+                        <li>En <strong>#velacion</strong> las velas aparecen al azar y puedes <strong>arrastrarlas y moverlas</strong> por la sala.</li>
                         <li>Entra a las <strong>Salas Romance en Vivo</strong> desde el panel de usuarios (<a href="galeria.html" style="color:#b30000;font-weight:bold;">galeria.html</a>).</li>
                     </ul>
                 </div>
@@ -894,7 +920,7 @@
          INTERFAZ PRINCIPAL DE 3 COLUMNAS
          ========================================================= -->
     <main class="contenedor-webchat">
-        <!-- Columna 1: Cine Simultáneo / Chat / Velación -->
+        <!-- Columna 1: Cine Simultáneo / Chat / Espacio Arrastrable Velación -->
         <section class="panel-mensajes">
             <marquee class="marquee-sala" id="marqueeTexto" behavior="scroll" direction="left">
                 *** SALA ACTIVA: #CHATZONA *** SINTONIZANDO: NOCHES DE PELUCHEO EN VIVO *** SALAS ROMANCE EN VIVO EN GALERIA.HTML ***
@@ -955,7 +981,6 @@
                 <span class="etiqueta-contador" id="etiquetaCantidad">1</span>
             </div>
 
-            <!-- Bloque ampliado hacia galeria.html -->
             <div class="caja-acceso-galeria">
                 <a href="galeria.html" class="btn-ir-galeria" title="Entrar a las Salas Romance en Vivo">
                     <span class="titulo-romance-vivo">💋 SALAS ROMANCE EN VIVO</span>
@@ -969,7 +994,6 @@
 
         <!-- Columna 3: Búsquedas al azar de 'romance' e 'ia drama romance' -->
         <aside class="panel-lateral-derecho">
-            <!-- Bloque 1: Búsqueda al azar de "romance" -->
             <div class="caja-anuncio">
                 <div class="header-anuncio">
                     <span>💘 </span>
@@ -981,7 +1005,6 @@
                 </div>
             </div>
 
-            <!-- Bloque 2: Búsqueda al azar de "ia drama romance" -->
             <div class="caja-anuncio">
                 <div class="header-anuncio drama">
                     <span>💔 </span>
@@ -1011,6 +1034,10 @@
             autor: 'Sistema'
         };
         let ultimoIframeCargadoKey = '';
+
+        // Guarda las coordenadas (x, y) de cada objeto vela para que el usuario las mueva libremente
+        const posicionesObjetosVelacion = {};
+        let zIndexObjetoActual = 10;
 
         let destinatarioSusurro = null;
         let usuarioActual = {
@@ -1173,7 +1200,6 @@
             document.getElementById('marqueeTexto').textContent = `*** SALA AISLADA: #${nuevaSala.toUpperCase()} *** NOCHES DE PELUCHEO EN VIVO *** SALAS ROMANCE EN VIVO EN GALERIA.HTML ***`;
             inputMensaje.placeholder = `Escribe en #${nuevaSala}...`;
 
-            // En #velacion se quita la parte de comentarios y se activa el altar de velas
             if (nuevaSala === 'velacion') {
                 formChat.style.display = 'none';
                 barraModoSusurro.style.display = 'none';
@@ -1267,7 +1293,6 @@
                 );
 
                 if (usuarioExistente) {
-                    // Casilla B: Sheety suele convertir "contraseña" en "contrasena" o mantener "contraseña"
                     const passGuardada = usuarioExistente.contrasena !== undefined
                         ? usuarioExistente.contrasena
                         : usuarioExistente['contraseña'];
@@ -1281,7 +1306,6 @@
                         return;
                     }
                 } else {
-                    // Registrar nuevo usuario en Casilla A (username) y Casilla B (contrasena)
                     await fetch(URL_HOJA1_USUARIOS, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1341,66 +1365,127 @@
         document.getElementById('btnCancelarSusurro').addEventListener('click', cancelarSusurro);
 
         // =========================================================
-        // 7. LECTURA DE HOJA4 (#VELACION CON VELA ASCII) Y HOJA3 (CHAT)
+        // 7. OBJETOS VELA ARRASTRABLES AL AZAR EN #VELACION (HOJA4)
         // =========================================================
-        function renderizarVelaPeticionAscii(textoPeticion, indice) {
-            const tarjeta = document.createElement('div');
-            tarjeta.className = 'tarjeta-vela-ascii';
+        function hacerObjetoArrastrable(elemento, claveObjeto) {
+            let arrastrando = false;
+            let offsetX = 0;
+            let offsetY = 0;
+
+            elemento.addEventListener('pointerdown', (e) => {
+                arrastrando = true;
+                elemento.setPointerCapture(e.pointerId);
+                elemento.classList.add('arrastrando');
+                zIndexObjetoActual++;
+                elemento.style.zIndex = zIndexObjetoActual;
+
+                const rectObj = elemento.getBoundingClientRect();
+                offsetX = e.clientX - rectObj.left;
+                offsetY = e.clientY - rectObj.top;
+            });
+
+            elemento.addEventListener('pointermove', (e) => {
+                if (!arrastrando) return;
+                const rectContenedor = listaMensajes.getBoundingClientRect();
+
+                let nuevoLeft = e.clientX - rectContenedor.left - offsetX;
+                let nuevoTop = e.clientY - rectContenedor.top - offsetY;
+
+                // Mantener el pequeño objeto dentro de los bordes del chat
+                const maxLeft = Math.max(0, rectContenedor.width - elemento.offsetWidth);
+                const maxTop = Math.max(0, rectContenedor.height - elemento.offsetHeight);
+
+                nuevoLeft = Math.max(0, Math.min(maxLeft, nuevoLeft));
+                nuevoTop = Math.max(0, Math.min(maxTop, nuevoTop));
+
+                elemento.style.left = `${nuevoLeft}px`;
+                elemento.style.top = `${nuevoTop}px`;
+
+                // Guardar la nueva posición para que no se reinicie al recargar datos
+                posicionesObjetosVelacion[claveObjeto] = {
+                    left: nuevoLeft,
+                    top: nuevoTop
+                };
+            });
+
+            const finalizarArrastre = (e) => {
+                if (!arrastrando) return;
+                arrastrando = false;
+                elemento.classList.remove('arrastrando');
+                if (elemento.hasPointerCapture(e.pointerId)) {
+                    elemento.releasePointerCapture(e.pointerId);
+                }
+            };
+
+            elemento.addEventListener('pointerup', finalizarArrastre);
+            elemento.addEventListener('pointercancel', finalizarArrastre);
+        }
+
+        function crearObjetoVelaAlAzar(textoPeticion, indice) {
+            const claveObjeto = `vela_${indice}_${textoPeticion.slice(0, 12)}`;
+            const objeto = document.createElement('div');
+            objeto.className = 'objeto-vela-movil';
+            objeto.title = 'Arrastra esta vela para moverla por la sala';
+
+            // Si aún no tiene posición asignada, ubicarlo en un punto aleatorio dentro del chat
+            if (!posicionesObjetosVelacion[claveObjeto]) {
+                const anchoDisponible = Math.max(180, (listaMensajes.clientWidth || 520) - 145);
+                const altoDisponible = Math.max(160, (listaMensajes.clientHeight || 380) - 125);
+                posicionesObjetosVelacion[claveObjeto] = {
+                    left: Math.floor(Math.random() * anchoDisponible) + 8,
+                    top: Math.floor(Math.random() * altoDisponible) + 18
+                };
+            }
+
+            objeto.style.left = `${posicionesObjetosVelacion[claveObjeto].left}px`;
+            objeto.style.top = `${posicionesObjetosVelacion[claveObjeto].top}px`;
+            objeto.style.zIndex = 10 + indice;
 
             const velaPre = document.createElement('pre');
             velaPre.className = 'arte-vela-ascii';
             velaPre.innerHTML =
-`    <span class="llama-vela">( )</span>
-    <span class="llama-vela"> ) </span>
-   .---.
-   |   |
-   |   |
-   |   |
-  [_____]`;
+`   <span class="llama-vela">( )</span>
+   <span class="llama-vela"> ) </span>
+  .---.
+  |   |
+  |   |
+ [_____]`;
 
-            const contenidoDiv = document.createElement('div');
-            contenidoDiv.className = 'texto-peticion-vela';
+            const textoDiv = document.createElement('div');
+            textoDiv.className = 'texto-objeto-peticion';
+            textoDiv.textContent = textoPeticion;
 
-            const cabecera = document.createElement('span');
-            cabecera.className = 'etiqueta-peticion-header';
-            cabecera.textContent = `🕯️ Petición #${indice + 1}`;
+            objeto.appendChild(velaPre);
+            objeto.appendChild(textoDiv);
 
-            const cuerpoTexto = document.createElement('div');
-            cuerpoTexto.textContent = textoPeticion;
-
-            contenidoDiv.appendChild(cabecera);
-            contenidoDiv.appendChild(cuerpoTexto);
-
-            tarjeta.appendChild(velaPre);
-            tarjeta.appendChild(contenidoDiv);
-            listaMensajes.appendChild(tarjeta);
+            hacerObjetoArrastrable(objeto, claveObjeto);
+            listaMensajes.appendChild(objeto);
         }
 
         async function cargarPeticionesVelacion() {
+            // No re-renderizar mientras el usuario está arrastrando una vela con el cursor
+            if (document.querySelector('.objeto-vela-movil.arrastrando')) return;
+
             try {
                 const response = await fetch(URL_HOJA4_VELACION);
                 const json = await response.json();
                 const filas = json.hoja4 || [];
 
-                listaMensajes.innerHTML = '';
+                listaMensajes.innerHTML = '<div class="aviso-altar-flotante">🕯️ Arrastra y mueve las velas</div>';
                 const miNombre = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
                 actualizarListaUsuarios([miNombre]);
 
                 let contador = 0;
                 filas.forEach(fila => {
-                    // Casilla C: columna "peticiones"
                     const textoPeticion = fila.peticiones;
                     if (textoPeticion && String(textoPeticion).trim() !== '') {
-                        renderizarVelaPeticionAscii(String(textoPeticion).trim(), contador);
+                        crearObjetoVelaAlAzar(String(textoPeticion).trim(), contador);
                         contador++;
                     }
                 });
 
                 if (contador === 0) {
-                    const vacio = document.createElement('div');
-                    vacio.className = 'tarjeta-vela-ascii';
-                    vacio.innerHTML = `<pre class="arte-vela-ascii">   ( )\n  .---.\n  |   |\n [_____]</pre><div class="texto-peticion-vela">Aún no hay peticiones encendidas en la hoja4.</div>`;
-                    listaMensajes.appendChild(vacio);
+                    crearObjetoVelaAlAzar('Sin peticiones encendidas aún', 0);
                 }
             } catch (error) {
                 console.error('Error al leer peticiones de hoja4:', error);
@@ -1408,7 +1493,6 @@
         }
 
         async function cargarMensajesYUsuarios() {
-            // Si estamos en #velacion, cargamos exclusivamente la hoja4 (casilla C: peticiones)
             if (salaActual === 'velacion') {
                 await cargarPeticionesVelacion();
                 return;
@@ -1518,7 +1602,6 @@
             listaMensajes.scrollTop = listaMensajes.scrollHeight;
         }
 
-        // Lista limpia de usuarios (sin botón individual de enlace en vivo)
         function actualizarListaUsuarios(usuarios) {
             const cantidad = usuarios.length;
             document.getElementById('contadorTop').textContent = cantidad;
