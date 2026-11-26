@@ -189,7 +189,6 @@
 			to { box-shadow: 0 0 12px #ff1a1a, 0 0 22px #ff0000; }
 		}
 
-		/* Texto del comentario fijo en el mapa, muy opaco resaltando en la oscuridad */
 		.texto-fijo-mapa {
 			margin-top: 6px;
 			color: rgba(255, 255, 255, 0.28);
@@ -417,7 +416,8 @@
 		const div1 = document.getElementById('div1');
 		const div2 = document.getElementById('div2');
 
-		const urlHoja2 = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja2';
+		// URL de tu aplicación web de Google Apps Script
+		const urlAppsScript = 'https://script.google.com/macros/s/AKfycbwVH5vI28KV_7WRnatfr6oVAazdmNVNTyFNH0sw1jOCTwTJLuoBs6Lz-StP48ef8Q37eA/exec';
 
 		// ----------------------------------------------------
 		// 1. TRANSICIÓN SILENCIOSA: DIV 2 -> DIV 1 -> MAPA
@@ -435,7 +435,7 @@
 		});
 
 		// ----------------------------------------------------
-		// 2. EFECTO LINTERNA AMPLIADA (+50%) E ILUMINACIÓN DE TEXTOS
+		// 2. EFECTO LINTERNA AMPLIADA E ILUMINACIÓN DE TEXTOS
 		// ----------------------------------------------------
 		const mapaContenedor = document.getElementById('mapaContenedor');
 		const capaLinterna = document.getElementById('capaOscuridadLinterna');
@@ -448,7 +448,6 @@
 			capaLinterna.style.setProperty('--x', `${mouseX}px`);
 			capaLinterna.style.setProperty('--y', `${mouseY}px`);
 
-			// Radio de detección ampliado proporcionalmente a la circunferencia (130px)
 			const pines = document.querySelectorAll('.pin-wrapper');
 			pines.forEach(pin => {
 				const pinRect = pin.getBoundingClientRect();
@@ -471,7 +470,7 @@
 		});
 
 		// ----------------------------------------------------
-		// 3. FIJAR COMENTARIOS Y PUNTOS EN COORDENADAS EXACTAS
+		// 3. FIJAR COMENTARIOS EN EL MAPA Y ENVIAR A APPS SCRIPT
 		// ----------------------------------------------------
 		const popupComentario = document.getElementById('popupComentario');
 		const inputTextoMapa = document.getElementById('inputTextoMapa');
@@ -519,9 +518,9 @@
 			popupComentario.style.display = 'none';
 			inputTextoMapa.value = '';
 
-			fetch(urlHoja2, {
+			fetch(urlAppsScript, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: { 'Content-Type': 'text/plain;charset=utf-8' },
 				body: JSON.stringify({
 					hoja2: {
 						comentario: comentarioTexto,
@@ -532,8 +531,8 @@
 				})
 			})
 			.then(res => res.json())
-			.then(data => console.log('Guardado en Sheety:', data))
-			.catch(err => console.error('Error Sheety:', err));
+			.then(data => console.log('Guardado en Google Sheets:', data))
+			.catch(err => console.error('Error al enviar a Apps Script:', err));
 		}
 
 		btnGuardarPin.addEventListener('click', (e) => {
@@ -573,10 +572,10 @@
 				}
 			});
 
-			fetch(urlHoja2)
+			fetch(urlAppsScript)
 			.then(res => res.json())
 			.then(json => {
-				const datos = json.hoja2 || json.hoja2S || [];
+				const datos = json.hoja2 || [];
 				datos.forEach(item => {
 					if (item.comentario) {
 						let x = parseFloat(item.x);
