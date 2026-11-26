@@ -290,7 +290,8 @@
 
         .nota-id-unico {
             font-size: 0.74rem;
-            color: #444;
+            color: #006600;
+            font-weight: bold;
             margin-top: 4px;
             font-family: 'Courier New', Courier, monospace;
         }
@@ -915,9 +916,9 @@
                 <!-- Formulario Invitado (Identidad única por sesión) -->
                 <form id="formInvitado" class="caja-formulario-pop2">
                     <div class="campo-grupo">
-                        <label for="invUsername">Nick de Invitado (Se asigna ID único):</label>
-                        <input type="text" id="invUsername" placeholder="Ej: Anonimo o tu apodo" required>
-                        <div class="nota-id-unico" id="previewNickUnico">Tu identidad única será: ~Anonimo#0000</div>
+                        <label for="invUsername">Nick de Invitado (Aparecerá en la lista de nicks para susurrar):</label>
+                        <input type="text" id="invUsername" value="Anonimo" placeholder="Ej: Anonimo o tu apodo" required>
+                        <div class="nota-id-unico" id="previewNickUnico">Tu nick único en la lista será: ~Anonimo#0000</div>
                     </div>
                     <button type="submit" id="btnSubmitInv" class="btn-3d btn-3d-verde" style="width: 100%; padding: 8px;">
                         ENTRAR COMO INVITADO ÚNICO & NOCHES DE PELUCHEO >>
@@ -942,7 +943,7 @@
                 <div class="caja-reglas">
                     <h4>⚠️ Reglas de la Red (#chatzona | #velacion | #cine):</h4>
                     <ul>
-                        <li>Cada invitado recibe un <strong>identificador único (#ID)</strong> para diferenciarse aunque entren varios anónimos.</li>
+                        <li>Cada anónimo aparece como una <strong>persona única (~Anonimo#ID)</strong> en la lista de nicks para susurrar.</li>
                         <li>En <strong>#velacion</strong> las velas y corazones binarios aparecen al azar y puedes <strong>moverlos libremente</strong>.</li>
                         <li>Entra a las <strong>Salas Romance en Vivo</strong> desde el panel de usuarios (<a href="galeria.html" style="color:#b30000;font-weight:bold;">galeria.html</a>).</li>
                     </ul>
@@ -1019,7 +1020,7 @@
 
             <div id="listaMensajes">
                 <div class="msg-linea msg-sistema">
-                    Conectando con la base de datos de Google Sheets...
+                    Conectando con Google Sheets...
                 </div>
             </div>
 
@@ -1084,10 +1085,9 @@
 
     <script>
         // =========================================================
-        // 1. CONEXIÓN DIRECTA CON GOOGLE APPS SCRIPT (SIN SHEETY)
-        //    Pega aquí la URL de tu implementación Web App (/exec)
+        // 1. URL REAL DE GOOGLE APPS SCRIPT
         // =========================================================
-        const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/REEMPLAZA_CON_TU_ID_DE_IMPLEMENTACION/exec';
+        const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzCDfiRDJFqbK54T7xsddIwcu_eclO1h5lv7-clDTYhjYu7nQ1qayv4Kbe79K1KS3Xe/exec';
         const VIDEO_BASE_CINE = 'a13lpRMqdYA';
 
         let salaActual = 'chatzona';
@@ -1137,6 +1137,7 @@
         async function leerHojaSheets(nombreHoja) {
             const url = `${URL_APPS_SCRIPT}?hoja=${encodeURIComponent(nombreHoja)}&t=${Date.now()}`;
             const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             return data[nombreHoja] || [];
         }
@@ -1161,11 +1162,10 @@
             return `${baseLimpia}#${codigoUnicoSesion}`;
         }
 
-        invUsernameInput.value = `Anonimo`;
-        previewNickUnico.textContent = `Tu identidad única será: ~${construirNickInvitadoUnico(invUsernameInput.value)}`;
+        previewNickUnico.textContent = `Tu nick único en la lista será: ~${construirNickInvitadoUnico(invUsernameInput.value)}`;
 
         invUsernameInput.addEventListener('input', () => {
-            previewNickUnico.textContent = `Tu identidad única será: ~${construirNickInvitadoUnico(invUsernameInput.value)}`;
+            previewNickUnico.textContent = `Tu nick único en la lista será: ~${construirNickInvitadoUnico(invUsernameInput.value)}`;
         });
 
         // =========================================================
@@ -1371,12 +1371,25 @@
             return ahora.toLocaleDateString('es-CO') + ' ' + ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
         }
 
-        // Acceso como invitado único (~Nick#ID)
+        // Acceso como invitado único (~Anonimo#ID) -> se registra en la lista de nicks para susurrar
         formInvitado.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btnInv = document.getElementById('btnSubmitInv');
+            btnInv.disabled = true;
+            btnInv.textContent = "CONECTANDO INVITADO ÚNICO...";
+
             const nickUnico = construirNickInvitadoUnico(invUsernameInput.value);
+            usuarioActual = { nick: nickUnico, esInvitado: true };
+
+            // Mostrar inmediatamente en la lista de nicks antes de esperar la red
+            const nombreFormateado = `~${nickUnico}`;
+            actualizarListaUsuarios([nombreFormateado]);
+
             await anunciarPresenciaEnSala(nickUnico, true);
-            completarAcceso(nickUnico, true, `Has entrado como invitado único ~${nickUnico} a #${salaActual}`);
+            completarAcceso(nickUnico, true, `Has entrado como invitado único ${nombreFormateado} a #${salaActual}`);
+
+            btnInv.disabled = false;
+            btnInv.textContent = "ENTRAR COMO INVITADO ÚNICO & NOCHES DE PELUCHEO >>";
         });
 
         // Acceso como usuario registrado en hoja1
@@ -1439,15 +1452,14 @@
             }
         });
 
-        // Registra la entrada del usuario en hoja3 para que aparezca inmediatamente como persona única en la lista
+        // Registra la entrada del usuario en hoja3 para que aparezca en la sección de nicks para susurrar
         async function anunciarPresenciaEnSala(nick, esInvitado) {
             const nombreFormateado = esInvitado ? `~${nick}` : `@${nick}`;
-            const salaDestino = salaActual === 'velacion' ? 'chatzona' : salaActual;
             try {
                 await guardarEnSheets({
                     hoja3: {
                         name: nombreFormateado,
-                        comentario: `[#${salaDestino}] [PRESENCIA] se ha conectado a la sala`,
+                        comentario: `[#${salaActual}] [PRESENCIA] se ha conectado a la sala`,
                         fecha: obtenerFechaActual()
                     }
                 });
@@ -1474,9 +1486,13 @@
         // 6. SISTEMA DE SUSURROS (MENSAJES PRIVADOS)
         // =========================================================
         function activarSusurro(nickDestino) {
-            if (salaActual === 'velacion') return;
             const miNombreCompleto = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
             if (nickDestino === miNombreCompleto) return;
+
+            // Si está en #velacion y hace clic en un nick para susurrar, lo lleva a #chatzona con el susurro listo
+            if (salaActual === 'velacion') {
+                cambiarDeSala('chatzona');
+            }
 
             destinatarioSusurro = nickDestino;
             barraModoSusurro.style.display = 'flex';
@@ -1701,14 +1717,22 @@
             if (document.querySelector('.objeto-vela-movil.arrastrando, .objeto-corazon-binario.arrastrando')) return;
 
             try {
-                const [filas4, filas5] = await Promise.all([
+                // Consultar hoja4 (velas), hoja5 (fotos) y hoja3 (usuarios activos para susurros)
+                const [filas4, filas5, registros3] = await Promise.all([
                     leerHojaSheets('hoja4'),
-                    leerHojaSheets('hoja5')
+                    leerHojaSheets('hoja5'),
+                    leerHojaSheets('hoja3')
                 ]);
 
-                listaMensajes.innerHTML = '<div class="aviso-altar-flotante">🕯️❤️ Arrastra las velas y corazones binarios</div>';
+                // Mantener la lista de nicks (incluyendo anónimos únicos) visible y activa para susurros
                 const miNombre = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
-                actualizarListaUsuarios([miNombre]);
+                const usuariosActivos = new Set([miNombre]);
+                registros3.forEach(fila => {
+                    if (fila.name) usuariosActivos.add(String(fila.name).trim());
+                });
+                actualizarListaUsuarios(Array.from(usuariosActivos));
+
+                listaMensajes.innerHTML = '<div class="aviso-altar-flotante">🕯️❤️ Arrastra las velas y corazones binarios</div>';
 
                 // 1. Velas desde Hoja 4 (Celda C: "peticion")
                 let contadorVelas = 0;
@@ -1754,7 +1778,7 @@
                 let ultimaTransmisionCine = null;
 
                 registros.forEach(fila => {
-                    const autor = fila.name || 'Anónimo';
+                    const autor = fila.name ? String(fila.name).trim() : 'Anónimo';
                     const textoCrudo = String(fila.comentario || '');
                     const fecha = fila.fecha || '';
 
@@ -1762,7 +1786,7 @@
                         const contenidoSinSala = textoCrudo.replace(etiquetaSala, '').trim();
                         usuariosEnEstaSala.add(autor);
 
-                        // Mensaje interno de presencia para registrar usuario único en la lista
+                        // Registro de presencia para que el usuario anónimo o registrado aparezca en el panel de nicks
                         if (contenidoSinSala.startsWith('[PRESENCIA]')) {
                             return;
                         }
@@ -1865,14 +1889,17 @@
                 const esInv = user.startsWith('~');
                 const simbolo = esInv ? '~' : '@';
                 const nombreLimpio = user.replace(/^[@~]/, '');
+                const esYo = user === miNombre;
 
                 li.innerHTML = `
                     <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                         <span class="icono-rol ${esInv ? 'rol-inv' : 'rol-reg'}">${simbolo}</span>
-                        <span style="cursor:pointer;" onclick="activarSusurro('${user}')" title="Susurrar a ${user}">${nombreLimpio}</span>
+                        <span style="cursor:${esYo ? 'default' : 'pointer'}; font-weight:${esYo ? 'bold' : 'normal'};" ${esYo ? '' : `onclick="activarSusurro('${user}')"`} title="${esYo ? 'Tú (Nick único activo)' : `Susurrar a ${user}`}">
+                            ${nombreLimpio}${esYo ? ' (tú)' : ''}
+                        </span>
                     </div>
                     <div class="acciones-usuario-item">
-                        ${user !== miNombre ? `<button type="button" class="btn-mini-susurro" onclick="activarSusurro('${user}')" title="Susurrar">💬</button>` : ''}
+                        ${!esYo ? `<button type="button" class="btn-mini-susurro" onclick="activarSusurro('${user}')" title="Susurrar a ${user}">💬</button>` : ''}
                     </div>
                 `;
                 listaUsuarios.appendChild(li);
