@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatZona Net Art - Cine Simultáneo, Noches de Pelucheo & Galería</title>
+    <title>ChatZona Net Art - Cine Simultáneo, Velación & Salas Romance</title>
     <style>
         * {
             box-sizing: border-box;
@@ -424,6 +424,60 @@
             background-color: #fafafa;
         }
 
+        /* Estilo ritual nocturno cuando se entra a #velacion */
+        #listaMensajes.modo-velacion {
+            background-color: #0d0014;
+            background-image: radial-gradient(#330022 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #f5e6cc;
+        }
+
+        .tarjeta-vela-ascii {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: linear-gradient(90deg, #1a0024 0%, #09000d 100%);
+            border: 1px solid #662244;
+            border-left: 4px solid #ffaa00;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+            box-shadow: 0 0 12px rgba(255, 170, 0, 0.15);
+        }
+
+        .arte-vela-ascii {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.75rem;
+            line-height: 1.05;
+            color: #ffcc33;
+            text-shadow: 0 0 6px #ff6600;
+            white-space: pre;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .llama-vela {
+            color: #ffea00;
+            animation: parpadeo 0.8s infinite alternate;
+        }
+
+        .texto-peticion-vela {
+            font-family: 'Georgia', serif;
+            font-size: 0.98rem;
+            color: #fff3d6;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+
+        .etiqueta-peticion-header {
+            display: block;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.72rem;
+            color: #ff88aa;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         .msg-linea {
             margin-bottom: 6px;
             padding: 3px 5px;
@@ -503,10 +557,10 @@
         }
 
         /* =========================================================
-           COLUMNA 2: USUARIOS + ENLACE DIRECTO A GALERIA.HTML
+           COLUMNA 2: USUARIOS + BLOQUE GRANDE SALAS ROMANCE EN VIVO
            ========================================================= */
         .panel-usuarios {
-            width: 215px;
+            width: 230px;
             background: #e8e8e8;
             border: 2px solid #000;
             display: flex;
@@ -533,32 +587,56 @@
             font-size: 0.8rem;
         }
 
-        /* Acceso directo a Salas de Chat en Vivo (galeria.html) */
+        /* Bloque ampliado hacia Salas Romance en Vivo (galeria.html) */
         .caja-acceso-galeria {
-            background: #1a0033;
-            padding: 6px;
-            border-bottom: 2px solid #000;
+            background: linear-gradient(180deg, #33001b 0%, #140024 100%);
+            padding: 10px 8px;
+            border-bottom: 3px solid #ffea00;
             text-align: center;
         }
 
         .btn-ir-galeria {
             display: block;
             width: 100%;
-            background: linear-gradient(90deg, #ff0055, #b30000);
+            background: linear-gradient(135deg, #ff0055 0%, #990033 100%);
             color: #ffea00;
-            border: 2px outset #ff6688;
-            padding: 5px 6px;
+            border: 2px outset #ff88aa;
+            padding: 11px 8px;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 0.76rem;
-            font-weight: bold;
             text-decoration: none;
             cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.6);
+            transition: transform 0.15s ease, background 0.2s ease;
         }
 
         .btn-ir-galeria:hover {
             background: #ffea00;
             color: #000;
             border-color: #fff;
+            transform: scale(1.02);
+        }
+
+        .btn-ir-galeria .titulo-romance-vivo {
+            display: block;
+            font-size: 0.86rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .btn-ir-galeria .subtitulo-romance-vivo {
+            display: block;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.72rem;
+            font-weight: normal;
+            line-height: 1.25;
+            color: #ffffff;
+        }
+
+        .btn-ir-galeria:hover .subtitulo-romance-vivo {
+            color: #220011;
+            font-weight: bold;
         }
 
         .ayuda-susurro {
@@ -605,18 +683,6 @@
             padding: 2px 5px;
             border-radius: 2px;
             cursor: pointer;
-        }
-
-        .btn-mini-vivo {
-            background: #000080;
-            color: #ffea00;
-            border: none;
-            font-size: 0.66rem;
-            padding: 2px 5px;
-            border-radius: 2px;
-            text-decoration: none;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: bold;
         }
 
         .icono-rol {
@@ -712,7 +778,7 @@
             .panel-lateral-derecho { display: none; }
         }
         @media (max-width: 620px) {
-            .panel-usuarios { width: 165px; }
+            .panel-usuarios { width: 175px; }
         }
     </style>
 </head>
@@ -743,7 +809,7 @@
                         </div>
                         <div class="opcion-sala" data-sala="velacion">
                             #velacion
-                            <span>Nocturna / Ritual</span>
+                            <span>Peticiones & Velas</span>
                         </div>
                         <div class="opcion-sala" data-sala="cine">
                             #cine
@@ -768,10 +834,10 @@
                     </button>
                 </form>
 
-                <!-- Formulario Registrado -->
+                <!-- Formulario Registrado (Hoja1: username casilla A, contraseña casilla B) -->
                 <form id="formRegistrado" class="caja-formulario-pop2" style="display: none;">
                     <div class="campo-grupo">
-                        <label for="regUsername">Nick / Usuario:</label>
+                        <label for="regUsername">Nick / Usuario (username):</label>
                         <input type="text" id="regUsername" placeholder="Ej: Elpepe697" required>
                     </div>
                     <div class="campo-grupo">
@@ -787,8 +853,8 @@
                     <h4>⚠️ Reglas de la Red (#chatzona | #velacion | #cine):</h4>
                     <ul>
                         <li>En <strong>#cine</strong> la reproducción es <strong>simultánea</strong> para todos los conectados.</li>
-                        <li>Desde la lista de <strong>Usuarios</strong> puedes entrar directo a las salas en vivo (<a href="galeria.html" style="color:#b30000;font-weight:bold;">galeria.html</a>).</li>
-                        <li>Haz clic sobre cualquier usuario conectado para enviarle un <strong>susurro privado</strong>.</li>
+                        <li>En <strong>#velacion</strong> se encienden velas con las peticiones registradas en el altar.</li>
+                        <li>Entra a las <strong>Salas Romance en Vivo</strong> desde el panel de usuarios (<a href="galeria.html" style="color:#b30000;font-weight:bold;">galeria.html</a>).</li>
                     </ul>
                 </div>
             </div>
@@ -828,10 +894,10 @@
          INTERFAZ PRINCIPAL DE 3 COLUMNAS
          ========================================================= -->
     <main class="contenedor-webchat">
-        <!-- Columna 1: Cine Simultáneo + Chat + Envío -->
+        <!-- Columna 1: Cine Simultáneo / Chat / Velación -->
         <section class="panel-mensajes">
             <marquee class="marquee-sala" id="marqueeTexto" behavior="scroll" direction="left">
-                *** SALA ACTIVA: #CHATZONA *** SINTONIZANDO: NOCHES DE PELUCHEO EN VIVO *** SALAS DE VIDEO EN GALERIA.HTML ***
+                *** SALA ACTIVA: #CHATZONA *** SINTONIZANDO: NOCHES DE PELUCHEO EN VIVO *** SALAS ROMANCE EN VIVO EN GALERIA.HTML ***
             </marquee>
 
             <!-- PANEL DE PROYECCIÓN SIMULTÁNEA DE LA SALA #CINE -->
@@ -875,27 +941,29 @@
                 </button>
             </div>
 
+            <!-- Barra de envío de comentarios (se oculta automáticamente en #velacion) -->
             <form id="formChat" class="barra-envio">
                 <input type="text" id="inputMensaje" placeholder="Escribe en #chatzona..." autocomplete="off" required>
                 <button type="submit" class="btn-3d btn-3d-rojo" id="btnEnviarMsg">Enviar</button>
             </form>
         </section>
 
-        <!-- Columna 2: Lista de Usuarios + Acceso a galeria.html -->
+        <!-- Columna 2: Lista de Usuarios + Bloque Grande Salas Romance en Vivo -->
         <aside class="panel-usuarios">
             <div class="header-usuarios">
                 <span>USUARIOS</span>
                 <span class="etiqueta-contador" id="etiquetaCantidad">1</span>
             </div>
 
-            <!-- Botón principal hacia el archivo galeria.html -->
+            <!-- Bloque ampliado hacia galeria.html -->
             <div class="caja-acceso-galeria">
-                <a href="galeria.html" class="btn-ir-galeria" title="Entrar al mosaico de cámaras y salas de chat en vivo">
-                    📹 SALAS EN VIVO (galeria.html)
+                <a href="galeria.html" class="btn-ir-galeria" title="Entrar a las Salas Romance en Vivo">
+                    <span class="titulo-romance-vivo">💋 SALAS ROMANCE EN VIVO</span>
+                    <span class="subtitulo-romance-vivo">Encuéntrate a escondidas con tu pareja</span>
                 </a>
             </div>
 
-            <div class="ayuda-susurro">Clic en nick: susurro | 📹: sala vivo</div>
+            <div class="ayuda-susurro">Clic en un nick para susurrar 🔒</div>
             <ul id="listaUsuarios"></ul>
         </aside>
 
@@ -929,14 +997,14 @@
 
     <script>
         // =========================================================
-        // 1. CONFIGURACIÓN DE ENDPOINTS (SHEETY HOJA1 Y HOJA3)
+        // 1. CONFIGURACIÓN DE ENDPOINTS SHEETY (HOJA1, HOJA3 Y HOJA4)
         // =========================================================
-        const URL_HOJA1_USUARIOS = 'https://api.sheety.co/3bf2b2add58e4c4d360e0b269fb830d8/hojadeC/hoja1';
+        const URL_HOJA1_USUARIOS = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja1';
         const URL_HOJA3_CHAT = 'https://api.sheety.co/3bf2b2add58e4c4d360e0b269fb830d8/hojadeC/hoja3';
+        const URL_HOJA4_VELACION = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja4';
         const VIDEO_BASE_CINE = 'a13lpRMqdYA';
 
         let salaActual = 'chatzona';
-        // Estado compartido del cine simultáneo
         let estadoCineGlobal = {
             videoId: VIDEO_BASE_CINE,
             inicioTimestamp: Date.now(),
@@ -956,6 +1024,7 @@
         const pop2Overlay = document.getElementById('pop2-overlay');
         const listaMensajes = document.getElementById('listaMensajes');
         const listaUsuarios = document.getElementById('listaUsuarios');
+        const formChat = document.getElementById('formChat');
         const inputMensaje = document.getElementById('inputMensaje');
         const moduloCine = document.getElementById('moduloCine');
         const reproductorCine = document.getElementById('reproductorCine');
@@ -971,8 +1040,6 @@
             const visual = Math.max(0, Math.min(100, Number(valorVisual)));
             sliderVolumenRadio.value = visual;
             etiquetaPorcentajeVol.textContent = `${visual}%`;
-
-            // 0% visual -> 0.20 (20% real); 100% visual -> 1.00 (100% real)
             streamRadio.volume = 0.20 + (visual / 100) * 0.80;
         }
 
@@ -1022,7 +1089,6 @@
             }
         }
 
-        // Actualizar el reloj de minuto en vivo cada segundo cuando se está en #cine
         setInterval(() => {
             if (salaActual === 'cine') {
                 const seg = Math.max(0, Math.floor((Date.now() - estadoCineGlobal.inicioTimestamp) / 1000));
@@ -1048,7 +1114,6 @@
 
             sincronizarProyectorSimultaneo(true);
 
-            // Guardamos el ID y el timestamp exacto de inicio para que todos entren en el mismo segundo
             const payloadVideo = `[#cine] [VIDEO:${videoId}|${ahoraMs}]`;
             renderizarMensajeVideo(nombreFormateado, videoId, ahoraMs, fechaActual);
             listaMensajes.scrollTop = listaMensajes.scrollHeight;
@@ -1105,13 +1170,23 @@
             });
 
             document.getElementById('nombreSalaTop').textContent = `#${nuevaSala}`;
-            document.getElementById('marqueeTexto').textContent = `*** SALA AISLADA: #${nuevaSala.toUpperCase()} *** NOCHES DE PELUCHEO EN VIVO *** SALAS EN VIVO EN GALERIA.HTML ***`;
+            document.getElementById('marqueeTexto').textContent = `*** SALA AISLADA: #${nuevaSala.toUpperCase()} *** NOCHES DE PELUCHEO EN VIVO *** SALAS ROMANCE EN VIVO EN GALERIA.HTML ***`;
             inputMensaje.placeholder = `Escribe en #${nuevaSala}...`;
+
+            // En #velacion se quita la parte de comentarios y se activa el altar de velas
+            if (nuevaSala === 'velacion') {
+                formChat.style.display = 'none';
+                barraModoSusurro.style.display = 'none';
+                listaMensajes.classList.add('modo-velacion');
+            } else {
+                formChat.style.display = 'flex';
+                listaMensajes.classList.remove('modo-velacion');
+            }
 
             if (nuevaSala === 'cine') {
                 moduloCine.style.display = 'block';
-                aplicarVolumenRadio(0); // Visualmente 0%, sonando al 20%
-                ultimoIframeCargadoKey = ''; // Forzar cálculo del segundo exacto actual
+                aplicarVolumenRadio(0);
+                ultimoIframeCargadoKey = '';
                 sincronizarProyectorSimultaneo(true);
             } else {
                 moduloCine.style.display = 'none';
@@ -1129,12 +1204,14 @@
         document.querySelectorAll('.btn-sala-top').forEach(btn => {
             btn.addEventListener('click', () => {
                 cambiarDeSala(btn.dataset.sala);
-                agregarMensajeSistema(`Te has cambiado a la sala aislada #${btn.dataset.sala}`);
+                if (btn.dataset.sala !== 'velacion') {
+                    agregarMensajeSistema(`Te has cambiado a la sala aislada #${btn.dataset.sala}`);
+                }
             });
         });
 
         // =========================================================
-        // 5. LOGIN Y ACCESO DESDE #POP2
+        // 5. LOGIN Y ACCESO DESDE #POP2 (HOJA1: username A, contraseña B)
         // =========================================================
         const tabRegistrado = document.getElementById('tabRegistrado');
         const tabInvitado = document.getElementById('tabInvitado');
@@ -1186,11 +1263,16 @@
                 const usuariosGuardados = data.hoja1 || [];
 
                 const usuarioExistente = usuariosGuardados.find(
-                    u => u.username && u.username.toLowerCase() === nick.toLowerCase()
+                    u => u.username && String(u.username).trim().toLowerCase() === nick.toLowerCase()
                 );
 
                 if (usuarioExistente) {
-                    if (String(usuarioExistente.contrasena) === pass) {
+                    // Casilla B: Sheety suele convertir "contraseña" en "contrasena" o mantener "contraseña"
+                    const passGuardada = usuarioExistente.contrasena !== undefined
+                        ? usuarioExistente.contrasena
+                        : usuarioExistente['contraseña'];
+
+                    if (String(passGuardada) === pass) {
                         completarAcceso(usuarioExistente.username, false, `Conectado como @${usuarioExistente.username} en #${salaActual}`);
                     } else {
                         alert("❌ Contraseña incorrecta para @" + usuarioExistente.username);
@@ -1199,14 +1281,14 @@
                         return;
                     }
                 } else {
+                    // Registrar nuevo usuario en Casilla A (username) y Casilla B (contrasena)
                     await fetch(URL_HOJA1_USUARIOS, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             hoja1: {
                                 username: nick,
-                                contrasena: pass,
-                                fecha: obtenerFechaActual()
+                                contrasena: pass
                             }
                         })
                     });
@@ -1229,7 +1311,9 @@
                 aplicarVolumenRadio(0);
                 sincronizarProyectorSimultaneo(true);
             }
-            agregarMensajeSistema(mensajeBienvenida);
+            if (salaActual !== 'velacion') {
+                agregarMensajeSistema(mensajeBienvenida);
+            }
             cargarMensajesYUsuarios();
         }
 
@@ -1237,6 +1321,7 @@
         // 6. SISTEMA DE SUSURROS (MENSAJES PRIVADOS)
         // =========================================================
         function activarSusurro(nickDestino) {
+            if (salaActual === 'velacion') return;
             const miNombreCompleto = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
             if (nickDestino === miNombreCompleto) return;
 
@@ -1256,9 +1341,79 @@
         document.getElementById('btnCancelarSusurro').addEventListener('click', cancelarSusurro);
 
         // =========================================================
-        // 7. LECTURA Y SINCRONIZACIÓN EN VIVO CON HOJA3
+        // 7. LECTURA DE HOJA4 (#VELACION CON VELA ASCII) Y HOJA3 (CHAT)
         // =========================================================
+        function renderizarVelaPeticionAscii(textoPeticion, indice) {
+            const tarjeta = document.createElement('div');
+            tarjeta.className = 'tarjeta-vela-ascii';
+
+            const velaPre = document.createElement('pre');
+            velaPre.className = 'arte-vela-ascii';
+            velaPre.innerHTML =
+`    <span class="llama-vela">( )</span>
+    <span class="llama-vela"> ) </span>
+   .---.
+   |   |
+   |   |
+   |   |
+  [_____]`;
+
+            const contenidoDiv = document.createElement('div');
+            contenidoDiv.className = 'texto-peticion-vela';
+
+            const cabecera = document.createElement('span');
+            cabecera.className = 'etiqueta-peticion-header';
+            cabecera.textContent = `🕯️ Petición #${indice + 1}`;
+
+            const cuerpoTexto = document.createElement('div');
+            cuerpoTexto.textContent = textoPeticion;
+
+            contenidoDiv.appendChild(cabecera);
+            contenidoDiv.appendChild(cuerpoTexto);
+
+            tarjeta.appendChild(velaPre);
+            tarjeta.appendChild(contenidoDiv);
+            listaMensajes.appendChild(tarjeta);
+        }
+
+        async function cargarPeticionesVelacion() {
+            try {
+                const response = await fetch(URL_HOJA4_VELACION);
+                const json = await response.json();
+                const filas = json.hoja4 || [];
+
+                listaMensajes.innerHTML = '';
+                const miNombre = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
+                actualizarListaUsuarios([miNombre]);
+
+                let contador = 0;
+                filas.forEach(fila => {
+                    // Casilla C: columna "peticiones"
+                    const textoPeticion = fila.peticiones;
+                    if (textoPeticion && String(textoPeticion).trim() !== '') {
+                        renderizarVelaPeticionAscii(String(textoPeticion).trim(), contador);
+                        contador++;
+                    }
+                });
+
+                if (contador === 0) {
+                    const vacio = document.createElement('div');
+                    vacio.className = 'tarjeta-vela-ascii';
+                    vacio.innerHTML = `<pre class="arte-vela-ascii">   ( )\n  .---.\n  |   |\n [_____]</pre><div class="texto-peticion-vela">Aún no hay peticiones encendidas en la hoja4.</div>`;
+                    listaMensajes.appendChild(vacio);
+                }
+            } catch (error) {
+                console.error('Error al leer peticiones de hoja4:', error);
+            }
+        }
+
         async function cargarMensajesYUsuarios() {
+            // Si estamos en #velacion, cargamos exclusivamente la hoja4 (casilla C: peticiones)
+            if (salaActual === 'velacion') {
+                await cargarPeticionesVelacion();
+                return;
+            }
+
             try {
                 const response = await fetch(URL_HOJA3_CHAT);
                 const json = await response.json();
@@ -1279,7 +1434,6 @@
                         const contenidoSinSala = textoCrudo.replace(etiquetaSala, '').trim();
                         usuariosEnEstaSala.add(autor);
 
-                        // Formato simultáneo: [VIDEO:ID|TIMESTAMP] o antiguo [VIDEO:ID]
                         const matchVideo = contenidoSinSala.match(/^\[VIDEO:([^|\]]+)(?:\|(\d+))?\]$/);
                         if (matchVideo && salaActual === 'cine') {
                             const vid = matchVideo[1];
@@ -1305,7 +1459,6 @@
                     }
                 });
 
-                // Sincronizar automáticamente si otro usuario puso un video nuevo en #cine
                 if (salaActual === 'cine' && ultimaTransmisionCine) {
                     const cambioDeEmision =
                         estadoCineGlobal.videoId !== ultimaTransmisionCine.videoId ||
@@ -1365,6 +1518,7 @@
             listaMensajes.scrollTop = listaMensajes.scrollHeight;
         }
 
+        // Lista limpia de usuarios (sin botón individual de enlace en vivo)
         function actualizarListaUsuarios(usuarios) {
             const cantidad = usuarios.length;
             document.getElementById('contadorTop').textContent = cantidad;
@@ -1387,15 +1541,16 @@
                     </div>
                     <div class="acciones-usuario-item">
                         ${user !== miNombre ? `<button type="button" class="btn-mini-susurro" onclick="activarSusurro('${user}')" title="Susurrar">💬</button>` : ''}
-                        <a href="galeria.html?user=${encodeURIComponent(nombreLimpio)}" class="btn-mini-vivo" title="Entrar a sala de chat en vivo en galeria.html">📹 Vivo</a>
                     </div>
                 `;
                 listaUsuarios.appendChild(li);
             });
         }
 
-        document.getElementById('formChat').addEventListener('submit', async (e) => {
+        formChat.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (salaActual === 'velacion') return;
+
             const texto = inputMensaje.value.trim();
             if (!texto) return;
 
@@ -1438,7 +1593,6 @@
         // =========================================================
         async function buscarImagenAlAzar(terminoBusqueda, imgElemento, txtElemento, terminoRespaldo) {
             try {
-                // Desplazamiento aleatorio para que cada recarga o clic traiga resultados distintos
                 const offsetAleatorio = Math.floor(Math.random() * 25);
                 const apiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(terminoBusqueda)}&gsrnamespace=6&gsrlimit=15&gsroffset=${offsetAleatorio}&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&origin=*`;
 
@@ -1446,7 +1600,6 @@
                 const datos = await respuesta.json();
                 const paginas = datos?.query?.pages ? Object.values(datos.query.pages) : [];
 
-                // Filtrar únicamente fotografías/ilustraciones válidas (jpg, png, webp, gif)
                 const imagenesValidas = paginas.filter(p => {
                     const url = p.imageinfo?.[0]?.thumburl || p.imageinfo?.[0]?.url || '';
                     return /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i.test(url);
@@ -1458,7 +1611,6 @@
                     imgElemento.src = urlFinal;
                     txtElemento.textContent = terminoBusqueda;
                 } else if (terminoRespaldo) {
-                    // Si la búsqueda exacta con "ia drama romance" no tiene coincidencias literales en ese offset, intenta respaldo
                     buscarImagenAlAzar(terminoRespaldo, imgElemento, txtElemento, null);
                 }
             } catch (error) {
@@ -1492,7 +1644,6 @@
         setInterval(cargarBannerIaDramaRomance, 14000);
 
         cargarMensajesYUsuarios();
-        // Refresco rápido cada 5 segundos para mantener sincronizado el cine y el chat
         setInterval(cargarMensajesYUsuarios, 5000);
     </script>
 </body>
