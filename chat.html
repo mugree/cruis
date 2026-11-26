@@ -450,7 +450,6 @@
             z-index: 1;
         }
 
-        /* Pequeño objeto móvil puesto al azar (Vela ASCII + Petición) */
         .objeto-vela-movil {
             position: absolute;
             width: 135px;
@@ -721,7 +720,7 @@
         .rol-inv { color: #008000; }
 
         /* =========================================================
-           4. COLUMNA DERECHA: BÚSQUEDAS AL AZAR DE IMÁGENES
+           4. COLUMNA DERECHA: BÚSQUEDAS AL AZAR DE ROMANCE Y DRAMA
            ========================================================= */
         .panel-lateral-derecho {
             width: 280px;
@@ -992,12 +991,12 @@
             <ul id="listaUsuarios"></ul>
         </aside>
 
-        <!-- Columna 3: Búsquedas al azar de 'romance' e 'ia drama romance' -->
+        <!-- Columna 3: Búsquedas al azar de Romance y Drama Romántico -->
         <aside class="panel-lateral-derecho">
             <div class="caja-anuncio">
                 <div class="header-anuncio">
                     <span>💘 </span>
-                    <button type="button" id="btnSigBanner1" style="cursor: pointer; font-size: 0.65rem; padding: 0 4px;" title="Buscar otra imagen al azar">↻</button>
+                    <button type="button" id="btnSigBanner1" style="cursor: pointer; font-size: 0.65rem; padding: 0 4px;" title="Buscar otra imagen de romance al azar">↻</button>
                 </div>
                 <div class="cuerpo-banner">
                     <img id="imgBanner1" class="img-banner-galeria" referrerpolicy="no-referrer" alt="romance">
@@ -1008,11 +1007,11 @@
             <div class="caja-anuncio">
                 <div class="header-anuncio drama">
                     <span>💔 </span>
-                    <button type="button" id="btnSigBanner2" style="cursor: pointer; font-size: 0.65rem; padding: 0 4px;" title="Buscar otra imagen al azar">↻</button>
+                    <button type="button" id="btnSigBanner2" style="cursor: pointer; font-size: 0.65rem; padding: 0 4px;" title="Buscar otra imagen de drama romántico al azar">↻</button>
                 </div>
                 <div class="cuerpo-banner">
-                    <img id="imgBanner2" class="img-banner-galeria" referrerpolicy="no-referrer" alt="ia drama romance">
-                    <div class="micro-texto-banner" id="txtBanner2">ia drama romance</div>
+                    <img id="imgBanner2" class="img-banner-galeria" referrerpolicy="no-referrer" alt="drama romantico">
+                    <div class="micro-texto-banner" id="txtBanner2">drama romantico</div>
                 </div>
             </div>
         </aside>
@@ -1365,7 +1364,7 @@
         document.getElementById('btnCancelarSusurro').addEventListener('click', cancelarSusurro);
 
         // =========================================================
-        // 7. OBJETOS VELA ARRASTRABLES AL AZAR EN #VELACION (HOJA4)
+        // 7. OBJETOS VELA ARRASTRABLES AL AZAR EN #VELACION (HOJA4 -> "peticion")
         // =========================================================
         function hacerObjetoArrastrable(elemento, claveObjeto) {
             let arrastrando = false;
@@ -1391,7 +1390,6 @@
                 let nuevoLeft = e.clientX - rectContenedor.left - offsetX;
                 let nuevoTop = e.clientY - rectContenedor.top - offsetY;
 
-                // Mantener el pequeño objeto dentro de los bordes del chat
                 const maxLeft = Math.max(0, rectContenedor.width - elemento.offsetWidth);
                 const maxTop = Math.max(0, rectContenedor.height - elemento.offsetHeight);
 
@@ -1401,7 +1399,6 @@
                 elemento.style.left = `${nuevoLeft}px`;
                 elemento.style.top = `${nuevoTop}px`;
 
-                // Guardar la nueva posición para que no se reinicie al recargar datos
                 posicionesObjetosVelacion[claveObjeto] = {
                     left: nuevoLeft,
                     top: nuevoTop
@@ -1427,7 +1424,6 @@
             objeto.className = 'objeto-vela-movil';
             objeto.title = 'Arrastra esta vela para moverla por la sala';
 
-            // Si aún no tiene posición asignada, ubicarlo en un punto aleatorio dentro del chat
             if (!posicionesObjetosVelacion[claveObjeto]) {
                 const anchoDisponible = Math.max(180, (listaMensajes.clientWidth || 520) - 145);
                 const altoDisponible = Math.max(160, (listaMensajes.clientHeight || 380) - 125);
@@ -1463,13 +1459,14 @@
         }
 
         async function cargarPeticionesVelacion() {
-            // No re-renderizar mientras el usuario está arrastrando una vela con el cursor
             if (document.querySelector('.objeto-vela-movil.arrastrando')) return;
 
             try {
                 const response = await fetch(URL_HOJA4_VELACION);
                 const json = await response.json();
-                const filas = json.hoja4 || [];
+
+                const claveRaiz = Object.keys(json).find(k => Array.isArray(json[k])) || 'hoja4';
+                const filas = json[claveRaiz] || [];
 
                 listaMensajes.innerHTML = '<div class="aviso-altar-flotante">🕯️ Arrastra y mueve las velas</div>';
                 const miNombre = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
@@ -1477,7 +1474,13 @@
 
                 let contador = 0;
                 filas.forEach(fila => {
-                    const textoPeticion = fila.peticiones;
+                    // Celda C llamada exactamente: peticion
+                    const clavePeticion = Object.keys(fila).find(
+                        k => k.trim().toLowerCase() === 'peticion'
+                    );
+
+                    const textoPeticion = clavePeticion ? fila[clavePeticion] : '';
+
                     if (textoPeticion && String(textoPeticion).trim() !== '') {
                         crearObjetoVelaAlAzar(String(textoPeticion).trim(), contador);
                         contador++;
@@ -1672,12 +1675,29 @@
         document.getElementById('btnRecargarChat').addEventListener('click', cargarMensajesYUsuarios);
 
         // =========================================================
-        // 8. BÚSQUEDA REAL AL AZAR DE "romance" E "ia drama romance"
+        // 8. BÚSQUEDA REAL AL AZAR DE ROMANCE Y DRAMA ROMÁNTICO
         // =========================================================
-        async function buscarImagenAlAzar(terminoBusqueda, imgElemento, txtElemento, terminoRespaldo) {
+        const consultasRomance = [
+            'romantic couple',
+            'romance love',
+            'lovers embrace',
+            'romantic sunset couple',
+            'romance painting'
+        ];
+
+        const consultasDramaRomantico = [
+            'romantic drama',
+            'dramatic romance',
+            'tragic lovers',
+            'heartbreak love',
+            'melodrama romance'
+        ];
+
+        async function buscarImagenRomanticaAlAzar(listaConsultas, imgElemento, txtElemento) {
+            const terminoElegido = listaConsultas[Math.floor(Math.random() * listaConsultas.length)];
             try {
-                const offsetAleatorio = Math.floor(Math.random() * 25);
-                const apiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(terminoBusqueda)}&gsrnamespace=6&gsrlimit=15&gsroffset=${offsetAleatorio}&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&origin=*`;
+                const offsetAleatorio = Math.floor(Math.random() * 20);
+                const apiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(terminoElegido)}&gsrnamespace=6&gsrlimit=18&gsroffset=${offsetAleatorio}&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&origin=*`;
 
                 const respuesta = await fetch(apiUrl);
                 const datos = await respuesta.json();
@@ -1685,19 +1705,22 @@
 
                 const imagenesValidas = paginas.filter(p => {
                     const url = p.imageinfo?.[0]?.thumburl || p.imageinfo?.[0]?.url || '';
-                    return /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i.test(url);
+                    const titulo = (p.title || '').toLowerCase();
+                    const esFormatoImagen = /\.(jpg|jpeg|png|webp)(\?.*)?$/i.test(url);
+                    const noEsDiagrama = !/(logo|icon|map|chart|graph|diagram|flag|svg)/i.test(titulo);
+                    return esFormatoImagen && noEsDiagrama;
                 });
 
                 if (imagenesValidas.length > 0) {
                     const elegida = imagenesValidas[Math.floor(Math.random() * imagenesValidas.length)];
                     const urlFinal = elegida.imageinfo[0].thumburl || elegida.imageinfo[0].url;
                     imgElemento.src = urlFinal;
-                    txtElemento.textContent = terminoBusqueda;
-                } else if (terminoRespaldo) {
-                    buscarImagenAlAzar(terminoRespaldo, imgElemento, txtElemento, null);
+                    txtElemento.textContent = terminoElegido;
+                } else if (terminoElegido !== 'romance love') {
+                    buscarImagenRomanticaAlAzar(['romance love'], imgElemento, txtElemento);
                 }
             } catch (error) {
-                console.error(`Error buscando "${terminoBusqueda}":`, error);
+                console.error(`Error buscando "${terminoElegido}":`, error);
             }
         }
 
@@ -1707,24 +1730,24 @@
         const txtBanner2 = document.getElementById('txtBanner2');
 
         function cargarBannerRomance() {
-            buscarImagenAlAzar('romance', imgBanner1, txtBanner1, 'love romance');
+            buscarImagenRomanticaAlAzar(consultasRomance, imgBanner1, txtBanner1);
         }
 
-        function cargarBannerIaDramaRomance() {
-            buscarImagenAlAzar('ia drama romance', imgBanner2, txtBanner2, 'drama romance');
+        function cargarBannerDramaRomantico() {
+            buscarImagenRomanticaAlAzar(consultasDramaRomantico, imgBanner2, txtBanner2);
         }
 
         document.getElementById('btnSigBanner1').addEventListener('click', cargarBannerRomance);
         imgBanner1.addEventListener('click', cargarBannerRomance);
 
-        document.getElementById('btnSigBanner2').addEventListener('click', cargarBannerIaDramaRomance);
-        imgBanner2.addEventListener('click', cargarBannerIaDramaRomance);
+        document.getElementById('btnSigBanner2').addEventListener('click', cargarBannerDramaRomantico);
+        imgBanner2.addEventListener('click', cargarBannerDramaRomantico);
 
         // Ejecución inicial
         cargarBannerRomance();
-        cargarBannerIaDramaRomance();
+        cargarBannerDramaRomantico();
         setInterval(cargarBannerRomance, 12000);
-        setInterval(cargarBannerIaDramaRomance, 14000);
+        setInterval(cargarBannerDramaRomantico, 14000);
 
         cargarMensajesYUsuarios();
         setInterval(cargarMensajesYUsuarios, 5000);
