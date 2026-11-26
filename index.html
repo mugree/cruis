@@ -12,7 +12,7 @@
 		}
 
 		body {
-			font-family: Arial, sans-serif;
+			font-family: 'Courier New', Courier, monospace;
 			background-color: #000000;
 			color: #ffffff;
 			width: 100vw;
@@ -60,317 +60,355 @@
 		}
 
 		/* ------------------------------------------------ */
-		/* SECCIÓN 2: MAPA INTERACTIVO Y COMENTARIOS        */
+		/* SECCIÓN 2: MAPA OSCURO, NIEBLA Y LINTERNA        */
 		/* ------------------------------------------------ */
 		#seccionMapa {
 			display: none;
 			width: 100vw;
 			min-height: 100vh;
 			background-color: #000;
-			padding: 40px 20px 120px 20px;
+			padding: 40px 20px 140px 20px;
 			flex-direction: column;
 			align-items: center;
 			overflow-y: auto;
+			position: relative;
 		}
 
 		#seccionMapa.activa {
 			display: flex;
 		}
 
-		/* Contenedor del Mapa */
 		.contenedor-mapa-wrapper {
 			width: 90vw;
 			max-width: 1100px;
 			text-align: center;
 			margin-bottom: 20px;
+			position: relative;
 		}
 
 		.titulo-arriba-mapa {
-			font-size: 22px;
+			font-size: 20px;
 			font-weight: normal;
-			color: #ffffff;
+			color: rgba(255, 255, 255, 0.25);
 			margin-bottom: 15px;
-			letter-spacing: 1px;
+			letter-spacing: 2px;
+			transition: color 0.3s;
 		}
 
 		.subtitulo-abajo-mapa {
 			font-size: 13px;
-			color: #888888;
+			color: rgba(255, 255, 255, 0.2);
 			margin-top: 15px;
-			margin-bottom: 60px;
-			letter-spacing: 1px;
+			margin-bottom: 80px;
+			letter-spacing: 2px;
 		}
 
 		#mapaContenedor {
 			position: relative;
 			width: 100%;
-			border: 1px solid #222222;
+			border: 1px solid #141414;
 			overflow: hidden;
 			cursor: crosshair;
+			background-color: #000;
 		}
 
+		/* Imagen del mapa oscurecida */
 		#mapaContenedor img {
 			width: 100%;
 			height: auto;
 			display: block;
+			filter: brightness(0.24) contrast(1.25) grayscale(0.35);
+			user-select: none;
+		}
+
+		/* Capa de niebla atmosférica */
+		.capa-niebla {
+			position: absolute;
+			top: -50%;
+			left: -50%;
+			width: 200%;
+			height: 200%;
+			background: 
+				radial-gradient(circle at 30% 40%, rgba(180, 180, 180, 0.08), transparent 45%),
+				radial-gradient(circle at 70% 60%, rgba(150, 150, 150, 0.09), transparent 50%),
+				radial-gradient(circle at 50% 50%, rgba(200, 200, 200, 0.05), transparent 60%);
+			filter: blur(25px);
+			animation: movimientoNiebla 18s infinite alternate ease-in-out;
+			pointer-events: none;
+			z-index: 50;
+		}
+
+		@keyframes movimientoNiebla {
+			0% { transform: translate(-4%, -3%) scale(1); }
+			50% { transform: translate(3%, 4%) scale(1.05); }
+			100% { transform: translate(-2%, 2%) scale(1.02); }
+		}
+
+		/* Máscara de oscuridad con circunferencia +50% (115px) y centro más claro */
+		#capaOscuridadLinterna {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			pointer-events: none;
+			z-index: 60;
+			background: radial-gradient(
+				circle 115px at var(--x, -250px) var(--y, -250px),
+				rgba(255, 255, 255, 0.35) 0%,
+				rgba(255, 255, 255, 0.14) 35%,
+				rgba(0, 0, 0, 0.62) 70%,
+				rgba(0, 0, 0, 0.94) 100%
+			);
+		}
+
+		/* ------------------------------------------------ */
+		/* PUNTOS ROJOS Y TEXTO FIJO OPACO EN EL MAPA       */
+		/* ------------------------------------------------ */
+		.pin-wrapper {
+			position: absolute;
+			transform: translate(-50%, -50%);
+			z-index: 120;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			pointer-events: none;
+		}
+
+		.pin-comentario {
+			width: 10px;
+			height: 10px;
+			background-color: #ff0000;
+			border-radius: 50%;
+			box-shadow: 0 0 8px #ff0000, 0 0 16px #ff0000;
+			animation: pulsoBrillo 1.6s infinite alternate ease-in-out;
+		}
+
+		@keyframes pulsoBrillo {
+			from { box-shadow: 0 0 4px #b30000, 0 0 8px #b30000; }
+			to { box-shadow: 0 0 12px #ff1a1a, 0 0 22px #ff0000; }
+		}
+
+		/* Texto del comentario fijo en el mapa, muy opaco resaltando en la oscuridad */
+		.texto-fijo-mapa {
+			margin-top: 6px;
+			color: rgba(255, 255, 255, 0.28);
+			font-size: 11px;
+			max-width: 160px;
+			text-align: center;
+			line-height: 1.2;
+			text-shadow: 0 0 6px rgba(255, 255, 255, 0.35), 0 1px 2px #000;
+			word-wrap: break-word;
+			transition: color 0.3s ease, text-shadow 0.3s ease;
+		}
+
+		.pin-wrapper.iluminado .texto-fijo-mapa {
+			color: rgba(255, 255, 255, 0.85);
+			text-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
 		}
 
 		/* Formulario Popup al hacer clic en el mapa */
 		#popupComentario {
 			display: none;
 			position: absolute;
-			background-color: #000000;
-			border: 1px solid #ffffff;
-			padding: 15px;
-			width: 260px;
+			background-color: #050505;
+			border: 1px solid #444;
+			padding: 12px;
+			width: 230px;
 			z-index: 500;
-			transform: translate(-50%, -100%);
+			transform: translate(-50%, -110%);
 		}
 
 		#popupComentario input[type="text"] {
 			width: 100%;
-			padding: 8px;
-			margin-bottom: 10px;
-			background-color: #111111;
-			border: 1px solid #333333;
-			color: #ffffff;
-			box-sizing: border-box;
-			font-size: 13px;
+			padding: 7px;
+			margin-bottom: 8px;
+			background-color: #0d0d0d;
+			border: 1px solid #2a2a2a;
+			color: #ccc;
+			font-family: inherit;
+			font-size: 12px;
+			outline: none;
 		}
 
 		#popupComentario .botones-popup {
 			display: flex;
-			gap: 8px;
+			gap: 6px;
 		}
 
 		#popupComentario button {
-			padding: 8px;
-			font-size: 12px;
-			border: 1px solid #ffffff;
-			background-color: #000000;
-			color: #ffffff;
+			padding: 6px;
+			font-size: 11px;
+			border: 1px solid #444;
+			background-color: #000;
+			color: #aaa;
 			cursor: pointer;
 			flex: 1;
+			font-family: inherit;
 		}
 
 		#popupComentario button:hover {
-			background-color: #ffffff;
-			color: #000000;
+			background-color: #222;
+			color: #fff;
 		}
 
 		/* ------------------------------------------------ */
-		/* PUNTOS ROJOS BRILLANTES (ANIMACIÓN RESPLANDOR)   */
-		/* ------------------------------------------------ */
-		.pin-comentario {
-			position: absolute;
-			width: 12px;
-			height: 12px;
-			background-color: #ff0000;
-			border: 1px solid #ffffff;
-			border-radius: 50%;
-			transform: translate(-50%, -50%);
-			cursor: pointer;
-			z-index: 100;
-			box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
-			animation: pulsoBrillo 1.5s infinite alternate ease-in-out;
-		}
-
-		@keyframes pulsoBrillo {
-			from {
-				box-shadow: 0 0 4px #e60000, 0 0 8px #e60000;
-			}
-			to {
-				box-shadow: 0 0 14px #ff3333, 0 0 26px #ff0000, 0 0 36px #ff0000;
-			}
-		}
-
-		.pin-comentario:hover {
-			transform: translate(-50%, -50%) scale(1.6);
-			z-index: 200;
-		}
-
-		.pin-comentario .tooltip-comentario {
-			display: none;
-			position: absolute;
-			bottom: 20px;
-			left: 50%;
-			transform: translateX(-50%);
-			background-color: #000000;
-			border: 1px solid #ffffff;
-			padding: 8px 12px;
-			width: 200px;
-			font-size: 12px;
-			color: #ffffff;
-			z-index: 300;
-			pointer-events: none;
-		}
-
-		.pin-comentario:hover .tooltip-comentario {
-			display: block;
-		}
-
-		/* ------------------------------------------------ */
-		/* ENLACE ABAJO DEL MAPA CON AMARILLO POCO SATURADO */
+		/* ENLACE ABAJO DEL MAPA                            */
 		/* ------------------------------------------------ */
 		.barra-enlace {
 			width: 100%;
 			max-width: 1100px;
 			text-align: center;
-			padding: 40px 0 20px 0;
-			margin-top: 60px;
-			border-top: 1px solid #222222;
+			padding: 50px 0 30px 0;
+			margin-top: 120px;
+			border-top: 1px solid #141414;
 		}
 
 		.enlace-veo {
-			color: #e2dfb5; /* Amarillo muy poco saturado */
-			font-size: 1.4rem;
-			font-weight: normal;
+			color: #e2dfb5;
+			opacity: 0.55;
+			font-size: 1.3rem;
 			text-decoration: underline;
-			letter-spacing: 2px;
+			letter-spacing: 3px;
 			cursor: pointer;
+			transition: opacity 0.3s;
 		}
 
 		.enlace-veo:hover {
-			color: #ffffff;
+			opacity: 1;
 		}
 
 		/* ------------------------------------------------ */
-		/* POP-UP MODAL DE LOGIN                           */
+		/* ALERTAS SIMPLES CON ESTILO ROMÁNTICO             */
 		/* ------------------------------------------------ */
-		#modalOverlayLogin {
+		#overlayAlerta {
 			display: none;
 			position: fixed;
 			top: 0;
 			left: 0;
 			width: 100vw;
 			height: 100vh;
-			background-color: rgba(0, 0, 0, 0.85);
-			z-index: 2000;
-			justify-content: center;
-			align-items: center;
+			background-color: rgba(0, 0, 0, 0.78);
+			backdrop-filter: blur(3px);
+			z-index: 3000;
 		}
 
-		#login {
-			position: relative;
-			width: 280px;
-			background-color: #000000;
-			border: 1px solid #ffffff;
-			padding: 25px;
-		}
-
-		.btn-cerrar-login {
+		.ventana-romantica {
 			position: absolute;
-			top: 10px;
-			right: 10px;
-			background: transparent;
-			border: none;
-			color: #ffffff;
-			font-size: 16px;
-			cursor: pointer;
+			width: 270px;
+			background: linear-gradient(160deg, #160c10 0%, #090607 100%);
+			border: 1px solid rgba(235, 185, 198, 0.45);
+			border-radius: 16px;
+			padding: 28px 22px 24px 22px;
+			text-align: center;
+			box-shadow: 0 10px 35px rgba(220, 150, 170, 0.16);
+			font-family: 'Georgia', 'Times New Roman', serif;
+			animation: aparecerSuave 0.45s ease-out forwards;
 		}
 
-		#login h2 {
-			margin-bottom: 15px;
-			font-size: 14px;
-			color: #ffffff;
-			font-weight: normal;
-			text-transform: uppercase;
-			letter-spacing: 1px;
+		@keyframes aparecerSuave {
+			from {
+				opacity: 0;
+				transform: translateY(8px) scale(0.97);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0) scale(1);
+			}
 		}
 
-		#login form input[type="text"],
-		#login form input[type="password"] {
-			width: 100%;
-			padding: 8px;
-			margin-bottom: 12px;
-			box-sizing: border-box;
-			border: 1px solid #333333;
-			background-color: #111111;
-			color: #ffffff;
-		}
-
-		#login form input[type="submit"] {
-			width: 100%;
-			padding: 8px;
-			background-color: #000000;
-			color: #ffffff;
-			border: 1px solid #ffffff;
-			cursor: pointer;
-			text-transform: uppercase;
+		.ornamento-romantico {
 			font-size: 12px;
+			color: rgba(235, 185, 198, 0.5);
+			letter-spacing: 6px;
+			margin-bottom: 12px;
 		}
 
-		#login form input[type="submit"]:hover {
-			background-color: #ffffff;
-			color: #000000;
+		.mensaje-romantico {
+			font-size: 20px;
+			font-style: italic;
+			font-weight: normal;
+			color: #f6e3e8;
+			margin-bottom: 24px;
+			letter-spacing: 1.5px;
+			text-shadow: 0 0 12px rgba(246, 227, 232, 0.25);
+		}
+
+		.botones-romanticos {
+			display: flex;
+			justify-content: center;
+			gap: 14px;
+		}
+
+		.btn-romantico {
+			background-color: transparent;
+			color: #e8ccd3;
+			border: 1px solid rgba(235, 185, 198, 0.4);
+			border-radius: 20px;
+			padding: 6px 22px;
+			font-family: 'Georgia', 'Times New Roman', serif;
+			font-style: italic;
+			font-size: 13px;
+			letter-spacing: 1px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+
+		.btn-romantico:hover {
+			background-color: rgba(235, 185, 198, 0.18);
+			border-color: #f6e3e8;
+			color: #ffffff;
+			box-shadow: 0 0 12px rgba(235, 185, 198, 0.25);
 		}
 	</style>
 </head>
 <body>
 
-	<!-- SECCIÓN 1: TRANSICIÓN DIV 2 -> DIV 1 A PANTALLA COMPLETA -->
+	<!-- SECCIÓN 1: TRANSICIÓN DIV 2 -> DIV 1 -->
 	<div id="seccionArte">
-		<!-- Inicia mostrando el Div 2 -->
 		<div id="div2" class="caja-fullscreen activa">
 			<img src="https://doctorcan.com/wp-content/uploads/2024/10/87156275_10028734-683x1024.png">
 		</div>
-
-		<!-- Div 1 -->
 		<div id="div1" class="caja-fullscreen"> 
 			<img src="https://www.infobae.com/resizer/v2/DZ5KM4RKKVCFJOLTCVG5CFKI7Q.png?auth=1f7623943d7c39e1f0ee2b77796e0b9f274fdf152934b02d5420353c62e3fc2f&smart=true&width=992&height=558&quality=85">
 		</div>
 	</div>
 
-	<!-- SECCIÓN 2: MAPA INTERACTIVO Y ENLACE FINAL -->
+	<!-- SECCIÓN 2: MAPA OSCURO, NIEBLA Y LINTERNA -->
 	<div id="seccionMapa">
-
-		<!-- Mapa de la universidad -->
 		<div class="contenedor-mapa-wrapper">
-			<!-- Título arriba del mapa -->
 			<h2 class="titulo-arriba-mapa">¿Donde has hecho cruissing?</h2>
 
 			<div id="mapaContenedor">
 				<img id="imgMapa" src="https://bffrepositorio.unal.edu.co/server/api/core/bitstreams/d1ffd88a-eb03-4c76-b5b9-db9ff4d39569/content" alt="Mapa Universidad Nacional">
+				
+				<!-- Niebla y Linterna -->
+				<div class="capa-niebla"></div>
+				<div id="capaOscuridadLinterna"></div>
 
+				<!-- Popup para escribir comentario en el punto exacto -->
 				<div id="popupComentario">
-					<input type="text" id="inputNombreMapa" placeholder="Usuario" readonly>
-					<input type="text" id="inputTextoMapa" placeholder="Escribe..." required>
+					<input type="text" id="inputTextoMapa" placeholder="..." autocomplete="off">
 					<div class="botones-popup">
-						<button type="button" id="btnGuardarPin">Publicar</button>
-						<button type="button" id="btnCerrarPopup">Cancelar</button>
+						<button type="button" id="btnGuardarPin">Fijar</button>
+						<button type="button" id="btnCerrarPopup">X</button>
 					</div>
 				</div>
 			</div>
 
-			<!-- Texto abajo del mapa -->
 			<p class="subtitulo-abajo-mapa">ubicalo en el mapa</p>
 		</div>
 
-		<!-- Enlace aún más abajo del mapa (Amarillo muy poco saturado) -->
+		<!-- Enlace inferior -->
 		<div class="barra-enlace">
 			<a id="btnCuandoTeVeo" class="enlace-veo">¿Cuando te veo?</a>
 		</div>
-
 	</div>
 
-	<!-- POP-UP MODAL DE LOGIN (Aparece al pulsar "¿Cuando te veo?") -->
-	<div id="modalOverlayLogin">
-		<div id="login">
-			<button class="btn-cerrar-login" id="btnCerrarLogin">&times;</button>
-			<h2>Acceder</h2>
-			<form id="loginForm">
-				<label for="username" style="font-size: 11px; display: block; margin-bottom: 4px;">USUARIO</label>
-				<input type="text" id="username" required>
-				<label for="pwd" style="font-size: 11px; display: block; margin-bottom: 4px;">CONTRASEÑA</label>
-				<input type="password" id="contraseña" required>
-				<input type="submit" value="Ingresar">
-			</form>
-			<div id="resultadoLogin" style="display: none; font-size: 12px; margin-top: 10px;"></div>
-		</div>
-	</div>
+	<!-- CONTENEDOR DE ALERTAS ROMÁNTICAS -->
+	<div id="overlayAlerta"></div>
 
 	<script>
-		let usuarioLogueadoActual = 'Anónimo';
 		let coordsClicActual = { xPercent: 0, yPercent: 0 };
 		let estadoSeccion = 1;
 
@@ -379,9 +417,7 @@
 		const div1 = document.getElementById('div1');
 		const div2 = document.getElementById('div2');
 
-		// Endpoints de Sheety
-		const urlHoja1 = 'https://api.sheety.co/3bf2b2add58e4c4d360e0b269fb830d8/hojadeC/hoja1';
-		const urlHoja2 = 'https://api.sheety.co/3bf2b2add58e4c4d360e0b269fb830d8/hojadeC/hoja2';
+		const urlHoja2 = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja2';
 
 		// ----------------------------------------------------
 		// 1. TRANSICIÓN SILENCIOSA: DIV 2 -> DIV 1 -> MAPA
@@ -399,48 +435,86 @@
 		});
 
 		// ----------------------------------------------------
-		// 2. LÓGICA DEL MAPA Y PUNTOS ROJOS BRILLANTES
+		// 2. EFECTO LINTERNA AMPLIADA (+50%) E ILUMINACIÓN DE TEXTOS
 		// ----------------------------------------------------
 		const mapaContenedor = document.getElementById('mapaContenedor');
+		const capaLinterna = document.getElementById('capaOscuridadLinterna');
+
+		mapaContenedor.addEventListener('mousemove', (e) => {
+			const rect = mapaContenedor.getBoundingClientRect();
+			const mouseX = e.clientX - rect.left;
+			const mouseY = e.clientY - rect.top;
+
+			capaLinterna.style.setProperty('--x', `${mouseX}px`);
+			capaLinterna.style.setProperty('--y', `${mouseY}px`);
+
+			// Radio de detección ampliado proporcionalmente a la circunferencia (130px)
+			const pines = document.querySelectorAll('.pin-wrapper');
+			pines.forEach(pin => {
+				const pinRect = pin.getBoundingClientRect();
+				const pinCenterX = pinRect.left - rect.left + (pinRect.width / 2);
+				const pinCenterY = pinRect.top - rect.top + (pinRect.height / 2);
+				const distancia = Math.hypot(mouseX - pinCenterX, mouseY - pinCenterY);
+
+				if (distancia < 130) {
+					pin.classList.add('iluminado');
+				} else {
+					pin.classList.remove('iluminado');
+				}
+			});
+		});
+
+		mapaContenedor.addEventListener('mouseleave', () => {
+			capaLinterna.style.setProperty('--x', `-250px`);
+			capaLinterna.style.setProperty('--y', `-250px`);
+			document.querySelectorAll('.pin-wrapper').forEach(p => p.classList.remove('iluminado'));
+		});
+
+		// ----------------------------------------------------
+		// 3. FIJAR COMENTARIOS Y PUNTOS EN COORDENADAS EXACTAS
+		// ----------------------------------------------------
 		const popupComentario = document.getElementById('popupComentario');
-		const inputNombreMapa = document.getElementById('inputNombreMapa');
 		const inputTextoMapa = document.getElementById('inputTextoMapa');
 		const btnGuardarPin = document.getElementById('btnGuardarPin');
 		const btnCerrarPopup = document.getElementById('btnCerrarPopup');
 
 		mapaContenedor.addEventListener('click', function(e) {
-			if (e.target.closest('.pin-comentario') || e.target.closest('#popupComentario')) {
-				return;
-			}
+			if (e.target.closest('#popupComentario')) return;
 
 			const rect = mapaContenedor.getBoundingClientRect();
 			const x = e.clientX - rect.left;
 			const y = e.clientY - rect.top;
 
-			coordsClicActual.xPercent = ((x / rect.width) * 100).toFixed(2);
-			coordsClicActual.yPercent = ((y / rect.height) * 100).toFixed(2);
+			coordsClicActual.xPercent = parseFloat(((x / rect.width) * 100).toFixed(4));
+			coordsClicActual.yPercent = parseFloat(((y / rect.height) * 100).toFixed(4));
 
 			popupComentario.style.left = coordsClicActual.xPercent + '%';
 			popupComentario.style.top = coordsClicActual.yPercent + '%';
 			popupComentario.style.display = 'block';
 
-			inputNombreMapa.value = usuarioLogueadoActual;
+			inputTextoMapa.value = '';
 			inputTextoMapa.focus();
 		});
 
-		btnCerrarPopup.addEventListener('click', () => {
+		btnCerrarPopup.addEventListener('click', (e) => {
+			e.stopPropagation();
 			popupComentario.style.display = 'none';
 			inputTextoMapa.value = '';
 		});
 
-		btnGuardarPin.addEventListener('click', function() {
+		function guardarYMostrarComentario() {
 			const comentarioTexto = inputTextoMapa.value.trim();
 			if (!comentarioTexto) return;
 
-			const autor = inputNombreMapa.value || 'Anónimo';
 			const fechaActual = new Date().toLocaleString('es-CO');
+			const xPos = coordsClicActual.xPercent;
+			const yPos = coordsClicActual.yPercent;
 
-			crearPinEnMapa(autor, comentarioTexto, fechaActual, coordsClicActual.xPercent, coordsClicActual.yPercent);
+			crearPinFijoEnMapa(comentarioTexto, xPos, yPos);
+
+			const guardadosLocal = JSON.parse(localStorage.getItem('pines_cruissing_unal') || '[]');
+			guardadosLocal.push({ comentario: comentarioTexto, x: xPos, y: yPos, fecha: fechaActual });
+			localStorage.setItem('pines_cruissing_unal', JSON.stringify(guardadosLocal));
 
 			popupComentario.style.display = 'none';
 			inputTextoMapa.value = '';
@@ -450,96 +524,147 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					hoja2: {
-						name: autor,
 						comentario: comentarioTexto,
-						fecha: fechaActual
+						fecha: fechaActual,
+						x: String(xPos),
+						y: String(yPos)
 					}
 				})
-			}).catch(err => console.error('Error en Sheety hoja2:', err));
-		});
-
-		function crearPinEnMapa(autor, texto, fecha, xPct, yPct) {
-			const pin = document.createElement('div');
-			pin.className = 'pin-comentario';
-			pin.style.left = xPct + '%';
-			pin.style.top = yPct + '%';
-
-			pin.innerHTML = `
-				<div class="tooltip-comentario">
-					<strong>${autor}</strong><br>
-					<span style="font-size: 10px; color: #888;">${fecha}</span><br>
-					<div style="margin-top: 4px;">${texto}</div>
-				</div>
-			`;
-
-			mapaContenedor.appendChild(pin);
+			})
+			.then(res => res.json())
+			.then(data => console.log('Guardado en Sheety:', data))
+			.catch(err => console.error('Error Sheety:', err));
 		}
 
-		function cargarComentariosHoja2() {
+		btnGuardarPin.addEventListener('click', (e) => {
+			e.stopPropagation();
+			guardarYMostrarComentario();
+		});
+
+		inputTextoMapa.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				guardarYMostrarComentario();
+			}
+		});
+
+		function crearPinFijoEnMapa(texto, xPct, yPct) {
+			const wrapper = document.createElement('div');
+			wrapper.className = 'pin-wrapper';
+			wrapper.style.left = xPct + '%';
+			wrapper.style.top = yPct + '%';
+
+			wrapper.innerHTML = `
+				<div class="pin-comentario"></div>
+				<div class="texto-fijo-mapa">${texto}</div>
+			`;
+
+			mapaContenedor.appendChild(wrapper);
+		}
+
+		function cargarPuntosGuardados() {
+			const mapaUnicos = new Map();
+
+			const locales = JSON.parse(localStorage.getItem('pines_cruissing_unal') || '[]');
+			locales.forEach(item => {
+				if (item.comentario && item.x && item.y) {
+					const clave = `${item.comentario}_${item.x}_${item.y}`;
+					mapaUnicos.set(clave, item);
+				}
+			});
+
 			fetch(urlHoja2)
 			.then(res => res.json())
 			.then(json => {
 				const datos = json.hoja2 || json.hoja2S || [];
 				datos.forEach(item => {
 					if (item.comentario) {
-						const x = item.x || Math.floor(Math.random() * 80 + 10);
-						const y = item.y || Math.floor(Math.random() * 80 + 10);
-						crearPinEnMapa(item.name || item.username || 'Anónimo', item.comentario, item.fecha || '', x, y);
+						let x = parseFloat(item.x);
+						let y = parseFloat(item.y);
+
+						if (isNaN(x) || isNaN(y)) {
+							let hash = 0;
+							for (let i = 0; i < item.comentario.length; i++) {
+								hash = item.comentario.charCodeAt(i) + ((hash << 5) - hash);
+							}
+							x = (Math.abs(hash) % 76) + 12;
+							y = (Math.abs(hash * 13) % 76) + 12;
+						}
+
+						const clave = `${item.comentario}_${x}_${y}`;
+						if (!mapaUnicos.has(clave)) {
+							mapaUnicos.set(clave, { comentario: item.comentario, x: x, y: y });
+						}
 					}
 				});
-			})
-			.catch(err => console.log('GET hoja2:', err));
-		}
 
-		cargarComentariosHoja2();
-
-		// ----------------------------------------------------
-		// 3. POP-UP MODAL LOGIN ACTIVADO POR "¿CUANDO TE VEO?"
-		// ----------------------------------------------------
-		const btnCuandoTeVeo = document.getElementById('btnCuandoTeVeo');
-		const modalOverlayLogin = document.getElementById('modalOverlayLogin');
-		const btnCerrarLogin = document.getElementById('btnCerrarLogin');
-		const loginForm = document.getElementById('loginForm');
-
-		btnCuandoTeVeo.addEventListener('click', () => {
-			modalOverlayLogin.style.display = 'flex';
-		});
-
-		btnCerrarLogin.addEventListener('click', () => {
-			modalOverlayLogin.style.display = 'none';
-		});
-
-		// Envío de datos mediante Sheety a HojadeC / hoja1
-		loginForm.addEventListener('submit', function(e) {
-			e.preventDefault();
-
-			const usernameVal = document.getElementById('username').value;
-			const contrasenaVal = document.getElementById('contraseña').value;
-
-			usuarioLogueadoActual = usernameVal;
-
-			fetch(urlHoja1, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					hoja1: {
-						username: usernameVal,
-						contraseña: contrasenaVal
-					}
-				})
-			})
-			.then(res => res.json())
-			.then(data => {
-				console.log('Credenciales guardadas en Sheety hoja1:', data);
-				// Redirección directa al enlace solicitado
-				window.location.href = 'cruisssing.html';
+				mapaUnicos.forEach(punto => {
+					crearPinFijoEnMapa(punto.comentario, punto.x, punto.y);
+				});
 			})
 			.catch(err => {
-				console.error('Error al guardar en hoja1:', err);
-				// Redirecciona de todos modos en caso de fallo de red
-				window.location.href = 'cruisssing.html';
+				console.log('Cargando respaldo local:', err);
+				mapaUnicos.forEach(punto => {
+					crearPinFijoEnMapa(punto.comentario, punto.x, punto.y);
+				});
 			});
+		}
+
+		cargarPuntosGuardados();
+
+		// ----------------------------------------------------
+		// 4. SECUENCIA DE ALERTAS SIMPLES Y ROMÁNTICAS
+		// ----------------------------------------------------
+		const btnCuandoTeVeo = document.getElementById('btnCuandoTeVeo');
+		const overlayAlerta = document.getElementById('overlayAlerta');
+
+		const mensajesRomanticos = [
+			'&lt;¿?&gt;',
+			'&lt;¿?¡¡¡&gt;',
+			'&lt;¿seguro?&gt;'
+		];
+
+		btnCuandoTeVeo.addEventListener('click', () => {
+			overlayAlerta.innerHTML = '';
+			overlayAlerta.style.display = 'block';
+			mostrarAlertaRomantica(0);
 		});
+
+		function mostrarAlertaRomantica(paso) {
+			if (paso >= mensajesRomanticos.length) {
+				window.location.href = 'cruisssing.html';
+				return;
+			}
+
+			const ventana = document.createElement('div');
+			ventana.className = 'ventana-romantica';
+
+			const offsetX = (paso - 1) * 26;
+			const offsetY = (paso - 1) * 24;
+			ventana.style.left = `calc(50% - 135px + ${offsetX}px)`;
+			ventana.style.top = `calc(50% - 75px + ${offsetY}px)`;
+			ventana.style.zIndex = 3001 + paso;
+
+			ventana.innerHTML = `
+				<div class="ornamento-romantico">♡</div>
+				<div class="mensaje-romantico">${mensajesRomanticos[paso]}</div>
+				<div class="botones-romanticos">
+					<button type="button" class="btn-romantico btn-si">sí</button>
+					<button type="button" class="btn-romantico btn-no">no</button>
+				</div>
+			`;
+
+			ventana.querySelector('.btn-si').addEventListener('click', () => {
+				mostrarAlertaRomantica(paso + 1);
+			});
+
+			ventana.querySelector('.btn-no').addEventListener('click', () => {
+				overlayAlerta.style.display = 'none';
+				overlayAlerta.innerHTML = '';
+			});
+
+			overlayAlerta.appendChild(ventana);
+		}
 	</script>
 
 </body>
