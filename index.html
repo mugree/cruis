@@ -144,7 +144,7 @@
 			100% { transform: translate(-2%, 2%) scale(1.02); }
 		}
 
-		/* Máscara de oscuridad con circunferencia +50% (115px) y centro más claro */
+		/* Máscara de oscuridad con circunferencia 115px y centro más claro */
 		#capaOscuridadLinterna {
 			position: absolute;
 			top: 0;
@@ -173,6 +173,7 @@
 			flex-direction: column;
 			align-items: center;
 			pointer-events: none;
+			transition: opacity 0.8s ease;
 		}
 
 		.pin-comentario {
@@ -410,14 +411,15 @@
 	<script>
 		let coordsClicActual = { xPercent: 0, yPercent: 0 };
 		let estadoSeccion = 1;
+		const LIMITE_INTERACCIONES = 25;
 
 		const seccionArte = document.getElementById('seccionArte');
 		const seccionMapa = document.getElementById('seccionMapa');
 		const div1 = document.getElementById('div1');
 		const div2 = document.getElementById('div2');
 
-		// URL de tu aplicación web de Google Apps Script
-		const urlAppsScript = 'https://script.google.com/macros/s/AKfycbwVH5vI28KV_7WRnatfr6oVAazdmNVNTyFNH0sw1jOCTwTJLuoBs6Lz-StP48ef8Q37eA/exec';
+		// PEGA AQUÍ LA NUEVA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
+		const urlAppsScript = 'https://script.google.com/macros/s/AKfycbyrYVZHzCHFViXz4IXX3roOu-c-21vu8m_r8PNG63Jo4yZwdFs9IaY2kWVqWfHKe0c07g/exec';
 
 		// ----------------------------------------------------
 		// 1. TRANSICIÓN SILENCIOSA: DIV 2 -> DIV 1 -> MAPA
@@ -470,7 +472,19 @@
 		});
 
 		// ----------------------------------------------------
-		// 3. FIJAR COMENTARIOS EN EL MAPA Y ENVIAR A APPS SCRIPT
+		// 3. REINICIO TOTAL DESPUÉS DE LA INTERACCIÓN 25
+		// ----------------------------------------------------
+		function reiniciarSistema() {
+			localStorage.removeItem('pines_cruissing_unal');
+			const pinesEnPantalla = document.querySelectorAll('.pin-wrapper');
+			pinesEnPantalla.forEach(pin => {
+				pin.style.opacity = '0';
+				setTimeout(() => pin.remove(), 800);
+			});
+		}
+
+		// ----------------------------------------------------
+		// 4. FIJAR COMENTARIOS EN EL MAPA Y ENVIAR A APPS SCRIPT
 		// ----------------------------------------------------
 		const popupComentario = document.getElementById('popupComentario');
 		const inputTextoMapa = document.getElementById('inputTextoMapa');
@@ -518,6 +532,11 @@
 			popupComentario.style.display = 'none';
 			inputTextoMapa.value = '';
 
+			// Si localmente ya alcanzó 25, reinicia de inmediato
+			if (guardadosLocal.length >= LIMITE_INTERACCIONES) {
+				setTimeout(reiniciarSistema, 600);
+			}
+
 			fetch(urlAppsScript, {
 				method: 'POST',
 				headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -531,7 +550,13 @@
 				})
 			})
 			.then(res => res.json())
-			.then(data => console.log('Guardado en Google Sheets:', data))
+			.then(data => {
+				console.log('Respuesta Google Sheets:', data);
+				// Si el servidor confirma el reinicio en el registro 25, limpia la pantalla
+				if (data.status === 'reset' || (data.total && data.total >= LIMITE_INTERACCIONES)) {
+					reiniciarSistema();
+				}
+			})
 			.catch(err => console.error('Error al enviar a Apps Script:', err));
 		}
 
@@ -565,17 +590,34 @@
 			const mapaUnicos = new Map();
 
 			const locales = JSON.parse(localStorage.getItem('pines_cruissing_unal') || '[]');
-			locales.forEach(item => {
-				if (item.comentario && item.x && item.y) {
-					const clave = `${item.comentario}_${item.x}_${item.y}`;
-					mapaUnicos.set(clave, item);
-				}
-			});
+			if (locales.length >= LIMITE_INTERACCIONES) {
+				localStorage.removeItem('pines_cruissing_unal');
+			} else {
+				locales.forEach(item => {
+					if (item.comentario && item.x && item.y) {
+						const clave = `${item.comentario}_${item.x}_${item.y}`;
+						mapaUnicos.set(clave, item);
+					}
+				});
+			}
 
 			fetch(urlAppsScript)
 			.then(res => res.json())
 			.then(json => {
 				const datos = json.hoja2 || [];
+
+				// Si la base de datos en Google Sheets ya tiene 25 o más, limpia localStorage y no dibuja nada
+				if (datos.length >= LIMITE_INTERACCIONES) {
+					reiniciarSistema();
+					return;
+				}
+
+				// Sincronizar con la nube si la hoja está vacía
+				if (datos.length === 0) {
+					localStorage.removeItem('pines_cruissing_unal');
+					mapaUnicos.clear();
+				}
+
 				datos.forEach(item => {
 					if (item.comentario) {
 						let x = parseFloat(item.x);
@@ -612,7 +654,7 @@
 		cargarPuntosGuardados();
 
 		// ----------------------------------------------------
-		// 4. SECUENCIA DE ALERTAS SIMPLES Y ROMÁNTICAS
+		// 5. SECUENCIA DE ALERTAS SIMPLES Y ROMÁNTICAS
 		// ----------------------------------------------------
 		const btnCuandoTeVeo = document.getElementById('btnCuandoTeVeo');
 		const overlayAlerta = document.getElementById('overlayAlerta');
