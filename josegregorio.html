@@ -268,7 +268,7 @@
 				Comunidad Gregoriana Internacional · Sanación, guía espiritual y ciencia oculta.
 			</div>
 		</div>
-		<img class="logo" alt="Logo" src="https://josegregoriohernandez.com/assets/images/logopeque.png" style="width 150%;">
+		<img class="logo" alt="Logo" src="https://josegregoriohernandez.com/assets/images/logopeque.png" style="width: 150px;">
 	</header>
 
 	<!-- MARQUEES WEB 1.0 -->
@@ -397,7 +397,7 @@
 						<div class="servicio">
 							<div data-img="9"></div>
 							<h3>UNIÓN Y PROTECCIÓN</h3>
-							<p>Los vínculos se han ido dañando por la distancia, los chismes, las envidias y las energías ajenas que se atravidensan en el camino.<br><br>El Doctor José Gregorio creció bajo principios de devoción, lealtad y unión; por eso brinda su guía a quienes buscan proteger un vínculo, atraer armonía o salvar lo que parecía perdido. Donde otros no ven solución, mostramos el camino.</p>
+							<p>Los vínculos se han ido dañando por la distancia, los chismes, las envidias y las energías ajenas que se atraviesan en el camino.<br><br>El Doctor José Gregorio creció bajo principios de devoción, lealtad y unión; por eso brinda su guía a quienes buscan proteger un vínculo, atraer armonía o salvar lo que parecía perdido. Donde otros no ven solución, mostramos el camino.</p>
 						</div>
 						<div class="servicio">
 							<div data-img="10"></div>
@@ -438,7 +438,7 @@ Amen."></div>
 				<div class="tarjeta-pop">
 					<div class="cabecera-tarjeta"><span>:: LIBRO DE TESTIMONIOS</span></div>
 					<marquee class="m-rojo" scrollamount="9">TESTIMONIOS ★ TESTIMONIOS ★ TESTIMONIOS ★ TESTIMONIOS ★ TESTIMONIOS ★</marquee>
-					<table class="grueso" style="margin-top:8px;">
+					<table class="grueso" id="tablaTestimonios" style="margin-top:8px;">
 						<tr>
 							<td style="width:28%; text-align:center;"><img src="https://josegregoriohernandez.com/assets/images/JGHWEB.jpg" style="width:90%; border:3px outset #6A0080;"></td>
 							<td>
@@ -469,6 +469,21 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 							</td>
 						</tr>
 					</table>
+
+					<!-- CAJA DE COMENTARIOS DE TESTIMONIOS (COLUMNA B EN SHEETY) -->
+					<fieldset style="border: 3px groove #6A0080; background-color: #FFFFCC; margin-top: 16px;">
+						<legend style="background-color: #6A0080; color: #FFFF00; font-family: 'Courier New', monospace; font-weight: bold; padding: 3px 10px; border: 2px solid #000;">
+							[ DEJAR NUEVO TESTIMONIO EN EL LIBRO ]
+						</legend>
+						<form id="formTestimonio">
+							<label class="mono"><b>Tu nombre o ciudad:</b></label><br>
+							<input type="text" id="autorTestimonio" required placeholder="Ej: Carlos G. - Cali" style="width: 60%; font-family: 'Courier New', monospace; padding: 4px; border: 2px inset #888; margin-bottom: 8px;"><br>
+							<label class="mono"><b>Relata tu testimonio o milagro recibido:</b></label><br>
+							<textarea id="textoTestimonio" rows="4" required placeholder="Escribe aquí cómo te ayudó el Dr. José Gregorio Hernández..." style="width: 96%; font-family: 'Times New Roman', serif; font-size: 15px; padding: 6px; border: 2px inset #888; margin-bottom: 8px;"></textarea><br>
+							<button type="submit" id="btnEnviarTestimonio" class="boton boton-morado">[ PUBLICAR TESTIMONIO ★ ]</button>
+							<span id="estadoTestimonio" class="mono" style="font-size: 12px; margin-left: 8px; color: #CC0000; font-weight: bold;"></span>
+						</form>
+					</fieldset>
 				</div>
 			</section>
 
@@ -512,23 +527,24 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 				</div>
 			</section>
 
-			<!-- FIELDSET INTERACTIVO ESTILO #POP -->
+			<!-- FIELDSET INTERACTIVO ESTILO #POP (VELACIÓN A / PETICIÓN C) -->
 			<fieldset style="border: 3px groove #CC0000; background-color: #FFFFFF; margin-top: 10px;">
 				<legend style="background-color: #FFFF00; color: #000000; font-family: 'Courier New', monospace; font-weight: bold; padding: 3px 10px; border: 2px solid #000;">
 					[ ENVIAR PETICIÓN O VELADORA VIRTUAL ]
 				</legend>
-				<form onsubmit="event.preventDefault(); alert('Tu petición ha sido registrada en el altar virtual.'); this.reset();">
+				<form id="formVeladora">
 					<label class="mono"><b>Motivo:</b></label>
-					<select style="font-family: 'Courier New', monospace; background: #FFFFCC; border: 2px inset #888;">
-						<option>Salud y Cirugía Espiritual</option>
-						<option>Unión de Pareja y Protección</option>
-						<option>Limpieza de Hogar / Negocio</option>
-						<option>Agradecimiento por Milagro</option>
+					<select id="motivoVeladora" style="font-family: 'Courier New', monospace; background: #FFFFCC; border: 2px inset #888;">
+						<option value="Agradecimiento por Milagro">Agradecimiento por Milagro (Tablón)</option>
+						<option value="Unión de Pareja y Protección">Unión de Pareja y Protección</option>
+						<option value="Limpieza de Hogar / Negocio">Limpieza de Hogar / Negocio</option>
+						<option value="Salud y Cirugía Espiritual">Salud y Cirugía Espiritual</option>
 					</select>
 					<br><br>
-					<label class="mono"><b>Nombre o iniciales:</b></label><br>
-					<input type="text" required placeholder="Ej: M.M. - Bogotá" style="width: 70%; font-family: 'Courier New', monospace; padding: 4px; border: 2px inset #888;">
-					<input type="submit" value="ENCENDER VELA ★" class="boton boton-rojo">
+					<label class="mono"><b>Nombre / Mensaje corto:</b></label><br>
+					<input type="text" id="mensajeVeladora" required placeholder="Ej: M.M. - Gracias por sanar a mi madre" style="width: 68%; font-family: 'Courier New', monospace; padding: 4px; border: 2px inset #888;">
+					<input type="submit" id="btnEnviarVeladora" value="ENCENDER VELA ★" class="boton boton-rojo">
+					<div id="estadoVeladora" class="mono" style="font-size: 12px; margin-top: 6px; color: #6A0080; font-weight: bold;"></div>
 				</form>
 			</fieldset>
 
@@ -540,11 +556,11 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 				★ TABLÓN DE MILAGROS ★
 			</div>
 
-			<!-- Marquee vertical Web 1.0 -->
-			<marquee direction="up" height="105" scrollamount="2" style="background: #FFFFFF; border: 2px inset #888888; padding: 6px; margin: 10px 0; font-family: 'Courier New', monospace; font-size: 12px;">
-				• [HOY] Nora A.: Gracias Dr. José Gregorio por unir mi hogar.<br><br>
-				• [AYER] Sofía C.: Milagro concedido tras la novena.<br><br>
-				• [EN VIVO] Sala de chat espiritual abierta ahora.
+			<!-- Marquee vertical Web 1.0 conectado a Columna A (velacion) -->
+			<marquee id="tablonMilagros" direction="up" height="120" scrollamount="2" style="background: #FFFFFF; border: 2px inset #888888; padding: 6px; margin: 10px 0; font-family: 'Courier New', monospace; font-size: 12px;">
+• [HOY] Nora A.: Gracias Dr. José Gregorio por unir mi hogar.<br><br>
+• [AYER] Sofía C.: Milagro concedido tras la novena.<br><br>
+• [EN VIVO] Sala de chat espiritual abierta ahora.
 			</marquee>
 
 			<h4 style="margin: 10px 0 6px 0; color: #CC0000; font-family: 'Courier New', monospace;">GUÍA RÁPIDA:</h4>
@@ -581,9 +597,9 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 			<hr size="3" color="#CC0000">
 
 			<div style="text-align: center; margin-top: 10px;">
-				<div style="font-size: 11px; font-weight: bold; margin-bottom: 4px;">DEVOTOS EN LÍNEA:</div>
-				<div style="background: #000000; color: #00FF00; font-family: 'Courier New', monospace; padding: 5px 10px; border: 3px inset #888888; display: inline-block; font-weight: bold;">
-					VISITAS: 084921
+				<div style="font-size: 11px; font-weight: bold; margin-bottom: 4px;">DEVOTOS EN LÍNEA / VISITAS:</div>
+				<div id="contadorVisitas" style="background: #000000; color: #00FF00; font-family: 'Courier New', monospace; padding: 5px 10px; border: 3px inset #888888; display: inline-block; font-weight: bold;">
+					VISITAS: CARGANDO...
 				</div>
 			</div>
 		</aside>
@@ -601,15 +617,182 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 
 <script>
 	/* ============================================================
-	   EDITA AQUÍ: pega las listas de imágenes extraídas
+	   1. CONTADOR DE VISITAS REAL
 	   ============================================================ */
-	const IMAGENES_SITIO_1 = [
-		// "https://josegregoriohernandez.com/.../imagen.jpg",
-	];
+	async function actualizarContadorReal() {
+		const elContador = document.getElementById('contadorVisitas');
+		try {
+			const res = await fetch('https://api.counterapi.dev/v1/consultorio-jgh-netart/visitas/up');
+			const data = await res.json();
+			if (data && typeof data.count !== 'undefined') {
+				elContador.textContent = 'VISITAS: ' + String(data.count).padStart(6, '0');
+			} else {
+				throw new Error('Sin conteo');
+			}
+		} catch (err) {
+			let local = parseInt(localStorage.getItem('jgh_visitas_local') || '1', 10);
+			local++;
+			localStorage.setItem('jgh_visitas_local', local);
+			elContador.textContent = 'VISITAS: ' + String(local).padStart(6, '0');
+		}
+	}
+	actualizarContadorReal();
+
+	/* ============================================================
+	   2. INTEGRACIÓN SHEETY (Columna A: velacion | B: comentarios | C: peticion)
+	   ============================================================ */
+	const SHEETY_URL = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja4';
+
+	function esc(s) {
+		return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+	}
+
+	// Cargar registros previos desde Sheety al iniciar
+	async function cargarDatosSheety() {
+		try {
+			const res = await fetch(SHEETY_URL);
+			const data = await res.json();
+			const filas = data.hoja4 || [];
+
+			const tablon = document.getElementById('tablonMilagros');
+			const tablaTest = document.getElementById('tablaTestimonios');
+
+			filas.forEach(fila => {
+				// Columna A: velacion -> va al Tablón de Milagros
+				const textoVelacion = fila.velacion || fila.a;
+				if (textoVelacion) {
+					tablon.innerHTML += `<br><br>• [MILAGRO] ${esc(textoVelacion)}`;
+				}
+
+				// Columna B: comentarios -> va a la tabla de Testimonios
+				const textoComentario = fila.comentarios || fila.b;
+				if (textoComentario) {
+					const tr = document.createElement('tr');
+					tr.innerHTML = `
+						<td style="width:28%; text-align:center;">
+							<div class="vacia" style="min-height:110px;">★ TESTIMONIO<br>DE DEVOTO ★</div>
+						</td>
+						<td>
+							<span class="dato-mono">TESTIMONIO DE LA COMUNIDAD</span>
+							<div class="pegar">${esc(textoComentario)}</div>
+						</td>
+					`;
+					tablaTest.appendChild(tr);
+				}
+			});
+		} catch (e) {
+			console.log('Nota: No se pudieron leer filas previas de Sheety:', e);
+		}
+	}
+	cargarDatosSheety();
+
+	// Formulario Veladora / Petición (Columna A o Columna C según selección)
+	document.getElementById('formVeladora').addEventListener('submit', async (e) => {
+		e.preventDefault();
+		const motivo = document.getElementById('motivoVeladora').value;
+		const mensaje = document.getElementById('mensajeVeladora').value.trim();
+		const btn = document.getElementById('btnEnviarVeladora');
+		const estado = document.getElementById('estadoVeladora');
+
+		if (!mensaje) return;
+		btn.disabled = true;
+		estado.textContent = 'Enviando al altar...';
+
+		const esMilagro = (motivo === 'Agradecimiento por Milagro');
+		const registroTexto = `${mensaje}`;
+
+		// Construir payload para Sheety (hoja4)
+		const payload = { hoja4: {} };
+		if (esMilagro) {
+			// Columna A: velacion
+			payload.hoja4.velacion = registroTexto;
+		} else {
+			// Columna C: peticion (Unión, Limpieza, Salud)
+			payload.hoja4.peticion = `[${motivo}] ${registroTexto}`;
+		}
+
+		try {
+			const res = await fetch(SHEETY_URL, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload)
+			});
+
+			if (!res.ok) throw new Error('Error en respuesta Sheety');
+
+			if (esMilagro) {
+				const tablon = document.getElementById('tablonMilagros');
+				tablon.innerHTML = `• [AHORA] ${esc(registroTexto)}<br><br>` + tablon.innerHTML;
+				estado.textContent = '★ ¡Agradecimiento publicado en el Tablón de Milagros!';
+			} else {
+				estado.textContent = `★ Petición de "${motivo}" registrada en el altar.`;
+			}
+			document.getElementById('formVeladora').reset();
+		} catch (err) {
+			estado.textContent = 'Error al conectar con el servidor. Intenta de nuevo.';
+		} finally {
+			btn.disabled = false;
+		}
+	});
+
+	// Formulario Caja de Comentarios en Testimonios (Columna B: comentarios)
+	document.getElementById('formTestimonio').addEventListener('submit', async (e) => {
+		e.preventDefault();
+		const autor = document.getElementById('autorTestimonio').value.trim();
+		const texto = document.getElementById('textoTestimonio').value.trim();
+		const btn = document.getElementById('btnEnviarTestimonio');
+		const estado = document.getElementById('estadoTestimonio');
+
+		if (!autor || !texto) return;
+		btn.disabled = true;
+		estado.textContent = 'Guardando testimonio...';
+
+		const comentarioCompleto = `${autor}\n\n${texto}`;
+		const payload = {
+			hoja4: {
+				comentarios: comentarioCompleto
+			}
+		};
+
+		try {
+			const res = await fetch(SHEETY_URL, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload)
+			});
+
+			if (!res.ok) throw new Error('Error al guardar comentario');
+
+			// Añadir inmediatamente a la tabla de testimonios en pantalla
+			const tablaTest = document.getElementById('tablaTestimonios');
+			const tr = document.createElement('tr');
+			tr.innerHTML = `
+				<td style="width:28%; text-align:center;">
+					<div class="vacia" style="min-height:110px;">★ NUEVO<br>TESTIMONIO ★</div>
+				</td>
+				<td>
+					<span class="dato-mono">RECIÉN PUBLICADO</span>
+					<div class="pegar">${esc(comentarioCompleto)}</div>
+				</td>
+			`;
+			tablaTest.appendChild(tr);
+
+			estado.textContent = '★ ¡Testimonio publicado!';
+			document.getElementById('formTestimonio').reset();
+		} catch (err) {
+			estado.textContent = 'No se pudo guardar el testimonio.';
+		} finally {
+			btn.disabled = false;
+		}
+	});
+
+	/* ============================================================
+	   3. IMÁGENES, CARRUSEL Y ROUTER
+	   ============================================================ */
+	const IMAGENES_SITIO_1 = [];
 	const IMAGENES_SITIO_2 = [
 		"https://drjosegregoriohernandezcol.com/wp-content/uploads/2022/10/consultorio-Dr-Jose-Gregorio-Hernandez-logo2.png"
 	];
-	/* ============================================================ */
 
 	const IDS_YT = ["5S5pI0TvBjw", "hyI7xxIYoT8", "N0cAESOUWE4", "oRpg5S1jMbc", "n6K_JE6qurE",
 		"5EzkhUCuDes", "AR6YgRr4DH4", "gqHybjm3Ilo", "auH62MMyDrs", "74oycKZS-B0", "62WxRK0GBfk", "D_7ZDUtMReY"];
@@ -621,9 +804,6 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 		if (SET2[i]) TODAS.push({ src: SET2[i], origen: "#2" });
 	}
 
-	function esc(s) {
-		return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-	}
 	function tag(i, clase) {
 		if (!TODAS.length) return '<div class="vacia">[imagen]</div>';
 		const m = TODAS[i % TODAS.length];
