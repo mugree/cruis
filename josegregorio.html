@@ -639,7 +639,7 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 	actualizarContadorReal();
 
 	/* ============================================================
-	   2. INTEGRACIÓN CON GOOGLE APPS SCRIPT (PESTAÑA hoja4)
+	   2. INTEGRACIÓN CON GOOGLE APPS SCRIPT (PESTAÑA hoja4 - Límite 50)
 	   (Columna A: velacion | B: comentarios | C: peticion)
 	   ============================================================ */
 	const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyzn-99WHOZSmoE78R5utJgOZTrCp2yjtEK9n0W3sTIhoxjQFjPzVKXJ2B54TIogsT-lQ/exec';
@@ -712,7 +712,7 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 			});
 
 			const result = await res.json();
-			if (result.status !== 'ok') throw new Error('Error en Apps Script');
+			if (result.status !== 'ok' && result.status !== 'reset') throw new Error('Error en Apps Script');
 
 			if (esMilagro) {
 				const tablon = document.getElementById('tablonMilagros');
@@ -754,7 +754,7 @@ Tenía un hogar y una familia maravillosa, un esposo maravilloso y dos hermosos 
 			});
 
 			const result = await res.json();
-			if (result.status !== 'ok') throw new Error('Error al guardar comentario');
+			if (result.status !== 'ok' && result.status !== 'reset') throw new Error('Error al guardar comentario');
 
 			const tablaTest = document.getElementById('tablaTestimonios');
 			const tr = document.createElement('tr');
