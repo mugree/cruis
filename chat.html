@@ -432,7 +432,7 @@
         #listaMensajes.modo-velacion {
             background-color: #09000f;
             background-image:
-                radial-gradient(circle at 50% 50%, rgba(255, 140, 0, 0.08) 0%, transparent 70%),
+                radial-gradient(circle at 50% 50%, rgba(255, 0, 51, 0.10) 0%, transparent 70%),
                 radial-gradient(#2a0022 1px, transparent 1px);
             background-size: 100% 100%, 24px 24px;
             overflow: hidden;
@@ -445,7 +445,7 @@
             right: 10px;
             font-family: 'Courier New', Courier, monospace;
             font-size: 0.72rem;
-            color: rgba(255, 204, 102, 0.7);
+            color: rgba(255, 204, 102, 0.75);
             pointer-events: none;
             z-index: 1;
         }
@@ -475,6 +475,64 @@
             transform: scale(1.08);
             filter: drop-shadow(0 0 12px rgba(255, 234, 0, 0.9));
             z-index: 99 !important;
+        }
+
+        /* Objeto Corazón Binario Rojo (mismo tamaño compacto que la vela) */
+        .objeto-corazon-binario {
+            position: absolute;
+            width: 120px;
+            height: 112px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            touch-action: none;
+            filter: drop-shadow(0 0 6px rgba(255, 0, 40, 0.75));
+            transition: transform 0.1s ease, filter 0.2s ease;
+        }
+
+        .objeto-corazon-binario:hover {
+            filter: drop-shadow(0 0 12px rgba(255, 20, 60, 0.95));
+            z-index: 50 !important;
+        }
+
+        .objeto-corazon-binario.arrastrando {
+            cursor: grabbing;
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 15px rgba(255, 0, 68, 1));
+            z-index: 99 !important;
+        }
+
+        /* Silueta de corazón recortada por clip-path */
+        .silueta-corazon-rojo {
+            width: 108px;
+            height: 98px;
+            background-color: #120004;
+            clip-path: path('M 54 94 C 54 94 4 63 4 30 C 4 12 18 2 33 2 C 43 2 50 8 54 15 C 58 8 65 2 75 2 C 90 2 104 12 104 30 C 104 63 54 94 54 94 Z');
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            pointer-events: none;
+            padding-top: 6px;
+        }
+
+        .matriz-binaria-roja {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 5.5px;
+            line-height: 5.6px;
+            letter-spacing: 0.4px;
+            font-weight: bold;
+            color: #ff0033;
+            text-shadow: 0 0 3px #ff0022;
+            white-space: pre;
+            text-align: center;
+            user-select: none;
+        }
+
+        .bit-tenue {
+            color: #660014;
+            text-shadow: none;
         }
 
         .arte-vela-ascii {
@@ -834,7 +892,7 @@
                         </div>
                         <div class="opcion-sala" data-sala="velacion">
                             #velacion
-                            <span>Velas & Objetos</span>
+                            <span>Velas & Corazones</span>
                         </div>
                         <div class="opcion-sala" data-sala="cine">
                             #cine
@@ -848,7 +906,7 @@
                     <button type="button" class="tab-btn" id="tabRegistrado">🔑 Nick Registrado</button>
                 </div>
 
-                <!-- Formulario Invitado (Sugiere 'Anonimo' por defecto) -->
+                <!-- Formulario Invitado -->
                 <form id="formInvitado" class="caja-formulario-pop2">
                     <div class="campo-grupo">
                         <label for="invUsername">Nick de Invitado (Sugerido: Anonimo):</label>
@@ -878,7 +936,7 @@
                     <h4>⚠️ Reglas de la Red (#chatzona | #velacion | #cine):</h4>
                     <ul>
                         <li>En <strong>#cine</strong> la reproducción es <strong>simultánea</strong> para todos los conectados.</li>
-                        <li>En <strong>#velacion</strong> las velas aparecen al azar y puedes <strong>arrastrarlas y moverlas</strong> por la sala.</li>
+                        <li>En <strong>#velacion</strong> las velas y corazones binarios aparecen al azar y puedes <strong>moverlos libremente</strong>.</li>
                         <li>Entra a las <strong>Salas Romance en Vivo</strong> desde el panel de usuarios (<a href="galeria.html" style="color:#b30000;font-weight:bold;">galeria.html</a>).</li>
                     </ul>
                 </div>
@@ -1019,11 +1077,12 @@
 
     <script>
         // =========================================================
-        // 1. CONFIGURACIÓN DE ENDPOINTS SHEETY (HOJA1, HOJA3 Y HOJA4)
+        // 1. CONFIGURACIÓN DE ENDPOINTS SHEETY (HOJA1, HOJA3, HOJA4 Y HOJA5)
         // =========================================================
         const URL_HOJA1_USUARIOS = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja1';
         const URL_HOJA3_CHAT = 'https://api.sheety.co/3bf2b2add58e4c4d360e0b269fb830d8/hojadeC/hoja3';
         const URL_HOJA4_VELACION = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja4';
+        const URL_HOJA5_FOTOS = 'https://api.sheety.co/50cfc222650c329283676702945c72c3/hojadeC/hoja5';
         const VIDEO_BASE_CINE = 'a13lpRMqdYA';
 
         let salaActual = 'chatzona';
@@ -1034,8 +1093,9 @@
         };
         let ultimoIframeCargadoKey = '';
 
-        // Guarda las coordenadas (x, y) de cada objeto vela para que el usuario las mueva libremente
+        // Coordenadas y caché binario para objetos en #velacion
         const posicionesObjetosVelacion = {};
+        const cacheCorazonesBinarios = {};
         let zIndexObjetoActual = 10;
 
         let destinatarioSusurro = null;
@@ -1364,7 +1424,9 @@
         document.getElementById('btnCancelarSusurro').addEventListener('click', cancelarSusurro);
 
         // =========================================================
-        // 7. OBJETOS VELA ARRASTRABLES AL AZAR EN #VELACION (HOJA4 -> "peticion")
+        // 7. OBJETOS ARRASTRABLES EN #VELACION:
+        //    - HOJA 4 (Celda C: "peticion") -> Velas ASCII
+        //    - HOJA 5 (Celda A: "foto") -> Corazones en Código Binario Rojo
         // =========================================================
         function hacerObjetoArrastrable(elemento, claveObjeto) {
             let arrastrando = false;
@@ -1418,6 +1480,82 @@
             elemento.addEventListener('pointercancel', finalizarArrastre);
         }
 
+        // Convierte una foto (URL o Base64) en una matriz binaria roja (1s y 0s)
+        function convertirFotoABinarioRojo(urlFoto) {
+            if (cacheCorazonesBinarios[urlFoto]) {
+                return Promise.resolve(cacheCorazonesBinarios[urlFoto]);
+            }
+
+            return new Promise((resolve) => {
+                const cols = 28;
+                const rows = 17;
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+
+                img.onload = () => {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = cols;
+                        canvas.height = rows;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, cols, rows);
+
+                        const pixels = ctx.getImageData(0, 0, cols, rows).data;
+                        let htmlBinario = '';
+
+                        for (let y = 0; y < rows; y++) {
+                            let fila = '';
+                            for (let x = 0; x < cols; x++) {
+                                const idx = (y * cols + x) * 4;
+                                const brillo = (pixels[idx] + pixels[idx + 1] + pixels[idx + 2]) / 3;
+                                if (brillo > 115) {
+                                    fila += '1';
+                                } else {
+                                    fila += '<span class="bit-tenue">0</span>';
+                                }
+                            }
+                            htmlBinario += fila + (y < rows - 1 ? '\n' : '');
+                        }
+
+                        cacheCorazonesBinarios[urlFoto] = htmlBinario;
+                        resolve(htmlBinario);
+                    } catch (err) {
+                        // Si CORS bloquea getImageData, generamos matriz binaria determinista desde la cadena de la foto
+                        const fallback = generarBinarioDeterminista(urlFoto, cols, rows);
+                        cacheCorazonesBinarios[urlFoto] = fallback;
+                        resolve(fallback);
+                    }
+                };
+
+                img.onerror = () => {
+                    const fallback = generarBinarioDeterminista(urlFoto, cols, rows);
+                    cacheCorazonesBinarios[urlFoto] = fallback;
+                    resolve(fallback);
+                };
+
+                img.src = urlFoto;
+            });
+        }
+
+        function generarBinarioDeterminista(textoSemilla, cols, rows) {
+            let hash = 0;
+            for (let i = 0; i < textoSemilla.length; i++) {
+                hash = ((hash << 5) - hash) + textoSemilla.charCodeAt(i);
+                hash |= 0;
+            }
+
+            let htmlBinario = '';
+            for (let y = 0; y < rows; y++) {
+                let fila = '';
+                for (let x = 0; x < cols; x++) {
+                    const bit = Math.abs((hash + x * 17 + y * 31) ^ (x * y)) % 2;
+                    fila += bit === 1 ? '1' : '<span class="bit-tenue">0</span>';
+                }
+                htmlBinario += fila + (y < rows - 1 ? '\n' : '');
+            }
+            return htmlBinario;
+        }
+
         function crearObjetoVelaAlAzar(textoPeticion, indice) {
             const claveObjeto = `vela_${indice}_${textoPeticion.slice(0, 12)}`;
             const objeto = document.createElement('div');
@@ -1458,40 +1596,95 @@
             listaMensajes.appendChild(objeto);
         }
 
+        async function crearObjetoCorazonBinarioAlAzar(urlFoto, indice) {
+            const claveObjeto = `corazon_${indice}_${urlFoto.slice(-14)}`;
+            const objeto = document.createElement('div');
+            objeto.className = 'objeto-corazon-binario';
+            objeto.title = 'Foto en código binario rojo (arrastra para mover)';
+
+            if (!posicionesObjetosVelacion[claveObjeto]) {
+                const anchoDisponible = Math.max(180, (listaMensajes.clientWidth || 520) - 135);
+                const altoDisponible = Math.max(160, (listaMensajes.clientHeight || 380) - 125);
+                posicionesObjetosVelacion[claveObjeto] = {
+                    left: Math.floor(Math.random() * anchoDisponible) + 10,
+                    top: Math.floor(Math.random() * altoDisponible) + 18
+                };
+            }
+
+            objeto.style.left = `${posicionesObjetosVelacion[claveObjeto].left}px`;
+            objeto.style.top = `${posicionesObjetosVelacion[claveObjeto].top}px`;
+            objeto.style.zIndex = 12 + indice;
+
+            const silueta = document.createElement('div');
+            silueta.className = 'silueta-corazon-rojo';
+
+            const matrizPre = document.createElement('pre');
+            matrizPre.className = 'matriz-binaria-roja';
+            matrizPre.innerHTML = await convertirFotoABinarioRojo(urlFoto);
+
+            silueta.appendChild(matrizPre);
+            objeto.appendChild(silueta);
+
+            hacerObjetoArrastrable(objeto, claveObjeto);
+            listaMensajes.appendChild(objeto);
+        }
+
         async function cargarPeticionesVelacion() {
-            if (document.querySelector('.objeto-vela-movil.arrastrando')) return;
+            if (document.querySelector('.objeto-vela-movil.arrastrando, .objeto-corazon-binario.arrastrando')) return;
 
             try {
-                const response = await fetch(URL_HOJA4_VELACION);
-                const json = await response.json();
+                // Consultar simultáneamente Hoja 4 (peticion) y Hoja 5 (foto)
+                const [resHoja4, resHoja5] = await Promise.all([
+                    fetch(URL_HOJA4_VELACION),
+                    fetch(URL_HOJA5_FOTOS)
+                ]);
 
-                const claveRaiz = Object.keys(json).find(k => Array.isArray(json[k])) || 'hoja4';
-                const filas = json[claveRaiz] || [];
+                const json4 = await resHoja4.json();
+                const json5 = await resHoja5.json();
 
-                listaMensajes.innerHTML = '<div class="aviso-altar-flotante">🕯️ Arrastra y mueve las velas</div>';
+                const claveRaiz4 = Object.keys(json4).find(k => Array.isArray(json4[k])) || 'hoja4';
+                const filas4 = json4[claveRaiz4] || [];
+
+                const claveRaiz5 = Object.keys(json5).find(k => Array.isArray(json5[k])) || 'hoja5';
+                const filas5 = json5[claveRaiz5] || [];
+
+                listaMensajes.innerHTML = '<div class="aviso-altar-flotante">🕯️❤️ Arrastra las velas y corazones binarios</div>';
                 const miNombre = usuarioActual.esInvitado ? `~${usuarioActual.nick}` : `@${usuarioActual.nick}`;
                 actualizarListaUsuarios([miNombre]);
 
-                let contador = 0;
-                filas.forEach(fila => {
-                    // Celda C llamada exactamente: peticion
+                // 1. Renderizar velas desde Hoja 4 (Celda C: "peticion")
+                let contadorVelas = 0;
+                filas4.forEach(fila => {
                     const clavePeticion = Object.keys(fila).find(
                         k => k.trim().toLowerCase() === 'peticion'
                     );
-
                     const textoPeticion = clavePeticion ? fila[clavePeticion] : '';
 
                     if (textoPeticion && String(textoPeticion).trim() !== '') {
-                        crearObjetoVelaAlAzar(String(textoPeticion).trim(), contador);
-                        contador++;
+                        crearObjetoVelaAlAzar(String(textoPeticion).trim(), contadorVelas);
+                        contadorVelas++;
                     }
                 });
 
-                if (contador === 0) {
-                    crearObjetoVelaAlAzar('Sin peticiones encendidas aún', 0);
+                // 2. Renderizar corazones binarios rojos desde Hoja 5 (Celda A: "foto")
+                let contadorFotos = 0;
+                for (const fila of filas5) {
+                    const claveFoto = Object.keys(fila).find(
+                        k => k.trim().toLowerCase() === 'foto'
+                    );
+                    const urlFoto = claveFoto ? fila[claveFoto] : '';
+
+                    if (urlFoto && String(urlFoto).trim() !== '') {
+                        await crearObjetoCorazonBinarioAlAzar(String(urlFoto).trim(), contadorFotos);
+                        contadorFotos++;
+                    }
+                }
+
+                if (contadorVelas === 0 && contadorFotos === 0) {
+                    crearObjetoVelaAlAzar('Sin peticiones ni fotos encendidas aún', 0);
                 }
             } catch (error) {
-                console.error('Error al leer peticiones de hoja4:', error);
+                console.error('Error al leer hoja4 / hoja5 en #velacion:', error);
             }
         }
 
